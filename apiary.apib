@@ -1,0 +1,200 @@
+FORMAT: 1A
+HOST: https://hub.raidparty.io/
+
+# RaidParty
+
+A very simple API to integrate your games into the RaidParty player network.
+
+The requests are very simple because RaidParty takes care of the complexity behind
+the scenes for you!
+
+
+## Getting Started
+
+Before you attempt to integrate using this documentation, 
+please ensure you have [signed up](https://developer.raidparty.io/signup) 
+for a RaidParty developer account.
+
+When you have created your account and logged in, you will
+then need to [add a game](https://developer.raidparty.io/game/add) to get a private key to be used in the requests below.
+
+***Important!***
+
+You should use an authority server to generate these requests. Do not store your private key on client side code!
+
+
+## Authenticated Request Concept
+
+In order to verify the requests are coming from your authority game server, you must
+create signed requests.
+
+This is a simple step of combining the parameters sent with the following character `:`
+
+In order for RaidParty to ensure your requests are valid you must create a signed request
+with your private key, using SHA1 algorithm as such:
+
+SHA1({email | device_id} : {my_id} : {private_key})
+
+e.g.
+
+SHA1("devsupport@raidparty.io:45392:b62c8253a5a88bb2af6766c9b5ebdaa5379cc0e3")
+
+The value created will then need to be sent with each request you make to this API using the
+`auth_key` parameter.
+
+If you are not sending your own systems player ID in the request, leave it out of the signed request to
+like so:
+
+SHA1({email | device_id} : {private_key})
+
+SHA1("devsupport@raidparty.io:b62c8253a5a88bb2af6766c9b5ebdaa5379cc0e3")
+
+
+
+## Player [/player]
+Most of your requests will involve the Player endpoint.
+
+---
+**Player attributes:**
+
+- id `(Number)` : unique player identifier within RaidParty
+- email `(String)` : unique email id of the player
+- device_id `(String)` : unique device id of the player
+- my_id `(String)` : the optional unique player id in your player database
+- last_login `(Datetime)` : the last known date and time the player accessed the game
+- created_at `(Datetime)` : Date and time player was first created
+---
+
+
+### Track Player [POST /player]
+
+You should perform this request everytime a player signs up or logs in to your game in order
+to allow the RaidParty engine to work effectively.
+
+You can perform some rate limiting yourself such as only triggering it once per day if the player logged in
+for that day. Alternatively you could submit it several times per day, but this is not necessary.
+
+When you submit this request our system checks if the player exists
+within the RaidParty player network. If they don't they will be asked to join
+via email or SMS.
+
++ Parameters
+    + auth_key: `092049c69762b688dc76be9ed12376a4fe3e7562` (string,required) - This is a specific SHA1 signing request created 
+    using your private key and all parameters you send in the request (Authenticated Request)
+    + email: `example@gmail.com` (email,optional) - You must supply the `email` or unique `device id`
+    + device_id: `8f310879adb8371ca49130231edbbc86` (string,optional) - You must supply the `email` or unique `device id`
+    + my_id: `45392` (string,optional) - This can be your own optional player ID
+
++ Request (application/json)
+
+        {
+            "auth_key": '092049c69762b688dc76be9ed12376a4fe3e7562',
+            "email": "example@gmail.com",
+            "my_id": "45392"
+        }
+
++ Response 201 (application/json)
+
+        [
+            {
+                "id": "b01720806079b8fdb8e36716a5f16554",
+                "email": "example@gmail.com",
+                "device_id": "8f310879adb8371ca49130231edbbc86",
+                "my_id": "45392",
+                "last_login": "2018-01-01T08:40:51.620Z",
+                "created_at": "2018-01-01T08:40:51.620Z",
+                "auth_key": "092049c69762b688dc76be9ed12376a4fe3e7562"
+            }
+        ]
+        
++ Response 401 (application/json)
+
+        [
+            {
+                "status": 401,
+                "reason": "Your request was not signed correctly",
+            }
+        ]
+
+
+
+### Get Player [GET /player/{id}]
+
+Retrieve information about a player.
+
++ Parameters
+    + auth_key: `092049c69762b688dc76be9ed12376a4fe3e7562` (string,required) - This is a specific signing request created using your private key
+    + email: `example@gmail.com` (email,optional) - You must supply the `email` or unique `device id`
+    + device_id: `8f310879adb8371ca49130231edbbc86` (string,optional) - You must supply the `email` or unique `device id`
+    + my_id: `45392` (string,optional) - This can be your own optional player ID
+    
++ Response 200 (application/json)
+
+        [
+            {
+                "id": "b01720806079b8fdb8e36716a5f16554",
+                "email": "example@gmail.com",
+                "device_id": "8f310879adb8371ca49130231edbbc86",
+                "my_id": "45392",
+                "last_login": "2018-01-01T08:40:51.620Z",
+                "created_at": "2018-01-01T08:40:51.620Z",
+                "auth_key": "092049c69762b688dc76be9ed12376a4fe3e7562"
+            }
+        ]
+        
++ Response 401 (application/json)
+
+        [
+            {
+                "status": 401,
+                "reason": "Your request was not signed correctly",
+            }
+        ]
+
+
+
+### Reward Player [POST /player/reward]
+
+Send a reward directly to a player.
+
++ Parameters
+    + auth_key: `092049c69762b688dc76be9ed12376a4fe3e7562` (string,required) - This is a specific signing request created using your private key
+    + email: `devsupport@raidparty.io` (email,optional) - You must supply the `email`, unique `device id` or `my_id`
+    + device_id: `8f310879adb8371ca49130231edbbc86` (string,optional) - You must supply the `email`, unique `device id` or `my_id`
+    + my_id: `45392` (string,optional) - This can be your own optional player ID
+    + reward: `0.005` (number,required) - This is the total number of Force currency to issue the player
+    + reason: `You got over 100 kills!` - This tells the player why they won the reward
+
++ Request (application/json)
+
+        {
+            "auth_key": '092049c69762b688dc76be9ed12376a4fe3e7562',
+            "device_id": "8f310879adb8371ca49130231edbbc86",
+            "my_id": "45392",
+            "reward": 0.005,
+            "reason": "You got over 100 kills!"
+        }
+        
++ Response 201 (application/json)
+
+        [
+            {
+                "id": "b01720806079b8fdb8e36716a5f16554",
+                "email": "devsupport@raidparty.io",
+                "device_id": "8f310879adb8371ca49130231edbbc86",
+                "my_id": "45392",
+                "reward": "0.005",
+                "last_login": "2018-01-01T08:40:51.620Z",
+                "created_at": "2018-01-01T08:40:51.620Z",
+                "auth_key": "092049c69762b688dc76be9ed12376a4fe3e7562"
+            }
+        ]
+        
++ Response 401 (application/json)
+
+        [
+            {
+                "status": 401,
+                "reason": "Your request was not signed correctly",
+            }
+        ]

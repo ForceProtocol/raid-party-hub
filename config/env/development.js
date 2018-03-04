@@ -12,13 +12,29 @@
 
 module.exports = {
 
-  /***************************************************************************
-   * Set the default database connection for models in the development       *
-   * environment (see config/connections.js and config/models.js )           *
-   ***************************************************************************/
+    connections : {
+        mysqlDbProd: {
+            adapter: 'sails-mysql',
+            host: '178.62.109.184',
+            user: 'triforcer236',
+            password: 'ji4Zr56Bu72FY',
+            database: 'raidparty_live'
+        },
+        mysqlDbDev: {
+            adapter: 'sails-mysql',
+            host: 'localhost',
+            user: 'root',
+            password: '',
+            database: 'raidparty_dev'
+        }
+    },
+    models: {
+        connection: 'mysqlDbDev',
+		migrate: 'alter'
+    },
+	
+    MANDRILL_KEY: '57Ev-Hbw1O4KoVnCT3UfnQ', 	// TEST KEY
 
-  // models: {
-  //   connection: 'someMongodbServer'
-  // }
+    hookTimeout: 120000,
 
 };

@@ -46,11 +46,6 @@ module.exports = {
     sendEmail: function(opts){
         let {fromEmail,fromName,toEmail,toName,subject,body,cc,bcc,inReply,headers} = opts;
 
-        fromEmail = translateToEmail(fromEmail);
-
-
-        !fromEmail.length && fromEmail.push('support@' + sails.config.MAILER);
-
         return new Promise(function(resolve,reject){
 
 
@@ -163,23 +158,3 @@ module.exports = {
 
     }
 };
-
-function translateToEmail(emails, dontChangeDomain){
-    let rsp = [];
-    if(!_.isArray(emails)) emails = [emails];
-
-    if(dontChangeDomain)
-        return emails.filter(validator.isEmail);
-
-    emails.forEach((fEmail)=>{
-        if(!_.isString(fEmail))
-            return;
-        if(validator.isEmail(fEmail)){
-            fEmail = fEmail.split("@")[0];
-        }
-
-        fEmail = fEmail + '@' + sails.config.MAILER;
-        validator.isEmail(fEmail) && rsp.push(fEmail);
-    });
-    return rsp;
-}

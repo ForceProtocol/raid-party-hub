@@ -5,7 +5,8 @@
  * @docs        :: https://sailsjs.com/docs/concepts/models-and-orm/models
  */
  
-const bcrypt = require('bcrypt-nodejs');
+const bcrypt = require('bcrypt-nodejs'),
+	uuidv4 = require('uuid/v4');
 
 module.exports = {
 
@@ -17,7 +18,7 @@ module.exports = {
 			unique: true,
 			size: 40,
 			defaultsTo: function() {
-				return uuid.v4();
+				return uuidv4();
 			}
         },
 		
@@ -46,14 +47,31 @@ module.exports = {
 			unique: true
 		},
 		
+		deviceType: {
+			type: 'string',
+			required: true
+		},
+		
 		accountStatus: {
 			type: 'integer',
 			defaultsTo: 0
 		},
 		
-		activatePin: {
+		pin: {
 			type: 'integer',
 			defaultsTo: 0
+		},
+		
+		pinAttempts: {
+			type: 'integer',
+			defaultsTo: 0
+		},
+		
+		pinCreatedAt: {
+			type: 'datetime',
+			defaultsTo: function() {
+				return new Date()
+			}
 		},
 		
 		games: {
@@ -64,21 +82,25 @@ module.exports = {
 		
 		toJSON: function () {
 			let obj = this.toObject();
+			delete obj.id;
 			delete obj.password;
+			delete obj.pinAttempts;
+			delete obj.activatePin;
+			delete obj.pinCreatedAt;
 			return obj;
-		},
-		validatePassword: function (attemptedPassword) {
-			let self = this;
-			return new Promise((resolve, reject)=>{
-				bcrypt.compare(attemptedPassword, self.password, (err, result)=>{
-				if(err)return reject(err);
-					resolve(result);
-				});
-			})
 		},
 		
 	},
 	
+	validatePassword: function (attemptedPassword,realPassword) {
+		return new Promise((resolve, reject)=>{
+			bcrypt.compare(attemptedPassword, realPassword, (err, result)=>{
+			if(err)return reject(err);
+				resolve(result);
+			});
+		});
+	},
+		
 	
 	beforeCreate: function (user, cb) {
 		bcrypt.genSalt(10, function (err, salt) {
@@ -103,7 +125,7 @@ module.exports = {
 	},
 	
 	customToJSON: function () {
-        return _.omit(this, ['password', 'createdAt', 'updatedAt'])
+        return _.omit(this, ['password', 'activatePin', 'pinCreatedAt', 'createdAt', 'updatedAt'])
     }
 
 };

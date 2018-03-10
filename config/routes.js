@@ -3,20 +3,20 @@ module.exports.routes = {
 	/** Public Routes */
 	'GET /': 'PagesController.getHomePage',
 	
-	/** API Player Routes */
+	/** API Player Routes 
 	'GET /player/:playerId': 'PlayerController.getPlayer',
 	'POST /player/track': 'PlayerController.trackPlayer',
 	'POST /player/reward': 'PlayerController.rewardPlayer',
 	
-	/** API Developer Routes */
+	/** API Developer Routes 
 	'GET /developer/:developerId': 'DeveloperController.getDeveloper',
 	'POST /developer': 'DeveloperController.signupDeveloper',
 	'POST /developer/login': 'DeveloperController.loginDeveloper',
 	
-	/** Developer Games Management */
+	/** Developer Games Management 
 	'GET /developer/games': 'DeveloperController.getGames',
 	'POST /developer/game': 'DeveloperController.addGame',
-	'GET /developer/game/:gameId': 'DeveloperController.getGame',
+	'GET /developer/game/:gameId': 'DeveloperController.getGame',*/
 	
 	/** OUR OWN MOBILE APPLICATION API ROUTES **/
 	'GET /mob/player/dashboard': 'MobileAppPlayerController.getPlayerDashboard',

@@ -8,6 +8,7 @@
     "bcrypt-nodejs": "0.0.3",
     "bcryptjs": "^2.4.3",
     "bignumber.js": "^6.0.0",
+    "crypto": "^1.0.1",
     "ejs": "^2.5.7",
     "grunt": "1.0.1",
     "grunt-contrib-clean": "1.0.0",
@@ -40,7 +41,9 @@
     "sails-hook-cron": "^2.2.2",
     "sails-hook-flash": "^0.2.2",
     "sails-mysql": "^0.11.5",
+    "sanitize-html": "^1.18.2",
     "sha1": "^1.1.1",
+    "uuid": "^3.2.1",
     "validator": "^9.4.1"
   },
   "scripts": {

@@ -1,54 +1,92 @@
 FORMAT: 1A
 HOST: https://hub.raidparty.io/
 
-# RaidParty
+# RaidParty™
 
-A very simple API to integrate your games into the RaidParty player network.
+### A very simple API to integrate your games into the RaidParty player network.
 
-The requests are very simple because RaidParty takes care of the complexity behind
-the scenes for you!
+This api has been engineered to be simple because RaidParty takes care of the complexity behind the scenes for you!
 
 
 ## Getting Started
 
 Before you attempt to integrate using this documentation, 
-please ensure you have [signed up](https://developer.raidparty.io/signup) 
+please ensure you have **[signed up](https://developer.raidparty.io/signup)** 
 for a RaidParty developer account.
 
 When you have created your account and logged in, you will
-then need to [add a game](https://developer.raidparty.io/game/add) to get a private key to be used in the requests below.
+then need to **[add a game](https://developer.raidparty.io/game/add)** to get both a public key
+and private key to be used in the requests below.
 
 ***Important!***
 
 You should use an authority server to generate these requests. Do not store your private key on client side code!
 
 
-## Authenticated Request Concept
+## Authentication
 
 In order to verify the requests are coming from your authority game server, you must
-create signed requests.
+create signed requests, and send with each request together with your games public key.
 
-This is a simple step of combining the parameters sent with the following character `:`
+This is a simple step of creating a SHA1 hash of the requested endpoint and your games private key, concetanated by the following character `:`
 
-In order for RaidParty to ensure your requests are valid you must create a signed request
-with your private key, using SHA1 algorithm as such:
+e.g. sending a request to the `/player/track` endpoint, would need the following auth token
+creating:
 
-SHA1({email | device_id} : {my_id} : {private_key})
+```
+SHA1("/player/track" + ":" + {game_private_key})
+```
 
-e.g.
+#### Example
 
-SHA1("devsupport@raidparty.io:45392:b62c8253a5a88bb2af6766c9b5ebdaa5379cc0e3")
+```
+SHA1("/player/track:2d3a3dc8-5566-44fa-81db-d67a681f8b12")
+```
 
-The value created will then need to be sent with each request you make to this API using the
-`auth_key` parameter.
+The above example generates the following SHA1 string:
 
-If you are not sending your own systems player ID in the request, leave it out of the signed request to
-like so:
+```
+057a228065529f65b5101614a289308d85758c20
+```
 
-SHA1({email | device_id} : {private_key})
+The hashed string created will then need to be sent as an `auth_key` parameter with the request, as such:
 
-SHA1("devsupport@raidparty.io:b62c8253a5a88bb2af6766c9b5ebdaa5379cc0e3")
+```json
+method: POST
+location: /player/track
 
+{
+    auth_key: "057a228065529f65b5101614a289308d85758c20",
+    public_key: "e9uf9un9cj3o0dssop0",
+    ......
+}
+```
+
+## HTTP Methods
+
+This API uses HTTP verbs (methods) as following:
+
++ `GET` - *Read* - used to **read** (or retrieve) a representation of a resource,
++ `POST` - *Create* - used to **create** new resources. In particular, it's used to create subordinate resources.
++ `PUT` - *Update/Replace* - used for **update** capabilities, PUT-ing to a known resource URI with the request body containing the newly-updated representation of the original resource. On successful request, replaces identified resource with the request body.
++ `PATCH` - *Update/Modify* - used for **modify** capabilities. The PATCH request only needs to contain the changes to the resource, not the complete resource.
++ `DELETE` - *Delete* - used to **delete** a resource identified by a URI.
+
+
+## Status Codes and Errors
+
+This API uses HTTP status codes to communicate with the API consumer.
+
++ `200 OK` - Response to a successful GET, PUT, PATCH or DELETE.
++ `201 Created` - Response to a POST that results in a creation.
++ `204 No Content` - Response to a successful request that won't be returning a body (like a DELETE request).
++ `400 Bad Request` - Malformed request; form validation errors.
++ `401 Unauthorized` - When no or invalid authentication details are provided.
++ `403 Forbidden` - When authentication succeeded but authenticated user doesn't have access to the resource.
++ `404 Not Found` - When a non-existent resource is requested.
++ `405 Method Not Allowed` - Method not allowed.
++ `406 Not Acceptable` - Could not satisfy the request Accept header.
++ `500 Server Error` - An unexpected error occured on our server
 
 
 ## Player [/player]
@@ -59,14 +97,14 @@ Most of your requests will involve the Player endpoint.
 
 - id `(Number)` : unique player identifier within RaidParty
 - email `(String)` : unique email id of the player
-- device_id `(String)` : unique device id of the player
-- my_id `(String)` : the optional unique player id in your player database
+- my_id `(String)` : the optional unique player id inside your game
+- game_reward `(Number)` : total reward earned by the player for the requested game
 - last_login `(Datetime)` : the last known date and time the player accessed the game
 - created_at `(Datetime)` : Date and time player was first created
 ---
 
 
-### Track Player [POST /player]
+### Track Player [POST /player/track]
 
 You should perform this request everytime a player signs up or logs in to your game in order
 to allow the RaidParty engine to work effectively.
@@ -81,38 +119,51 @@ via email or SMS.
 + Parameters
     + auth_key: `092049c69762b688dc76be9ed12376a4fe3e7562` (string,required) - This is a specific SHA1 signing request created 
     using your private key and all parameters you send in the request (Authenticated Request)
-    + email: `example@gmail.com` (email,optional) - You must supply the `email` or unique `device id`
-    + device_id: `8f310879adb8371ca49130231edbbc86` (string,optional) - You must supply the `email` or unique `device id`
+    + public_key: `ba4409a5-33c3-4454-ba1a-234fb9c7d807` (string,required) - This is the public key generated for your game.
+    + email: `example@gmail.com` (email,required) - You must supply the `email` of the player
     + my_id: `45392` (string,optional) - This can be your own optional player ID
 
 + Request (application/json)
-
+    + Headers
+            Location: /player/track
+    + Body
+    
         {
-            "auth_key": '092049c69762b688dc76be9ed12376a4fe3e7562',
+            "auth_key": "092049c69762b688dc76be9ed12376a4fe3e7562",
+            "public_key": "ba4409a5-33c3-4454-ba1a-234fb9c7d807"
             "email": "example@gmail.com",
             "my_id": "45392"
         }
 
 + Response 201 (application/json)
+    This is a successfull response.
 
         [
             {
                 "id": "b01720806079b8fdb8e36716a5f16554",
                 "email": "example@gmail.com",
-                "device_id": "8f310879adb8371ca49130231edbbc86",
                 "my_id": "45392",
                 "last_login": "2018-01-01T08:40:51.620Z",
                 "created_at": "2018-01-01T08:40:51.620Z",
-                "auth_key": "092049c69762b688dc76be9ed12376a4fe3e7562"
             }
         ]
         
-+ Response 401 (application/json)
++ Response 400 (application/json)
+    If you fail to provide the valid email of the player you will get an error response.
 
         [
             {
-                "status": 401,
-                "reason": "Your request was not signed correctly",
+                "reason": "You did not provide a valid email ID of the player.",
+            }
+        ]
+        
++ Response 403 (application/json)
+    This likely means you did not provide a valid `public_key` or
+    the `auth_key` has not been signed correctly.
+
+        [
+            {
+                "reason": "Could not discover a record with details sent.",
             }
         ]
 
@@ -123,22 +174,24 @@ via email or SMS.
 Retrieve information about a player.
 
 + Parameters
+    + public_key: `e9uf9un9cj3o0dssop0` (string,required) - This is the public key generated for your game.
     + auth_key: `092049c69762b688dc76be9ed12376a4fe3e7562` (string,required) - This is a specific signing request created using your private key
-    + email: `example@gmail.com` (email,optional) - You must supply the `email` or unique `device id`
-    + device_id: `8f310879adb8371ca49130231edbbc86` (string,optional) - You must supply the `email` or unique `device id`
+    + email: `example@gmail.com` (email,required) - You must supply the `email` of the player
     + my_id: `45392` (string,optional) - This can be your own optional player ID
     
 + Response 200 (application/json)
-
+    + Headers
+            Location: /player/d0c8535a-2e1a-4c3c-9713-1ff2e525ae72
+    + Body
+    
         [
             {
-                "id": "b01720806079b8fdb8e36716a5f16554",
+                "id": "d0c8535a-2e1a-4c3c-9713-1ff2e525ae72",
                 "email": "example@gmail.com",
-                "device_id": "8f310879adb8371ca49130231edbbc86",
                 "my_id": "45392",
+                "game_reward": 0.583,
                 "last_login": "2018-01-01T08:40:51.620Z",
                 "created_at": "2018-01-01T08:40:51.620Z",
-                "auth_key": "092049c69762b688dc76be9ed12376a4fe3e7562"
             }
         ]
         
@@ -146,7 +199,6 @@ Retrieve information about a player.
 
         [
             {
-                "status": 401,
                 "reason": "Your request was not signed correctly",
             }
         ]
@@ -159,17 +211,21 @@ Send a reward directly to a player.
 
 + Parameters
     + auth_key: `092049c69762b688dc76be9ed12376a4fe3e7562` (string,required) - This is a specific signing request created using your private key
-    + email: `devsupport@raidparty.io` (email,optional) - You must supply the `email`, unique `device id` or `my_id`
-    + device_id: `8f310879adb8371ca49130231edbbc86` (string,optional) - You must supply the `email`, unique `device id` or `my_id`
+    + public_key: `ba4409a5-33c3-4454-ba1a-234fb9c7d807` (string,required) - This is the public key generated for your game.
+    + email: `example@gmail.com` (email,required) - You must supply the `email` of the player
     + my_id: `45392` (string,optional) - This can be your own optional player ID
     + reward: `0.005` (number,required) - This is the total number of Force currency to issue the player
     + reason: `You got over 100 kills!` - This tells the player why they won the reward
 
 + Request (application/json)
-
+    + Headers
+            Location: /player/reward
+    + Body
+    
         {
-            "auth_key": '092049c69762b688dc76be9ed12376a4fe3e7562',
-            "device_id": "8f310879adb8371ca49130231edbbc86",
+            "auth_key": "092049c69762b688dc76be9ed12376a4fe3e7562",
+            "public_key": "ba4409a5-33c3-4454-ba1a-234fb9c7d807"
+            "email": "example@gmail.com",
             "my_id": "45392",
             "reward": 0.005,
             "reason": "You got over 100 kills!"
@@ -181,9 +237,9 @@ Send a reward directly to a player.
             {
                 "id": "b01720806079b8fdb8e36716a5f16554",
                 "email": "devsupport@raidparty.io",
-                "device_id": "8f310879adb8371ca49130231edbbc86",
                 "my_id": "45392",
-                "reward": "0.005",
+                "reward": 0.005,
+                "reason": "You got over 100 kills!",
                 "last_login": "2018-01-01T08:40:51.620Z",
                 "created_at": "2018-01-01T08:40:51.620Z",
                 "auth_key": "092049c69762b688dc76be9ed12376a4fe3e7562"
@@ -194,7 +250,6 @@ Send a reward directly to a player.
 
         [
             {
-                "status": 401,
                 "reason": "Your request was not signed correctly",
             }
         ]

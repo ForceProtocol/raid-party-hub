@@ -1,5 +1,5 @@
 /**
- * User.js
+ * Game.js
  *
  * @description :: A model definition.  Represents a database table/collection/etc.
  * @docs        :: https://sailsjs.com/docs/concepts/models-and-orm/models
@@ -17,6 +17,10 @@ module.exports = {
 		description: {
             type: 'text'
         },
+		
+		avatar: {
+			type: 'string'
+		},
 		
 		gameId: {
             type: 'string',
@@ -46,7 +50,7 @@ module.exports = {
         },
 		
 		developer: {
-			model: 'Developer'
+			model: 'developer'
 		},
 		
 		players: {
@@ -55,6 +59,10 @@ module.exports = {
 			through: 'playertogame'
 		},
 		
+		rewards: {
+			collection: 'playerrewards',
+			via: 'game'
+		},
 		
     },
 };

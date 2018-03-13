@@ -27,7 +27,11 @@ module.exports = {
 			required: true,
 			unique: true
         },
-
+		
+		forceBalance: {
+			type: 'string'
+		},
+		
         deviceId: {
 			type: 'string',
 			required: true,

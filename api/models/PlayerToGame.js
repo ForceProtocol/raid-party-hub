@@ -1,5 +1,5 @@
 /**
- * Player.js
+ * PlayerToGame.js
  *
  * @description :: A model definition.  Represents a database table/collection/etc.
  * @docs        :: https://sailsjs.com/docs/concepts/models-and-orm/models
@@ -18,18 +18,18 @@ module.exports = {
 			defaultsTo: 0
         },
 		
-		lastLogin: {
-            type: 'datetime',
-			defaultsTo: new Date()
-        },
-		
 		player: {
 			model: 'player'
 		},
 		
 		game: {
 			model: 'game'
-		}
+		},
+		
+		lastLogin: {
+            type: 'datetime',
+			defaultsTo: new Date()
+        },
 		
     },
 	

@@ -5,6 +5,8 @@
  * @help        :: See http://links.sailsjs.org/docs/controllers
  */
 
+const BigNumber = require('bignumber.js');
+ 
 module.exports = {
 	
 	
@@ -434,6 +436,13 @@ module.exports = {
 			if(player.accountStatus == 1){
 				throw new CustomError('Your account has not been activated yet. Please check your email', {status: 403,err_code:"activate"});
 			}
+			
+			// Work out FORCE balance in dollar
+			let forceTotal = new BigNumber(player.forceBalance);
+			
+			player.totalForce = forceTotal.toFormat(6);
+			
+			player.totalForceUSD = parseInt(forceTotal) * 0.11;
 			
 			return res.ok({success:true, player:player});
 		}catch(err){

@@ -11,11 +11,11 @@ This api has been engineered to be simple because RaidParty takes care of the co
 ## Getting Started
 
 Before you attempt to integrate using this documentation, 
-please ensure you have **[signed up](https://developer.raidparty.io/signup)** 
+please ensure you have **[signed up](https://app.raidparty.io/signup)** 
 for a RaidParty developer account.
 
 When you have created your account and logged in, you will
-then need to **[add a game](https://developer.raidparty.io/game/add)** to get both a public key
+then need to **[add a game](https://app.raidparty.io/game/add)** to get both a public key
 and private key to be used in the requests below.
 
 ***Important!***
@@ -103,24 +103,41 @@ Most of your requests will involve the Player endpoint.
 - created_at `(Datetime)` : Date and time player was first created
 ---
 
+## Tracking Players
 
-### Track Player [POST /player/track]
-
-You should perform this request everytime a player signs up or logs in to your game in order
+You should perform one of the track player requests below everytime a player signs up or logs in to your game in order
 to allow the RaidParty engine to work effectively.
 
-You can perform some rate limiting yourself such as only triggering it once per day if the player logged in
-for that day. Alternatively you could submit it several times per day, but this is not necessary.
+You can perform some rate limiting yourself such as only triggering it once per day if the player logged in within 24 hours.
 
-When you submit this request our system checks if the player exists
+When you submit a track player request, our system checks if the player exists
 within the RaidParty player network. If they don't they will be asked to join
-via email or SMS.
+via email or SMS if provided.
+
+Choose the `Track Player By Device ID` if you **do not** have the players email.
+
+Choose the `Track Player By Email` if you **do** have the players email.
+
+
+## Rewarding Players
+
+Everytime you want to issue a reward to a player, you should use one of the reward player methods below.
+
+Choose the `Reward Player By Device ID` if you **do not** have the players email.
+
+Choose the `Reward Player By Email` if you **do** have the players email.
+
+
+
+### Track Player By Device ID [POST /player/track/device]
+
+Use this request if you do not have the players email address to send.
 
 + Parameters
     + auth_key: `092049c69762b688dc76be9ed12376a4fe3e7562` (string,required) - This is a specific SHA1 signing request created 
     using your private key and all parameters you send in the request (Authenticated Request)
     + public_key: `ba4409a5-33c3-4454-ba1a-234fb9c7d807` (string,required) - This is the public key generated for your game.
-    + email: `example@gmail.com` (email,required) - You must supply the `email` of the player
+    + device_id: `ba1a-234fb9c7d807` (email,required) - You must supply the `email` of the player
     + my_id: `45392` (string,optional) - This can be your own optional player ID
 
 + Request (application/json)
@@ -130,23 +147,21 @@ via email or SMS.
     
         {
             "auth_key": "092049c69762b688dc76be9ed12376a4fe3e7562",
-            "public_key": "ba4409a5-33c3-4454-ba1a-234fb9c7d807"
-            "email": "example@gmail.com",
+            "public_key": "ba4409a5-33c3-4454-ba1a-234fb9c7d807",
+            "device_id": "ba1a-234fb9c7d807",
             "my_id": "45392"
         }
 
 + Response 201 (application/json)
     This is a successfull response.
 
-        [
-            {
-                "id": "b01720806079b8fdb8e36716a5f16554",
-                "email": "example@gmail.com",
-                "my_id": "45392",
-                "last_login": "2018-01-01T08:40:51.620Z",
-                "created_at": "2018-01-01T08:40:51.620Z",
-            }
-        ]
+        {
+            "id": "b01720806079b8fdb8e36716a5f16554",
+            "device_id": "ba1a-234fb9c7d807",
+            "my_id": "45392",
+            "last_login": "2018-01-01T08:40:51.620Z",
+            "created_at": "2018-01-01T08:40:51.620Z",
+        }
         
 + Response 400 (application/json)
     If you fail to provide the valid email of the player you will get an error response.
@@ -169,29 +184,101 @@ via email or SMS.
 
 
 
-### Get Player [GET /player/{id}]
+### Track Player By Email [POST /player/track/email]
 
-Retrieve information about a player.
+Use this request to track by the players email. If the player is not discovered
+on the RaidParty player app, they will receive an invitation to join by email.
 
 + Parameters
-    + public_key: `e9uf9un9cj3o0dssop0` (string,required) - This is the public key generated for your game.
-    + auth_key: `092049c69762b688dc76be9ed12376a4fe3e7562` (string,required) - This is a specific signing request created using your private key
-    + email: `example@gmail.com` (email,required) - You must supply the `email` of the player
+    + auth_key: `092049c69762b688dc76be9ed12376a4fe3e7562` (string,required) - This is a specific SHA1 signing request created 
+    using your private key and all parameters you send in the request (Authenticated Request)
+    + public_key: `ba4409a5-33c3-4454-ba1a-234fb9c7d807` (string,required) - This is the public key generated for your game.
+    + email: `player@email.com` (email,required) - You must supply the `email` of the player
     + my_id: `45392` (string,optional) - This can be your own optional player ID
-    
-+ Response 200 (application/json)
+
++ Request (application/json)
     + Headers
-            Location: /player/d0c8535a-2e1a-4c3c-9713-1ff2e525ae72
+            Location: /player/track
     + Body
     
+        {
+            "auth_key": "092049c69762b688dc76be9ed12376a4fe3e7562",
+            "public_key": "ba4409a5-33c3-4454-ba1a-234fb9c7d807",
+            "email": "player@email.com",
+            "my_id": "45392"
+        }
+
++ Response 201 (application/json)
+    This is a successfull response.
+
+        {
+            "id": "b01720806079b8fdb8e36716a5f16554",
+            "email": "player@email.com",
+            "my_id": "45392",
+            "last_login": "2018-01-01T08:40:51.620Z",
+            "created_at": "2018-01-01T08:40:51.620Z",
+        }
+        
++ Response 400 (application/json)
+    If you fail to provide the valid email of the player you will get an error response.
+
         [
             {
-                "id": "d0c8535a-2e1a-4c3c-9713-1ff2e525ae72",
-                "email": "example@gmail.com",
+                "reason": "You did not provide a valid email ID of the player.",
+            }
+        ]
+        
++ Response 403 (application/json)
+    This likely means you did not provide a valid `public_key` or
+    the `auth_key` has not been signed correctly.
+
+        [
+            {
+                "reason": "Could not discover a record with details sent.",
+            }
+        ]
+
+
+
+### Reward Player By Device ID [POST /player/reward/device]
+
+Send a reward directly to a player.
+
+Reward should be defined in FORCE currency values.
+
++ Parameters
+    + auth_key: `092049c69762b688dc76be9ed12376a4fe3e7562` (string,required) - This is a specific signing request created using your private key
+    + public_key: `ba4409a5-33c3-4454-ba1a-234fb9c7d807` (string,required) - This is the public key generated for your game.
+    + reward: `0.005` (number,required) - This is the total number of Force currency to issue the player
+    + reason: `You got over 100 kills!` (string,required) - This tells the player why they won the reward
+    + device_id: `example@gmail.com` (email,required) - You must supply the `email` of the player
+
++ Request (application/json)
+    + Headers
+            Location: /player/reward/device
+    + Body
+    
+        {
+            "auth_key": "092049c69762b688dc76be9ed12376a4fe3e7562",
+            "public_key": "ba4409a5-33c3-4454-ba1a-234fb9c7d807"
+            "device_id": "ba1a-234fb9c7d807",
+            "my_id": "45392",
+            "reward": 0.005,
+            "reason": "You got over 100 kills!"
+        }
+        
++ Response 201 (application/json)
+
+        [
+            {
+                "id": "b01720806079b8fdb8e36716a5f16554",
+                "device_id": "ba1a-234fb9c7d807",
                 "my_id": "45392",
-                "game_reward": 0.583,
+                "reward": 0.005,
+                "reason": "You got over 100 kills!",
                 "last_login": "2018-01-01T08:40:51.620Z",
                 "created_at": "2018-01-01T08:40:51.620Z",
+                "auth_key": "092049c69762b688dc76be9ed12376a4fe3e7562"
             }
         ]
         
@@ -203,29 +290,37 @@ Retrieve information about a player.
             }
         ]
 
++ Response 401 (application/json)
 
-
-### Reward Player [POST /player/reward]
+        [
+            {
+                "reason": "Insufficient FORCE available to reward player.",
+            }
+        ]
+        
+        
+### Reward Player By Email [POST /player/reward/email]
 
 Send a reward directly to a player.
+
+Reward should be defined in FORCE currency values.
 
 + Parameters
     + auth_key: `092049c69762b688dc76be9ed12376a4fe3e7562` (string,required) - This is a specific signing request created using your private key
     + public_key: `ba4409a5-33c3-4454-ba1a-234fb9c7d807` (string,required) - This is the public key generated for your game.
-    + email: `example@gmail.com` (email,required) - You must supply the `email` of the player
-    + my_id: `45392` (string,optional) - This can be your own optional player ID
     + reward: `0.005` (number,required) - This is the total number of Force currency to issue the player
-    + reason: `You got over 100 kills!` - This tells the player why they won the reward
+    + reason: `You got over 100 kills!` (string,required) - This tells the player why they won the reward
+    + email: `player@email.com` (email,required) - You must supply the `email` of the player
 
 + Request (application/json)
     + Headers
-            Location: /player/reward
+            Location: /player/reward/email
     + Body
     
         {
             "auth_key": "092049c69762b688dc76be9ed12376a4fe3e7562",
             "public_key": "ba4409a5-33c3-4454-ba1a-234fb9c7d807"
-            "email": "example@gmail.com",
+            "email": "player@email.com",
             "my_id": "45392",
             "reward": 0.005,
             "reason": "You got over 100 kills!"
@@ -251,5 +346,13 @@ Send a reward directly to a player.
         [
             {
                 "reason": "Your request was not signed correctly",
+            }
+        ]
+
++ Response 401 (application/json)
+
+        [
+            {
+                "reason": "Insufficient FORCE available to reward player.",
             }
         ]

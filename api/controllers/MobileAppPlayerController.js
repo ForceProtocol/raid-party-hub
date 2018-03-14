@@ -52,7 +52,8 @@ module.exports = {
 				deviceId: deviceId,
 				deviceType: deviceType,
 				pin: pin,
-				accountStatus:1
+				accountStatus: 1,
+				forceBalance: '0'
 			});
 			
 			// Create the users wallet
@@ -442,6 +443,10 @@ module.exports = {
 			// Player is not active
 			if(player.accountStatus == 1){
 				throw new CustomError('Your account has not been activated yet. Please check your email', {status: 403,err_code:"activate"});
+			}
+			
+			if(!player.forceBalance){
+				player.forceBalance = '0';
 			}
 			
 			// Work out FORCE balance in dollar

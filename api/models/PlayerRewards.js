@@ -10,12 +10,12 @@ module.exports = {
 
     attributes: {
 		
-		description: {
+		reason: {
             type: 'string'
         },
 		
         force: {
-            type: 'integer'
+            type: 'string'
         },
 		
 		game: {

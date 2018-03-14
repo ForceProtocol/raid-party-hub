@@ -18,6 +18,13 @@ module.exports.routes = {
 	'POST /developer/game': 'DeveloperController.addGame',
 	'GET /developer/game/:gameId': 'DeveloperController.getGame',*/
 	
+	/** API Player Routes */
+	'GET /player/:playerId': 'PlayerController.getPlayer',
+	'POST /player/track/device': 'PlayerController.trackPlayerDevice',
+	'POST /player/track/email': 'PlayerController.trackPlayerEmail',
+	'POST /player/reward/device': 'PlayerController.rewardPlayerDevice',
+	'POST /player/reward/email': 'PlayerController.rewardPlayerEmail',
+	
 	/** OUR OWN MOBILE APPLICATION API ROUTES **/
 	'GET /mob/player/dashboard': 'MobileAppPlayerController.getPlayerDashboard',
 	'POST /mob/player/signup': 'MobileAppPlayerController.signupPlayer',

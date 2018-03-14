@@ -34,6 +34,13 @@ module.exports = {
 				throw new CustomError('This email is already registered with another account. Please login to your account.', {status: 400});
             }
 			
+			let existingPlayerDevice = await Player.findOne({deviceId: deviceId});
+
+			// Player already exists
+            if(existingPlayerDevice){
+				throw new CustomError('This device is already registered with another account. Please login to your account using the following email: ' + existingPlayerDevice.email, {status: 400});
+            }
+			
 			// Create activation PIN
 			let pin = util.randomFixedInteger(6);
 			

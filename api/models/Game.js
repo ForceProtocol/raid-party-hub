@@ -9,17 +9,33 @@ module.exports = {
     tableName: 'games',
     attributes: {
 	
+		gameId: {
+            type: 'string',
+			unique: true,
+			size: 40,
+			defaultsTo: function() {
+				return uuidv4();
+			}
+        },
+		
 		title: {
             type: 'string',
 			required: true
         },
 		
 		description: {
-            type: 'text'
+            type: 'text',
+			required: true
         },
 		
+		platform: {
+			type: 'string',
+			enum: ['android', 'ios', 'pc', 'playstation', 'xbox', 'switch']
+		},
+		
 		avatar: {
-			type: 'string'
+			type: 'string',
+			required: true
 		},
 		
 		gameId: {

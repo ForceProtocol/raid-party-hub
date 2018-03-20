@@ -67,7 +67,7 @@ module.exports = {
 			
 			// Send activation email/SMS to player to activate their account
 			await EmailService.sendEmail({
-                fromEmail: 'team@raidparty.io',
+                fromEmail: 'support@raidparty.io',
                 fromName: 'Success Team',
                 toEmail: player.email,
                 toName: player.email,
@@ -193,7 +193,7 @@ module.exports = {
 					
 					// Send activation email/SMS to player to activate their account
 					await EmailService.sendEmail({
-						fromEmail: 'accounts@raidparty.io',
+						fromEmail: 'support@raidparty.io',
 						fromName: 'Account Team',
 						toEmail: player.email,
 						toName: player.email,
@@ -267,7 +267,7 @@ module.exports = {
 			
 			// Send activation email/SMS to player to activate their account
 			await EmailService.sendEmail({
-                fromEmail: 'team@raidparty.io',
+                fromEmail: 'support@raidparty.io',
                 fromName: 'Success Team',
                 toEmail: player.email,
                 toName: player.email,
@@ -328,7 +328,7 @@ module.exports = {
 					
 					// Send activation email/SMS to player to activate their account
 					await EmailService.sendEmail({
-						fromEmail: 'accounts@raidparty.io',
+						fromEmail: 'support@raidparty.io',
 						fromName: 'Account Team',
 						toEmail: player.email,
 						toName: player.email,
@@ -396,7 +396,7 @@ module.exports = {
 					
 					// Send activation email/SMS to player to activate their account
 					await EmailService.sendEmail({
-						fromEmail: 'accounts@raidparty.io',
+						fromEmail: 'support@raidparty.io',
 						fromName: 'Account Team',
 						toEmail: player.email,
 						toName: player.email,

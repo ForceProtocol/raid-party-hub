@@ -33,6 +33,7 @@ module.exports.routes = {
 	/** OUR OWN MOBILE APPLICATION API ROUTES **/
 	'GET /mob/player/dashboard': 'MobileAppPlayerController.getPlayerDashboard',
 	'GET /mob/player/games': 'MobileAppPlayerController.getGames',
+	'GET /mob/player/rewards': 'MobileAppPlayerController.getRewards',
 	'POST /mob/player/signup': 'MobileAppPlayerController.signupPlayer',
 	'POST /mob/player/login': 'MobileAppPlayerController.loginPlayer',
 	'POST /mob/player/activate': 'MobileAppPlayerController.activatePlayer',

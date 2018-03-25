@@ -519,8 +519,7 @@ module.exports = {
 	*/
 	async getGames(req, res) {
 		try {
-			
-			let deviceType = req.param("device").toLowerCase(),
+			let deviceType = req.param("device_type").toLowerCase(),
 			excludePlatform = 'android';
 			
 			if(deviceType == 'android'){
@@ -536,6 +535,21 @@ module.exports = {
 		}
 	},
 	
+	
+	
+	/**
+	* Get the last 25 rewards
+	*/
+	async getRewards(req, res) {
+		try {
+			// Get games we need for this device
+			let rewards = await PlayerRewards.find({player:req.token.user.id}).populate("player").populate("game").sort("id DESC").limit("25");
+
+			return res.ok({rewards:rewards});
+		}catch(err){
+			return util.errorResponse(err, res);
+		}
+	},
 	
 	
 	

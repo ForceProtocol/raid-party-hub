@@ -27,6 +27,8 @@ module.exports.policies = {
         validatePin: true,
         changePassword: true,
         getPlayerDashboard: 'tokenAuth',
-        updatePassword: 'tokenAuth'
+        getGames: 'tokenAuth',
+        getRewards: 'tokenAuth',
+        updatePassword: 'tokenAuth',
     },
 };

@@ -18,6 +18,11 @@ module.exports = {
 			}
         },
 		
+		active: {
+            type: 'boolean',
+			defaultsTo: false
+        },
+		
 		title: {
             type: 'string',
 			required: true
@@ -28,13 +33,18 @@ module.exports = {
 			required: true
         },
 		
+		link: {
+            type: 'text',
+			required: true
+        },
+		
 		platform: {
 			type: 'string',
 			enum: ['android', 'ios', 'pc', 'playstation', 'xbox', 'switch']
 		},
 		
 		avatar: {
-			type: 'string',
+			type: 'text',
 			required: true
 		},
 		

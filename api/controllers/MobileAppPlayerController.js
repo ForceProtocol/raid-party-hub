@@ -510,4 +510,33 @@ module.exports = {
 			return util.errorResponse(err, res);
 		}
 	},
+	
+	
+	
+	
+	/**
+	* Get list of active games
+	*/
+	async getGames(req, res) {
+		try {
+			
+			let deviceType = req.param("device").toLowerCase(),
+			excludePlatform = 'android';
+			
+			if(deviceType == 'android'){
+				excludePlatform = 'ios';
+			}
+			
+			// Get games we need for this device
+			let games = await Game.find({active:true,platform:deviceType,platform: { '!' : excludePlatform}});
+
+			return res.ok({games:games});
+		}catch(err){
+			return util.errorResponse(err, res);
+		}
+	},
+	
+	
+	
+	
 };

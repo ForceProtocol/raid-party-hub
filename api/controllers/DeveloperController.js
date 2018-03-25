@@ -5,11 +5,12 @@
  * @help        :: See http://links.sailsjs.org/docs/controllers
  */
 
+const fs = require("fs");
 
 module.exports = {
 
 
-/**
+	/**
 	* Sign Up New Developer
 	*/
 	async signupDeveloper(req, res) {
@@ -405,9 +406,15 @@ module.exports = {
 			let gameTitle = req.param("title"),
 				description = req.param("description"),
 				platform = req.param("platform"),
-				avatar = req.param("avatar");
+				link = req.param("link");
+				
+			if(!req.files[0]){
+				throw new CustomError('You must provide a valid game image to be listed on the RaidParty player app.', {status: 401});
+			}
+				
+			let avatarBase64Data = await new Buffer(fs.readFileSync(req.files[0].path)).toString("base64");
 			
-			let addGame = await Game.create({title:gameTitle,description:description,avatar:avatar,platform:platform,developer:developer.id});
+			let addGame = await Game.create({title:gameTitle,description:description,link:link,avatar:avatarBase64Data,platform:platform,developer:developer.id});
 			
 			if(!addGame){
 				throw new CustomError('Could not add that game due to a technical issue. Please try again later.', {status: 400});
@@ -431,15 +438,49 @@ module.exports = {
 				gameTitle = req.param("title"),
 				description = req.param("description"),
 				platform = req.param("platform"),
-				avatar = req.param("avatar");
-			
-			let addGame = await Game.update({gameId:gameId},{title:gameTitle,description:description,avatar:avatar,platform:platform});
+				link = req.param("link");
+
+			let addGame = await Game.update({gameId:gameId,developer:developer.id},{title:gameTitle,description:description,link:link,platform:platform});
 			
 			if(!addGame){
 				throw new CustomError('Could not update that game due to a technical issue. Please try again later.', {status: 400});
 			}
 			
 			return res.ok({game:addGame});
+		}catch(err){
+			return util.errorResponse(err, res);
+		}
+	},
+	
+	
+	/**
+	* Delete game
+	*/
+	async deleteGame(req, res) {
+		try {
+			let developer = req.developer;
+			
+			let gameId = req.param("gameId"),
+				gameTitle = req.param("title");
+
+			let game = await Game.findOne({id:gameId,developer:developer.id});
+			
+			if(!game){
+				throw new CustomError('You do not have relevant permissions to delete that game.', {status: 501});
+			}
+			
+			// Invalid game title entered - to confirm deletion
+			if(game.title != gameTitle){
+				throw new CustomError('You entered the game title incorrectly, that game could not be deleted. Please check the game title and try again.', {status: 400});
+			}
+			
+			let gameDeleted = await Game.destroy({id:game.id});
+			
+			if(!gameDeleted){
+				throw new CustomError('There was a technical problem while deleting the game.', {status: 400});
+			}
+			
+			return res.ok({success:true});
 		}catch(err){
 			return util.errorResponse(err, res);
 		}
@@ -461,20 +502,6 @@ module.exports = {
 			}
 			
 			return res.ok({game:game});
-		}catch(err){
-			return util.errorResponse(err, res);
-		}
-	},
-	
-	
-	/**
-	* Update Avatar
-	*/
-	async uploadAvatar(req, res) {
-		try {
-			let developer = req.developer;
-			
-			return res.ok({game:addGame});
 		}catch(err){
 			return util.errorResponse(err, res);
 		}

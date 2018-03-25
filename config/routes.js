@@ -3,30 +3,36 @@ module.exports.routes = {
 	/** Public Routes */
 	'GET /': 'PagesController.getHomePage',
 	
+	
 	/** API Player Routes 
 	'GET /player/:playerId': 'PlayerController.getPlayer',
 	'POST /player/track': 'PlayerController.trackPlayer',
 	'POST /player/reward': 'PlayerController.rewardPlayer',
 	
-	/** API Developer Routes 
-	'GET /developer/:developerId': 'DeveloperController.getDeveloper',
-	'POST /developer': 'DeveloperController.signupDeveloper',
-	'POST /developer/login': 'DeveloperController.loginDeveloper',
 	
-	/** Developer Games Management 
-	'GET /developer/games': 'DeveloperController.getGames',
-	'POST /developer/game': 'DeveloperController.addGame',
-	'GET /developer/game/:gameId': 'DeveloperController.getGame',*/
+	/** Developer Games Management */
+	'GET /app/developer/games': 'DeveloperController.getGames',
+	'GET /app/developer/game/:gameId': 'DeveloperController.getGame',
+	'GET /app/developer/balance': 'DeveloperController.getBalance',
+	'POST /app/developer/game': 'DeveloperController.addGame',
+	'POST /app/developer/game/:gameId': 'DeveloperController.updateGame',
+	'POST /app/developer/activate': 'DeveloperController.activateDeveloper',
+	'POST /app/developer/reset-password': 'DeveloperController.resetPassword',
+	'POST /app/developer/change-password': 'DeveloperController.changePassword',
+	'POST /app/developer/update-password': 'DeveloperController.updatePassword',
+	
 	
 	/** API Player Routes */
-	'GET /player/:playerId': 'PlayerController.getPlayer',
-	'POST /player/track/device': 'PlayerController.trackPlayerDevice',
-	'POST /player/track/email': 'PlayerController.trackPlayerEmail',
-	'POST /player/reward/device': 'PlayerController.rewardPlayerDevice',
-	'POST /player/reward/email': 'PlayerController.rewardPlayerEmail',
+	'GET /sdk/player/:playerId': 'PlayerController.getPlayer',
+	'POST /sdk/player/track/device': 'PlayerController.trackPlayerDevice',
+	'POST /sdk/player/track/email': 'PlayerController.trackPlayerEmail',
+	'POST /sdk/player/reward/device': 'PlayerController.rewardPlayerDevice',
+	'POST /sdk/player/reward/email': 'PlayerController.rewardPlayerEmail',
+	
 	
 	/** OUR OWN MOBILE APPLICATION API ROUTES **/
 	'GET /mob/player/dashboard': 'MobileAppPlayerController.getPlayerDashboard',
+	'GET /mob/player/games': 'MobileAppPlayerController.getGames',
 	'POST /mob/player/signup': 'MobileAppPlayerController.signupPlayer',
 	'POST /mob/player/login': 'MobileAppPlayerController.loginPlayer',
 	'POST /mob/player/activate': 'MobileAppPlayerController.activatePlayer',

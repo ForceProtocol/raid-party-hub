@@ -32,27 +32,30 @@ module.exports = function (req, res, next) {
 		}
 		
 		// Make sure is a valid and active developer
-		let developer = await Developer.findOne({id:req.token.user.id});
+		Developer.findOne({id:req.token.user.id}).exec(function(err,developer){
 			
-		// Could not find that account
-		if(!developer){
-			return res.send(401, {err: 'Could not find an account with those details. Please check your details and try again.'});
-		}
-		
-		// Developer is locked
-		if(developer.accountStatus == 0){
-			return res.send(401, {err: 'Your account has been blocked.'});
-		}
-		
-		// Player is not active
-		if(developer.accountStatus == 1){
-			return res.send(401, {err: 'Your account has not been activated yet. Please check your email'});
-		}
-		
-		req.developer = developer;
-        req.payload = token.data;
+			// Could not find that account
+			if(!developer){
+				return res.send(401, {err: 'Could not find an account with those details. Please check your details and try again.'});
+			}
+			
+			// Developer is locked
+			if(developer.accountStatus == 0){
+				return res.send(401, {err: 'Your account has been blocked.'});
+			}
+			
+			// Player is not active
+			if(developer.accountStatus == 1){
+				return res.send(401, {err: 'Your account has not been activated yet. Please check your email'});
+			}
+			
+			req.developer = developer;
+			req.payload = token.data;
 
-        next();
+			next();
+			
+		});
+		
     }, {
         ignoreExpiration: false
     });

@@ -14,8 +14,7 @@ module.exports = {
 		},
 		
         reward: {
-            type: 'integer',
-			defaultsTo: 0
+            type: 'string',
         },
 		
 		player: {

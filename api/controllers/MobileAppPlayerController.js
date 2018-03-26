@@ -528,7 +528,11 @@ module.exports = {
 			
 			// Get games we need for this device
 			let games = await Game.find({active:true,platform:deviceType,platform: { '!' : excludePlatform}});
-
+			
+			games = _.map(games, function(game){
+				return {game_id:game.gameId,title:game.title,description:game.description,link:game.link,platform:game.platform,avatar:game.avatar};
+			});
+			
 			return res.ok({games:games});
 		}catch(err){
 			return util.errorResponse(err, res);
@@ -544,7 +548,11 @@ module.exports = {
 		try {
 			// Get games we need for this device
 			let rewards = await PlayerRewards.find({player:req.token.user.id}).populate("player").populate("game").sort("id DESC").limit("25");
-
+			
+			rewards = _.map(rewards, function(reward){
+				return {reason:reward.reason,force:reward.force,game:{title:reward.game.title}};
+			});
+			
 			return res.ok({rewards:rewards});
 		}catch(err){
 			return util.errorResponse(err, res);

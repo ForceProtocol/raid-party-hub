@@ -90,16 +90,10 @@ module.exports = {
 			via: 'game'
 		},
 		
-		
-		toJSON: function () {
-			let obj = this.toObject();
-			delete obj.id;
-			delete obj.avatar;
-			delete obj.publicKey;
-			delete obj.privateKey;
-			return obj;
-		},
-		
     },
+	
+	customToJSON: function () {
+        return _.omit(this, ['publicKey', 'privateKey', 'id'])
+    }
 };
 

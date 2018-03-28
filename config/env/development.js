@@ -24,7 +24,7 @@ module.exports = {
             adapter: 'sails-mysql',
             host: 'localhost',
             user: 'root',
-            password: '',
+            password: 'root',
             database: 'raidparty_dev'
         }
     },

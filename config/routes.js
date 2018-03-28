@@ -3,7 +3,8 @@ module.exports.routes = {
 	/** Public Routes */
 	'GET /': 'PagesController.getHomePage',
 	
-	
+	/** Developer Login and Signups */
+	'POST /app/developer': 'DeveloperController.signupDeveloper',
 	/** API Player Routes 
 	'GET /player/:playerId': 'PlayerController.getPlayer',
 	'POST /player/track': 'PlayerController.trackPlayer',

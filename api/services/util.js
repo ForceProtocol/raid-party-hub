@@ -98,5 +98,17 @@ module.exports = {
      */
     randomFixedInteger: function (length) {
         return Math.floor(Math.pow(10, length-1) + Math.random() * (Math.pow(10, length) - Math.pow(10, length-1) - 1));
-    }
+    },
+	
+	
+	getPlayerGameCode: function (length) {
+		var text = "";
+		var possible = "ABCDEFGHJKLMNPQRSTWXYZ0123456789";
+
+		for (var i = 0; i < length; i++){
+			text += possible.charAt(Math.floor(Math.random() * possible.length));
+		}
+		
+		return text;
+    },
 };

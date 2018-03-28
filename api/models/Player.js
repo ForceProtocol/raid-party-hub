@@ -40,12 +40,6 @@ module.exports = {
 			required: true,
 			unique: true
         },
-
-        deviceId: {
-			type: 'string',
-			required: true,
-			unique: true
-		},
 		
 		deviceType: {
 			type: 'string',
@@ -60,6 +54,16 @@ module.exports = {
 		pin: {
 			type: 'integer',
 			defaultsTo: 0
+		},
+		
+		longitude: {
+			type: 'string',
+			defaultsTo: ''
+		},
+		
+		latitude: {
+			type: 'string',
+			defaultsTo: ''
 		},
 		
 		pinAttempts: {

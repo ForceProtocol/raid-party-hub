@@ -17,13 +17,14 @@ module.exports = {
 	
 		const email = req.param("email"),
 				password = req.param("password"),
-				deviceId = req.param("device_id"),
-				deviceType = req.param("device_type");
+				deviceType = req.param("device_type"),
+				longitude = req.param("lon"),
+				latitude = req.param("lat");
 				
         try {
 					
 			// Validate sent params
-			if(!deviceId || !deviceType || !email || !password){
+			if(!deviceType || !email || !password){
 				throw new CustomError('You did not provide all signup details required.', {status: 400});
 			}
 				
@@ -34,11 +35,11 @@ module.exports = {
 				throw new CustomError('This email is already registered with another account. Please login to your account.', {status: 400});
             }
 			
-			let existingPlayerDevice = await Player.findOne({deviceId: deviceId});
+			let existingPlayerDevice = await Player.findOne({email: email});
 
 			// Player already exists
             if(existingPlayerDevice){
-				throw new CustomError('This device is already registered with another account. Please login to your account using the following email: ' + existingPlayerDevice.email, {status: 400});
+				throw new CustomError('This email is already registered with another account. Please login to your account using the following email: ' + existingPlayerDevice.email, {status: 400});
             }
 			
 			// Create activation PIN
@@ -49,11 +50,12 @@ module.exports = {
 			let player = await Player.create({
 				email: email,
 				password: password,
-				deviceId: deviceId,
 				deviceType: deviceType,
 				pin: pin,
 				accountStatus: 1,
-				forceBalance: '0'
+				forceBalance: '0',
+				latitude: latitude,
+				longitude: longitude
 			});
 			
 			// Create the users wallet
@@ -554,6 +556,59 @@ module.exports = {
 			});
 			
 			return res.ok({rewards:rewards});
+		}catch(err){
+			return util.errorResponse(err, res);
+		}
+	},
+	
+	
+	
+	/**
+	* Get specific game code for player to link their raidparty account with the game on install
+	*/
+	async getPlayerGameCode(req, res) {
+		try {
+			let gameId = req.param("game_id"),
+			newPlayerGameCode;
+			
+			// Obtain our system game ID from the user game ID
+			let game = await Game.findOne({gameId:gameId});
+			
+			if(!game){
+				sails.log.debug("getPlayerGameCode: could not find that game");
+				throw new CustomError('Could not find that game', {status: 401,err_code:"not_found"});
+			}
+			
+			// Check if this player already has this game code
+			let gameCode = await PlayerToGame.findOne({game:game.id,player:req.token.user.id}).populate('game').populate('player');
+			
+			// TODO: Check that this code is not older than say 5 hours
+			
+			// This player does not have an associated game code
+			if(!gameCode){
+				newPlayerGameCode = util.getPlayerGameCode(5);
+				
+				// Make sure the code generated is unique against this game
+				let gameCodeExist = await PlayerToGame.findOne({game:game.id,code:newPlayerGameCode});
+				
+				// This game code already exists - generate a new one
+				if(gameCodeExist){
+					newPlayerGameCode = util.getPlayerGameCode(5);
+				}
+				
+				let savePlayerGameCode = await PlayerToGame.create({game:game.id,player:req.token.user.id,code:newPlayerGameCode,reward:'0'});
+				
+				if(!savePlayerGameCode){
+					sails.log.debug("getPlayerGameCode: could not save a unique code for the player");
+					throw new CustomError('Could not generate a unique game code. Please try again.', {status: 401,err_code:""});
+				}
+								
+			}else{
+				newPlayerGameCode = gameCode.code;
+				sails.log.debug("getPlayerGameCode: new player game code already exist",gameCode.code);
+			}
+			
+			return res.ok({code:newPlayerGameCode});
 		}catch(err){
 			return util.errorResponse(err, res);
 		}

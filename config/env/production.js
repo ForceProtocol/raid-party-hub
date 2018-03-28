@@ -22,6 +22,13 @@ module.exports = {
             password: 'ji4Zr56Bu72FY',
             database: 'raidparty_live'
         },
+        mysqlDbDev: {
+            adapter: 'sails-mysql',
+            host: 'localhost',
+            user: 'root',
+            password: 'root',
+            database: 'raidparty_dev'
+        }
     },
     models: {
         connection: 'mysqlDbProd'

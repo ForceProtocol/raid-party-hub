@@ -563,57 +563,5 @@ module.exports = {
 	
 	
 	
-	/**
-	* Get specific game code for player to link their raidparty account with the game on install
-	*/
-	async getPlayerGameCode(req, res) {
-		try {
-			let gameId = req.param("game_id"),
-			newPlayerGameCode;
-			
-			// Obtain our system game ID from the user game ID
-			let game = await Game.findOne({gameId:gameId});
-			
-			if(!game){
-				sails.log.debug("getPlayerGameCode: could not find that game");
-				throw new CustomError('Could not find that game', {status: 401,err_code:"not_found"});
-			}
-			
-			// Check if this player already has this game code
-			let gameCode = await PlayerToGame.findOne({game:game.id,player:req.token.user.id}).populate('game').populate('player');
-			
-			// TODO: Check that this code is not older than say 5 hours
-			
-			// This player does not have an associated game code
-			if(!gameCode){
-				newPlayerGameCode = util.getPlayerGameCode(5);
-				
-				// Make sure the code generated is unique against this game
-				let gameCodeExist = await PlayerToGame.findOne({game:game.id,code:newPlayerGameCode});
-				
-				// This game code already exists - generate a new one
-				if(gameCodeExist){
-					newPlayerGameCode = util.getPlayerGameCode(5);
-				}
-				
-				let savePlayerGameCode = await PlayerToGame.create({game:game.id,player:req.token.user.id,code:newPlayerGameCode,reward:'0'});
-				
-				if(!savePlayerGameCode){
-					sails.log.debug("getPlayerGameCode: could not save a unique code for the player");
-					throw new CustomError('Could not generate a unique game code. Please try again.', {status: 401,err_code:""});
-				}
-								
-			}else{
-				newPlayerGameCode = gameCode.code;
-				sails.log.debug("getPlayerGameCode: new player game code already exist",gameCode.code);
-			}
-			
-			return res.ok({code:newPlayerGameCode});
-		}catch(err){
-			return util.errorResponse(err, res);
-		}
-	},
-	
-	
 	
 };

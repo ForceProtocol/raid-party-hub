@@ -12,21 +12,21 @@ module.exports = {
 
 	/**
 	* Track a player request from a game using their device ID
-	* Route: /player/track/device
+	* Route: /sdk/player/track
 	*/
 	async trackPlayer(req, res) {
 	
 		try {
 			let publicKey = req.param('public_key'),
 				authKey = req.param('auth_key'),
-				code = req.param('code'),
+				playerEmail = req.param('user_id'),
 				developersPlayerId = req.param('my_id');
 				
 				
 			// Make sure valid information was sent
-			if(typeof deviceId == 'undefined' || deviceId.length < 1){
-				sails.log.debug("trackerPlayer : No valid deviceId provided");
-				return res.json('400',{'reason':'You did not provide a valid advertising ID of the player'});
+			if(typeof playerEmail == 'undefined' || playerEmail.length < 1){
+				sails.log.debug("trackerPlayer : No valid user_id provided");
+				return res.json('400',{'reason':'You did not provide a valid user_id of the player'});
 			}
 			
 			// Authenticate the request - is this really from the developers game?
@@ -38,23 +38,9 @@ module.exports = {
 				return res.json('403',{'reason':'Could not discover a record with details sent.'});
 			}
 			
-			/** Check if the authKey the developer sent is valid */
-			
-			// Create the encrypted request hash for comparison of what the developer sent
-			let validAuth = sha1('/sdk/player/track/device:' + game.privateKey);
-			
-			// Invalid Key Provided! Log this incase it's abuse/hacking attempt
-			if(authKey != validAuth){
-				sails.log.debug("trackerPlayer : Invalid authKey provided by developer.",authKey,validAuth);
-				//SecurityLog.create({developerId:game.developer[0].id,publicKey:publicKey,reason:'Invalid Auth Attempt'}).exec(function(err,created){});
-				return res.json('403',{'reason':'Invalid auth sent.'});
-			}
-			
-			
-			/** The auth key is valid, proceed */
 			
 			// Attempt to find this player
-			let player = await Player.findOne({deviceId:deviceId}).populate('games');
+			let player = await Player.findOne({email:playerEmail}).populate('games');
 			
 			// Player not found - invite them to use RaidParty
 			if(!player){
@@ -76,7 +62,6 @@ module.exports = {
 				
 				playerData = {
 					id: player.playerId,
-					advertising_id: player.deviceId,
 					last_login: linkPlayerToGame.lastLogin,
 					created_at: linkPlayerToGame.createdAt,
 					my_id: linkPlayerToGame.myId
@@ -89,7 +74,6 @@ module.exports = {
 				
 				playerData = {
 					id: player.playerId,
-					advertising_id: player.deviceId,
 					last_login: linkPlayerToGame[0].lastLogin,
 					created_at: linkPlayerToGame[0].createdAt,
 					my_id: linkPlayerToGame[0].myId

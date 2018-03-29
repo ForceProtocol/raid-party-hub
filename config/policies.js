@@ -29,7 +29,6 @@ module.exports.policies = {
         getPlayerDashboard: 'tokenAuth',
         getGames: 'tokenAuth',
         getRewards: 'tokenAuth',
-        getPlayerGameCode: 'tokenAuth',
         updatePassword: 'tokenAuth',
     },
 };

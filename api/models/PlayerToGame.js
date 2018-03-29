@@ -13,10 +13,6 @@ module.exports = {
 			type: 'string'
 		},
 		
-		code: {
-			type: 'string',
-		},
-		
         reward: {
             type: 'string',
         },

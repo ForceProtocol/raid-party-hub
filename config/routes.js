@@ -24,6 +24,7 @@ module.exports.routes = {
 	
 	/** API Player Routes */
 	'GET /sdk/player/:playerId': 'PlayerController.getPlayer',
+	'POST /sdk/player/track': 'PlayerController.trackPlayer',
 	'POST /sdk/player/track/device': 'PlayerController.trackPlayerDevice',
 	'POST /sdk/player/track/email': 'PlayerController.trackPlayerEmail',
 	'POST /sdk/player/reward/device': 'PlayerController.rewardPlayerDevice',

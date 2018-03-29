@@ -10,7 +10,102 @@ var sha1 = require('sha1');
 module.exports = {
 
 
-/**
+	/**
+	* Track a player request from a game using their device ID
+	* Route: /player/track/device
+	*/
+	async trackPlayer(req, res) {
+	
+		try {
+			let publicKey = req.param('public_key'),
+				authKey = req.param('auth_key'),
+				code = req.param('code'),
+				developersPlayerId = req.param('my_id');
+				
+				
+			// Make sure valid information was sent
+			if(typeof deviceId == 'undefined' || deviceId.length < 1){
+				sails.log.debug("trackerPlayer : No valid deviceId provided");
+				return res.json('400',{'reason':'You did not provide a valid advertising ID of the player'});
+			}
+			
+			// Authenticate the request - is this really from the developers game?
+			let game = await Game.findOne({publicKey:publicKey}).populate('developer');
+			
+			// Game was not found with public key
+			if(!game){
+				sails.log.debug("trackerPlayer : Could not find that game with the public key: ",publicKey);
+				return res.json('403',{'reason':'Could not discover a record with details sent.'});
+			}
+			
+			/** Check if the authKey the developer sent is valid */
+			
+			// Create the encrypted request hash for comparison of what the developer sent
+			let validAuth = sha1('/sdk/player/track/device:' + game.privateKey);
+			
+			// Invalid Key Provided! Log this incase it's abuse/hacking attempt
+			if(authKey != validAuth){
+				sails.log.debug("trackerPlayer : Invalid authKey provided by developer.",authKey,validAuth);
+				//SecurityLog.create({developerId:game.developer[0].id,publicKey:publicKey,reason:'Invalid Auth Attempt'}).exec(function(err,created){});
+				return res.json('403',{'reason':'Invalid auth sent.'});
+			}
+			
+			
+			/** The auth key is valid, proceed */
+			
+			// Attempt to find this player
+			let player = await Player.findOne({deviceId:deviceId}).populate('games');
+			
+			// Player not found - invite them to use RaidParty
+			if(!player){
+				// TODO: Send email to player inviting to RaidParty
+				sails.log.debug("trackerPlayer : Player not found in RaidParty network. Inviting player to join.");
+				return res.json('202',{'reason':'Player is not within RaidParty network. They have been invited.'});
+			}
+			
+			// Check to see if this player is already registered against this game
+			/*let playerLinkedToGameState = !!_.find(player.games,function(gameElement){
+				return game.id == gameElement.id;
+			});*/
+			
+			let playerLinkedToGameState = await PlayerToGame.findOne({player:player.id,game:game.id});
+			
+			// Player is not linked to this game
+			if(!playerLinkedToGameState){
+				let linkPlayerToGame = await PlayerToGame.create({player:player.id,game:game.id,myId:developersPlayerId,lastLogin:new Date()});
+				
+				playerData = {
+					id: player.playerId,
+					advertising_id: player.deviceId,
+					last_login: linkPlayerToGame.lastLogin,
+					created_at: linkPlayerToGame.createdAt,
+					my_id: linkPlayerToGame.myId
+				}
+				
+				return res.json('201',{playerData});
+			}else{
+				// Record this player accessed the game
+				let linkPlayerToGame = await PlayerToGame.update({id:playerLinkedToGameState.id},{lastLogin:new Date()});
+				
+				playerData = {
+					id: player.playerId,
+					advertising_id: player.deviceId,
+					last_login: linkPlayerToGame[0].lastLogin,
+					created_at: linkPlayerToGame[0].createdAt,
+					my_id: linkPlayerToGame[0].myId
+				}
+				
+				return res.json('201',{playerData});
+			}
+			
+		}catch(err){
+			util.errorResponse(err, res);
+		}
+    },
+	
+	
+	
+	/**
 	* Track a player request from a game using their device ID
 	* Route: /player/track/device
 	*/

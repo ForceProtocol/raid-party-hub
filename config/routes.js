@@ -22,13 +22,12 @@ module.exports.routes = {
 	'POST /app/developer/update-password': 'DeveloperController.updatePassword',
 	
 	
-	/** API Player Routes */
+	/** SDK PLAYER ROUTES */
 	'GET /sdk/player/:playerId': 'PlayerController.getPlayer',
 	'POST /sdk/player/track': 'PlayerController.trackPlayer',
-	'POST /sdk/player/track/device': 'PlayerController.trackPlayerDevice',
-	'POST /sdk/player/track/email': 'PlayerController.trackPlayerEmail',
-	'POST /sdk/player/reward/device': 'PlayerController.rewardPlayerDevice',
-	'POST /sdk/player/reward/email': 'PlayerController.rewardPlayerEmail',
+	
+	/** SDK GAME ROUTES */
+	'POST /sdk/game/event': 'PlayerController.trackEvent',
 	
 	
 	/** OUR OWN MOBILE APPLICATION API ROUTES **/

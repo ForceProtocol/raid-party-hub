@@ -88,6 +88,11 @@ module.exports = {
 			through: 'playertogame'
 		},
 		
+		playerToGameEvent: {
+			collection: 'playertogameevent',
+			via: 'player'
+		},
+		
 		rewards: {
 			collection: 'playerrewards',
 			via: 'player'

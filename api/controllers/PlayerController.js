@@ -22,6 +22,12 @@ module.exports = {
 				playerEmail = req.param('user_id'),
 				developersPlayerId = req.param('my_id');
 				
+			// Ensure Auth Key is set and a valid key format
+			if(typeof authKey == 'undefined' || authKey.length < 40){
+				sails.log.debug("trackerPlayer : Not a valid request");
+				// TODO: add a log that a bad request was made
+				return res.json('400',{'reason':'You did not provide a valid request'});
+			}
 				
 			// Make sure valid information was sent
 			if(typeof playerEmail == 'undefined' || playerEmail.length < 1){
@@ -36,6 +42,14 @@ module.exports = {
 			if(!game){
 				sails.log.debug("trackerPlayer : Could not find that game with the public key: ",publicKey);
 				return res.json('403',{'reason':'Could not discover a record with details sent.'});
+			}
+			
+			
+			// Authenticate the request
+			if(!SdkAuth.validAuthKey(authKey,publicKey,game.privateKey,'/sdk/player/track',playerEmail)){
+				sails.log.debug("trackerPlayer : Invalid auth_key was sent");
+				// TODO: add a log that a bad request was made
+				return res.json('400',{'reason':'You did not provide a valid request'});
 			}
 			
 			
@@ -89,23 +103,46 @@ module.exports = {
 	
 	
 	
+	
+	
 	/**
-	* Track a player request from a game using their device ID
-	* Route: /player/track/device
+	* Track an in-game event
+	* Route: /sdk/game/event
 	*/
-	async trackPlayerDevice(req, res) {
+	async trackEvent(req, res) {
 	
 		try {
 			let publicKey = req.param('public_key'),
 				authKey = req.param('auth_key'),
-				deviceId = req.param('advertising_id'),
+				playerEmail = req.param('user_id'),
+				eventName = req.param('event_name'),
+				eventDescription = req.param('event_description'),
+				eventValue = req.param('event_value'),
 				developersPlayerId = req.param('my_id');
 				
+			// Ensure Auth Key is set and a valid key format
+			if(typeof authKey == 'undefined' || authKey.length < 40){
+				sails.log.debug("PlayerController.trackerEvent: Not a valid request");
+				// TODO: add a log that a bad request was made
+				return res.json('400',{'reason':'You did not provide a valid request'});
+			}
 				
 			// Make sure valid information was sent
-			if(typeof deviceId == 'undefined' || deviceId.length < 1){
-				sails.log.debug("trackerPlayer : No valid deviceId provided");
-				return res.json('400',{'reason':'You did not provide a valid advertising ID of the player'});
+			if(typeof playerEmail == 'undefined' || playerEmail.length < 1){
+				sails.log.debug("PlayerController.trackerEvent: No valid user_id provided");
+				return res.json('400',{'reason':'You did not provide a valid user_id of the player'});
+			}
+			
+			// Event Name is required
+			if(typeof eventName == 'undefined' || eventName.length < 2){
+				sails.log.debug("PlayerController.trackerEvent: Invalid event name");
+				return res.json('400',{'reason':'Invalid event name. Event Name is required.'});
+			}
+			
+			// Event Description is required
+			if(typeof eventDescription == 'undefined' || eventDescription.length < 2){
+				sails.log.debug("PlayerController.trackerEvent: Invalid event Description");
+				return res.json('400',{'reason':'Invalid event description. Event Description is required.'});
 			}
 			
 			// Authenticate the request - is this really from the developers game?
@@ -113,424 +150,43 @@ module.exports = {
 			
 			// Game was not found with public key
 			if(!game){
-				sails.log.debug("trackerPlayer : Could not find that game with the public key: ",publicKey);
+				sails.log.debug("PlayerController.trackerEvent: Could not find that game with the public key: ",publicKey);
 				return res.json('403',{'reason':'Could not discover a record with details sent.'});
 			}
 			
-			/** Check if the authKey the developer sent is valid */
 			
-			// Create the encrypted request hash for comparison of what the developer sent
-			let validAuth = sha1('/sdk/player/track/device:' + game.privateKey);
-			
-			// Invalid Key Provided! Log this incase it's abuse/hacking attempt
-			if(authKey != validAuth){
-				sails.log.debug("trackerPlayer : Invalid authKey provided by developer.",authKey,validAuth);
-				//SecurityLog.create({developerId:game.developer[0].id,publicKey:publicKey,reason:'Invalid Auth Attempt'}).exec(function(err,created){});
-				return res.json('403',{'reason':'Invalid auth sent.'});
+			// Authenticate the request
+			if(!SdkAuth.validAuthKey(authKey,publicKey,game.privateKey,'/sdk/game/event',playerEmail + ':' + eventName)){
+				sails.log.debug("PlayerController.trackerEvent: Invalid auth_key was sent");
+				// TODO: add a log that a bad request was made
+				return res.json('400',{'reason':'You did not provide a valid request'});
 			}
 			
 			
-			/** The auth key is valid, proceed */
-			
 			// Attempt to find this player
-			let player = await Player.findOne({deviceId:deviceId}).populate('games');
+			let player = await Player.findOne({email:playerEmail}).populate('games');
 			
 			// Player not found - invite them to use RaidParty
 			if(!player){
 				// TODO: Send email to player inviting to RaidParty
-				sails.log.debug("trackerPlayer : Player not found in RaidParty network. Inviting player to join.");
+				sails.log.debug("PlayerController.trackerEvent: Player not found in RaidParty network. Inviting player to join.");
 				return res.json('202',{'reason':'Player is not within RaidParty network. They have been invited.'});
 			}
 			
-			// Check to see if this player is already registered against this game
-			/*let playerLinkedToGameState = !!_.find(player.games,function(gameElement){
-				return game.id == gameElement.id;
-			});*/
+			// Record this event against the player and game
+			let recordGameEvent = await PlayerToGameEvent.create({game:game.id,player:player.id,eventName:eventName,eventDescription:eventDescription,eventValue:eventValue});
 			
-			let playerLinkedToGameState = await PlayerToGame.findOne({player:player.id,game:game.id});
-			
-			// Player is not linked to this game
-			if(!playerLinkedToGameState){
-				let linkPlayerToGame = await PlayerToGame.create({player:player.id,game:game.id,myId:developersPlayerId,lastLogin:new Date()});
-				
-				playerData = {
-					id: player.playerId,
-					advertising_id: player.deviceId,
-					last_login: linkPlayerToGame.lastLogin,
-					created_at: linkPlayerToGame.createdAt,
-					my_id: linkPlayerToGame.myId
-				}
-				
-				return res.json('201',{playerData});
-			}else{
-				// Record this player accessed the game
-				let linkPlayerToGame = await PlayerToGame.update({id:playerLinkedToGameState.id},{lastLogin:new Date()});
-				
-				playerData = {
-					id: player.playerId,
-					advertising_id: player.deviceId,
-					last_login: linkPlayerToGame[0].lastLogin,
-					created_at: linkPlayerToGame[0].createdAt,
-					my_id: linkPlayerToGame[0].myId
-				}
-				
-				return res.json('201',{playerData});
+			if(!recordGameEvent){
+				sails.log.debug("PlayerController.trackerEvent: Could not record that game event");
+				return res.json('202',{'reason':'The game event could not be tracked.'});
 			}
+			
+			return res.json('201',recordGameEvent);
 			
 		}catch(err){
 			util.errorResponse(err, res);
 		}
     },
-	
-	
-	
-	
-	/**
-	* Reward a player by device ID
-	* Route: /player/reward/email
-	*/
-	async rewardPlayerDevice(req, res) {
-	
-		try {
-			let publicKey = req.param('public_key'),
-				authKey = req.param('auth_key'),
-				deviceId = req.param('advertising_id'),
-				reward = req.param('reward'),
-				reason = req.param('reason');
-				
-				
-			// Make sure valid information was sent
-			if(typeof deviceId == 'undefined' || deviceId.length < 1){
-				sails.log.debug("trackerPlayer : No valid deviceId provided");
-				return res.json('400',{'reason':'You did not provide a valid device ID of the player'});
-			}
-			
-			// Make sure valid information was sent
-			if(typeof reward == 'undefined' || reward.length < 1){
-				sails.log.debug("trackerPlayer : No valid reward given for reward");
-				return res.json('400',{'reason':'You did not provide a reward for the player.'});
-			}
-			
-			reward = parseFloat(reward);
-			
-			// Make sure valid information was sent
-			if(typeof reward != 'number'){
-				sails.log.debug("trackerPlayer : Invalid format for reward - not a number");
-				return res.json('400',{'reason':'The reward parameter was sent as a string. It must be of type float or integer, not a string.'});
-			}
-			
-			// Make sure valid information was sent
-			if(typeof reason == 'undefined' || reason.length < 1){
-				sails.log.debug("trackerPlayer : No valid reason given for reward");
-				return res.json('400',{'reason':'You did not provide a reason for why the player was rewarded'});
-			}
-			
-			// Authenticate the request - is this really from the developers game?
-			let game = await Game.findOne({publicKey:publicKey}).populate('developer');
-			
-			// Game was not found with public key
-			if(!game){
-				sails.log.debug("trackerPlayer : Could not find that game with the public key: ",publicKey);
-				return res.json('403',{'reason':'Could not discover a record with details sent.'});
-			}
-			
-			/** Check if the authKey the developer sent is valid */
-			
-			// Create the encrypted request hash for comparison of what the developer sent
-			let validAuth = sha1('/sdk/player/reward/device:' + game.privateKey);
-			
-			// Invalid Key Provided! Log this incase it's abuse/hacking attempt
-			if(authKey != validAuth){
-				sails.log.debug("trackerPlayer : Invalid authKey provided by developer.",authKey,validAuth);
-				//SecurityLog.create({developerId:game.developer[0].id,publicKey:publicKey,reason:'Invalid Auth Attempt'}).exec(function(err,created){});
-				return res.json('403',{'reason':'Invalid auth sent.'});
-			}
-						
-			/** The auth key is valid, proceed */
-			// Make sure the developer has enough FORCE currency to reward players
-			if(parseFloat(game.developer.forceBalance) < reward){
-				sails.log.debug("trackerPlayer : Not enough FORCE reward");
-				return res.json('400',{'reason':'Your account does not have enough FORCE currency to reward players with. Please topup your account.'});
-			}
-			
-			
-			// Attempt to find this player
-			let player = await Player.findOne({deviceId:deviceId}).populate('games');
-			
-			// Player not found - invite them to use RaidParty
-			if(!player){
-				// TODO: Send email to player inviting to RaidParty
-				sails.log.debug("trackerPlayer : Player not found in RaidParty network. Inviting player to join.");
-				return res.json('202',{'reason':'Player is not within RaidParty network. They have been invited.'});
-			}
-			
-			
-			let playerLinkedToGameState = await PlayerToGame.findOne({player:player.id,game:game.id});
-			
-			// Player is not linked to this game
-			if(!playerLinkedToGameState){
-				let linkPlayerToGame = await PlayerToGame.create({player:player.id,game:game.id,myId:developersPlayerId,lastLogin:new Date()});
-				
-				// Add the reward to the player
-				let addPlayerReward = await PlayerRewards.create({player:player.id,game:game.id,force:reward,reason:reason});
-				
-				playerData = {
-					id: player.playerId,
-					advertising_id: player.deviceId,
-					last_login: linkPlayerToGame.lastLogin,
-					created_at: linkPlayerToGame.createdAt,
-					my_id: linkPlayerToGame.myId,
-					reward: reward,
-					reason: reason
-				}
-				
-				return res.json('201',{playerData});
-			}else{
-				// Record this player accessed the game
-				
-				if(!playerLinkedToGameState.reward || playerLinkedToGameState.reward == 'NaN'){
-					playerLinkedToGameState.reward = '0';
-				}
-				
-				reward = parseFloat(playerLinkedToGameState.reward) + reward;
-				
-				let linkPlayerToGame = await PlayerToGame.update({id:playerLinkedToGameState.id},{lastLogin:new Date(),reward:reward});
-				
-				// Add the reward to the player
-				let addPlayerReward = await PlayerRewards.create({player:player.id,game:game.id,force:reward,reason:reason});
-			
-				playerData = {
-					id: player.playerId,
-					advertising_id: player.deviceId,
-					last_login: linkPlayerToGame[0].lastLogin,
-					created_at: linkPlayerToGame[0].createdAt,
-					my_id: linkPlayerToGame[0].myId,
-					reward: reward,
-					reason: reason
-				}
-				
-				return res.json('201',{playerData});
-			}
-			
-			
-		}catch(err){
-			util.errorResponse(err, res);
-		}
-    },
-	
-	
-	
-	
-	
-	/**
-	* Track a player request from a game using their email
-	* Route: /player/track/email
-	*/
-	async trackPlayerEmail(req, res) {
-	
-		try {
-			let publicKey = req.param('public_key'),
-				authKey = req.param('auth_key'),
-				playerEmail = req.param('email'),
-				developersPlayerId = req.param('my_id');
-				
-			// Make sure valid information was sent
-			if(typeof playerEmail == 'undefined' || playerEmail.length > 0){
-				sails.log.debug("trackerPlayer : No valid email provided");
-				return res.json('400',{'reason':'You did not provide a valid email ID of the player'});
-			}
-			
-			// Authenticate the request - is this really from the developers game?
-			let game = await Game.findOne({publicKey:publicKey}).populate('developer');
-			
-			// Game was not found with public key
-			if(!game){
-				sails.log.debug("trackerPlayer : Could not find that game with the public key: ",publicKey);
-				return res.json('403',{'reason':'Could not discover a record with details sent.'});
-			}
-			
-			
-			/** Check if the authKey the developer sent is valid */
-			
-			// Create the encrypted request hash for comparison of what the developer sent
-			let validAuth = sha1('/player/track/email:' + game.privateKey);
-			
-			// Invalid Key Provided! Log this incase it's abuse/hacking attempt
-			if(authKey != validAuth){
-				sails.log.debug("trackerPlayer : Invalid authKey provided by developer.",authKey,validAuth);
-				SecurityLog.create({developerId:game.developer[0].id,publicKey:publicKey,reason:'Invalid Auth Attempt'}).exec(function(err,created){});
-				return res.json('403',{'reason':'Invalid auth sent.'});
-			}
-			
-			
-			/** The auth key is valid, proceed */
-			
-			// Attempt to find this player
-			let player = await Player.findOne({email:email}).populate('games');
-			
-			// Player not found - invite them to use RaidParty
-			if(!player){
-				// TODO: Send email to player inviting to RaidParty
-				sails.log.debug("trackerPlayer : Player not found in RaidParty network. Inviting player to join.");
-				return res.json('202',{'reason':'Player is not within RaidParty network. They have been invited.'});
-			}
-			
-			// Check to see if this player is already registered against this game
-			let playerLinkedToGameState = !!_.find(player.games,function(gameElement){
-				return game.id == gameElement.id;
-			});
-			
-			// Player is not linked to this game
-			if(!playerLinkedToGameState){
-				let linkPlayerToGame = await PlayerToGame.create({player:player.id,game:game.id,myId:developersPlayerId});
-			}else{
-				// Record this player accessed the game
-				let linkPlayerToGame = await PlayerToGame.update({player:player.id,game:game.id,lastLogin:new Date()});
-				
-				if(_.isArray(linkPlayerToGame) && linkPlayerToGame.length){
-					linkPlayerToGame = linkPlayerToGame[0];
-				}else{
-					sails.log.error("trackerPlayer : Failed to update a players record to associated game");
-					throw new CustomError("Could not update the player record to associated game.",{status:500});
-				}
-			}
-			
-			playerData = {
-				id: playerId,
-				email: player.email,
-				my_id: linkPlayerToGame.myId,
-				auth_key: authKey
-			}
-
-			return res.json('201',{player:playerData});
-			
-		}catch(err){
-			util.errorResponse(err, res);
-		}
-    },
-	
-	
-	
-
-	
-	
-	
-	/**
-	* Reward a player by email ID
-	* Route: /player/reward/email
-	*/
-	async rewardPlayerEmail(req, res) {
-	
-		try {
-			let publicKey = req.param('public_key'),
-				authKey = req.param('auth_key'),
-				playerEmail = req.param('email'),
-				reward = req.param('reward'),
-				reason = req.param('reason');
-				
-				
-			// Make sure valid information was sent
-			if(typeof playerEmail == 'undefined' || playerEmail.length > 0){
-				sails.log.debug("trackerPlayer : No valid email provided");
-				return res.json('400',{'reason':'You did not provide a valid email ID of the player'});
-			}
-			
-			// Make sure valid information was sent
-			if(typeof reward == 'undefined' || reward.length > 0){
-				sails.log.debug("trackerPlayer : No valid reward given for reward");
-				return res.json('400',{'reason':'You did not provide a reward for the player.'});
-			}
-			
-			// Make sure valid information was sent
-			if(typeof reward != 'number'){
-				sails.log.debug("trackerPlayer : Invalid format for reward - not a number");
-				return res.json('400',{'reason':'The reward parameter was sent as a string. It must be of type float or integer, not a string.'});
-			}
-			
-			// Make sure valid information was sent
-			if(typeof reason == 'undefined' || reason.length > 0){
-				sails.log.debug("trackerPlayer : No valid reason given for reward");
-				return res.json('400',{'reason':'You did not provide a reason for why the player was rewarded'});
-			}
-			
-			// Authenticate the request - is this really from the developers game?
-			let game = await Game.findOne({publicKey:publicKey}).populate('developer');
-			
-			// Game was not found with public key
-			if(!game){
-				sails.log.debug("trackerPlayer : Could not find that game with the public key: ",publicKey);
-				return res.json('403',{'reason':'Could not discover a record with details sent.'});
-			}
-			
-			/** Check if the authKey the developer sent is valid */
-			
-			// Create the encrypted request hash for comparison of what the developer sent
-			let validAuth = sha1('/player/reward/email:' + game.privateKey);
-			
-			// Invalid Key Provided! Log this incase it's abuse/hacking attempt
-			if(authKey != validAuth){
-				sails.log.debug("trackerPlayer : Invalid authKey provided by developer.",authKey,validAuth);
-				SecurityLog.create({developerId:game.developer[0].id,publicKey:publicKey,reason:'Invalid Auth Attempt'}).exec(function(err,created){});
-				return res.json('403',{'reason':'Invalid auth sent.'});
-			}
-			
-			
-			/** The auth key is valid, proceed */
-			// Make sure the developer has enough FORCE currency to reward players
-			if(parseFloat(game.developer.forceBalance) < reward){
-				sails.log.debug("trackerPlayer : Not enough FORCE reward");
-				return res.json('400',{'reason':'Your account does not have enough FORCE currency to reward players with. Please topup your account.'});
-			}
-			
-			
-			// Attempt to find this player
-			let player = await Player.findOne({email:email}).populate('games');
-			
-			// Player not found - invite them to use RaidParty
-			if(!player){
-				// TODO: Send email to player inviting to RaidParty
-				sails.log.debug("trackerPlayer : Player not found in RaidParty network. Inviting player to join.");
-				return res.json('202',{'reason':'Player is not within RaidParty network. They have been invited.'});
-			}
-			
-			// Check to see if this player is already registered against this game
-			let playerLinkedToGameState = !!_.find(player.games,function(gameElement){
-				return game.id == gameElement.id;
-			});
-			
-			// Player is not linked to this game
-			if(!playerLinkedToGameState){
-				let linkPlayerToGame = await PlayerToGame.create({player:player.id,game:game.id,reward:reward});
-			}else{
-				// Record this player accessed the game
-				reward = parseFloat(player.reward) + reward;
-				let linkPlayerToGame = await PlayerToGame.update({player:player.id,game:game.id,lastLogin:new Date(),reward:newReward});
-				
-				if(_.isArray(linkPlayerToGame) && linkPlayerToGame.length){
-					linkPlayerToGame = linkPlayerToGame[0];
-				}else{
-					sails.log.error("rewardPlayer : Failed to update a players record to associated game");
-					throw new CustomError("Could not update the player record to associated game.",{status:500});
-				}
-			}
-			
-			// Add the reward to the player
-			let addPlayerReward = await PlayerRewards.create({player:player.id,game:game.id,force:reward,reason:reason});
-			
-			playerData = {
-				id: playerId,
-				email: player.email,
-				my_id: linkPlayerToGame.myId,
-				auth_key: authKey
-			}
-
-			return res.json('201',{player:playerData});
-			
-		}catch(err){
-			util.errorResponse(err, res);
-		}
-    },
-
 	
 	
 

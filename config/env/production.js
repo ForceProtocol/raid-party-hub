@@ -27,7 +27,7 @@ module.exports = {
         connection: 'mysqlDbProd'
     },
 
-	MANDRILL_KEY: 'pScbI1GG5IjISeRbQIvzXg',		// PRODUCTION KEY
+	MANDRILL_KEY: 'EHaaGsImRCQrLW9vrWSedA',		// PRODUCTION KEY
 
     hookTimeout: 120000,
 

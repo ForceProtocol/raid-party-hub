@@ -45,7 +45,7 @@ module.exports = {
 		
 		platform: {
 			type: 'string',
-			enum: ['android', 'ios', 'pc', 'playstation', 'xbox', 'switch']
+			enum: ['android', 'ios', 'pc', 'console']
 		},
 		
 		avatar: {

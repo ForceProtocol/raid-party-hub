@@ -552,7 +552,7 @@ module.exports = {
 			let rewards = await PlayerRewards.find({player:req.token.user.id}).populate("player").populate("game").sort("id DESC").limit("25");
 			
 			rewards = _.map(rewards, function(reward){
-				return {reason:reward.reason,force:reward.force,game:{title:reward.game.title}};
+				return {reason:reward.reason,amount:reward.amount,currency:reward.currency,avatar:reward.avatar,link:reward.link,created_at:reward.createdAt,game:{title:reward.game.title}};
 			});
 			
 			return res.ok({rewards:rewards});

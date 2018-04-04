@@ -11,11 +11,29 @@ module.exports = {
     attributes: {
 		
 		reason: {
-            type: 'string'
+            type: 'string',
+			required: true
         },
 		
-        force: {
-            type: 'string'
+        amount: {
+            type: 'string',
+			required: true
+        },
+		
+		currency: {
+			type: 'string',
+			defaultsTo: 'FORCE',
+			required: true
+		},
+		
+		avatar: {
+			type: 'text',
+			defaultsTo: ''
+		},
+		
+		link: {
+            type: 'text',
+			defaultsTo: ''
         },
 		
 		game: {

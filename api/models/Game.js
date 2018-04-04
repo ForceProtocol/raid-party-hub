@@ -28,6 +28,11 @@ module.exports = {
 			required: true
         },
 		
+		rewardAvailable: {
+            type: 'text',
+			defaultsTo: '0.0'
+        },
+		
 		description: {
             type: 'text',
 			required: true

@@ -532,7 +532,7 @@ module.exports = {
 			let games = await Game.find({active:true,platform:deviceType,platform: { '!' : excludePlatform}});
 			
 			games = _.map(games, function(game){
-				return {game_id:game.gameId,title:game.title,description:game.description,link:game.link,platform:game.platform,avatar:game.avatar};
+				return {game_id:game.gameId,title:game.title,reward:game.rewardAvailable,description:game.description,link:game.link,platform:game.platform,avatar:game.avatar};
 			});
 			
 			return res.ok({games:games});

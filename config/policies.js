@@ -34,5 +34,8 @@ module.exports.policies = {
 
     DeveloperController: {
         signupDeveloper: true,
+        loginDeveloper: true,
+        resetPassword: true,
+        changePassword: true,
     }
 };

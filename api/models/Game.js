@@ -53,15 +53,6 @@ module.exports = {
 			required: true
 		},
 		
-		gameId: {
-            type: 'string',
-			unique: true,
-			size: 40,
-			defaultsTo: function() {
-				return uuid.v4();
-			}
-        },
-		
 		publicKey: {
             type: 'string',
 			unique: true,
@@ -81,7 +72,7 @@ module.exports = {
         },
 		
 		developer: {
-			model: 'developer'
+			type: 'string',
 		},
 		
 		players: {
@@ -103,7 +94,7 @@ module.exports = {
     },
 	
 	customToJSON: function () {
-        return _.omit(this, ['publicKey', 'privateKey', 'id'])
+        return _.omit(this, ['publicKey', 'privateKey', 'gameId'])
     }
 };
 

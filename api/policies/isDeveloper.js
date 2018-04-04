@@ -32,7 +32,8 @@ module.exports = function (req, res, next) {
 		}
 		
 		// Make sure is a valid and active developer
-		Developer.findOne({id:req.token.user.id}).exec(function(err,developer){
+
+		Developer.findOne({developerId:token.user.developerId}).exec(function(err,developer){
 			
 			// Could not find that account
 			if(!developer){

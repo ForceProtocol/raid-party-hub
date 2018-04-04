@@ -33,6 +33,7 @@ module.exports.policies = {
     },
 
     DeveloperController: {
+        '*': 'isDeveloper',
         signupDeveloper: true,
         loginDeveloper: true,
         resetPassword: true,

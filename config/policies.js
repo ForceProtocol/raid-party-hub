@@ -31,4 +31,8 @@ module.exports.policies = {
         getRewards: 'tokenAuth',
         updatePassword: 'tokenAuth',
     },
+
+    DeveloperController: {
+        signupDeveloper: true,
+    }
 };

@@ -43,6 +43,7 @@
     "sails-mysql": "^0.11.5",
     "sanitize-html": "^1.18.2",
     "sha1": "^1.1.1",
+    "skipper": "^0.8.5",
     "uuid": "^3.2.1",
     "validator": "^9.4.1"
   },

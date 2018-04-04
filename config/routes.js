@@ -5,6 +5,7 @@ module.exports.routes = {
 	
 	/** Developer Login and Signups */
 	'POST /app/developer': 'DeveloperController.signupDeveloper',
+	'POST /app/developer/login': 'DeveloperController.loginDeveloper',
 	/** API Player Routes 
 	'GET /player/:playerId': 'PlayerController.getPlayer',
 	'POST /player/track': 'PlayerController.trackPlayer',

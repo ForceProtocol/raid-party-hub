@@ -17,11 +17,13 @@ module.exports = {
 	
 		const email = req.param("email"),
 			password = req.param("password");
-				
+			firstName = req.param("firstName");
+			lastName = req.param("lastName");
+
         try {
 					
 			// Validate sent params
-			if(!email || !password){
+			if(!email || !password || !firstName || !lastName) {
 				throw new CustomError('You did not provide all signup details required.', {status: 400});
 			}
 				
@@ -40,6 +42,8 @@ module.exports = {
 			let developer = await Developer.create({
 				email: email,
 				password: password,
+				firstName: firstName,
+				lastName: lastName,
 				pin: pin,
 				accountStatus: 1,
 				forceBalance: '0'
@@ -100,7 +104,7 @@ module.exports = {
 			// Developer is activated - try to login
 			if(developer.accountStatus == 2){
 				// Check password matches
-				let isValidPassword = await Developer.validatePassword(password,player.password);
+				let isValidPassword = await Developer.validatePassword(password,developer.password);
 				
 				// Invalid password entered
 				if(!isValidPassword){

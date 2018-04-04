@@ -6,6 +6,8 @@
  */
 
 const fs = require("fs");
+const BigNumber = require('bignumber.js');
+
 
 module.exports = {
 
@@ -365,9 +367,11 @@ module.exports = {
 	async getGames(req, res) {
 		try {
 			let developer = req.developer;
+			let games = await Game.findOne({ developer: developer.id });
 
-			let games = Game.find({ developer: developer.id });
-
+			console.log('#########################')
+			console.log(games);
+			console.log('#########################')
 			return res.ok({ games: games });
 		} catch (err) {
 			return util.errorResponse(err, res);

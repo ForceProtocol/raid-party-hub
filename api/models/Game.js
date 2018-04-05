@@ -4,6 +4,8 @@
  * @description :: A model definition.  Represents a database table/collection/etc.
  * @docs        :: https://sailsjs.com/docs/concepts/models-and-orm/models
  */
+const uuidv4 = require('uuid/v4');
+const bcrypt = require('bcrypt-nodejs');
 
 module.exports = {
     tableName: 'games',
@@ -52,13 +54,13 @@ module.exports = {
 			type: 'text',
 			required: true
 		},
-		
+
 		publicKey: {
             type: 'string',
 			unique: true,
 			size: 40,
 			defaultsTo: function() {
-				return uuid.v4();
+				return uuidv4();
 			}
         },
 		
@@ -67,7 +69,7 @@ module.exports = {
 			unique: true,
 			size: 40,
 			defaultsTo: function() {
-				return uuid.v4();
+				return uuidv4();
 			}
         },
 		

@@ -31,7 +31,8 @@ module.exports = {
         }
     },
     models: {
-        connection: 'mysqlDbDev' 
+        connection: 'mysqlDbDev',
+		migrate: 'safe'
     },
 
 	MANDRILL_KEY: 'EHaaGsImRCQrLW9vrWSedA',		// PRODUCTION KEY

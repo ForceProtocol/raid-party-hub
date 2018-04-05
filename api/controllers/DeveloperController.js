@@ -368,10 +368,6 @@ module.exports = {
 		try {
 			let developer = req.developer;
 			let games = await Game.findOne({ developer: developer.id });
-
-			console.log('#########################')
-			console.log(games);
-			console.log('#########################')
 			return res.ok({ games: games });
 		} catch (err) {
 			return util.errorResponse(err, res);
@@ -414,21 +410,29 @@ module.exports = {
 			let gameTitle = req.param("title"),
 				description = req.param("description"),
 				platform = req.param("platform"),
-				link = req.param("link");
+				link = req.param("link"),
+				active = req.param('activeStatus')
 
-			if (!req.files[0]) {
+			if (!req.file('avatar')) {
 				throw new CustomError('You must provide a valid game image to be listed on the RaidParty developer app.', { status: 401 });
 			}
 
-			let avatarBase64Data = await new Buffer(fs.readFileSync(req.files[0].path)).toString("base64");
+			req.file('avatar').upload({ maxBytes: 10000000 }, async function (err, file) {
+				if (!file) {
+					throw new CustomError('Error Uploading image file.', { status: 401 });
+				}
 
-			let addGame = await Game.create({ title: gameTitle, description: description, link: link, avatar: avatarBase64Data, platform: platform, developer: developer.id });
+				let avatarBase64Data = await new Buffer(fs.readFileSync(file[0].fd)).toString("base64");
 
-			if (!addGame) {
-				throw new CustomError('Could not add that game due to a technical issue. Please try again later.', { status: 400 });
-			}
+				let addGame = await Game.create({ title: gameTitle, description: description, active: active, link: link, avatar: avatarBase64Data, platform: platform, developer: developer.id });
 
-			return res.ok({ game: addGame });
+				if (!addGame) {
+					throw new CustomError('Could not add that game due to a technical issue. Please try again later.', { status: 400 });
+				}
+
+				return res.ok({ game: addGame });
+			});
+
 		} catch (err) {
 			return util.errorResponse(err, res);
 		}

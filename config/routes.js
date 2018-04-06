@@ -5,6 +5,7 @@ module.exports.routes = {
 	
 	/** Developer Login and Signups */
 	'POST /app/developer': 'DeveloperController.signupDeveloper',
+	'GET /app/developer/activate': 'DeveloperController.activateDeveloper',
 	'POST /app/developer/login': 'DeveloperController.loginDeveloper',
 	/** API Player Routes 
 	'GET /player/:playerId': 'PlayerController.getPlayer',
@@ -18,7 +19,7 @@ module.exports.routes = {
 	'GET /app/developer/balance': 'DeveloperController.getBalance',
 	'POST /app/developer/game': 'DeveloperController.addGame',
 	'POST /app/developer/game/:gameId': 'DeveloperController.updateGame',
-	'POST /app/developer/activate': 'DeveloperController.activateDeveloper',
+	'DELETE /app/developer/game/:gameId': 'DeveloperController.deleteGame',
 	'POST /app/developer/reset-password': 'DeveloperController.resetPassword',
 	'POST /app/developer/change-password': 'DeveloperController.changePassword',
 	'POST /app/developer/update-password': 'DeveloperController.updatePassword',

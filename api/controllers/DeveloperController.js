@@ -53,7 +53,7 @@ module.exports = {
 
 			// Create the users wallet
 			//WalletService.createUserWallet(developer.id).catch(err=>{sails.log.error('On signup, failed to create developer wallet: ', err)});
-			let activationLink = "https://app.raidparty.io/activate?developer=" + developer.developerId + "&pin=" + pin;
+			let activationLink = sails.config.APP_HOST + "/app/developer/activate?developer=" + developer.developerId + "&pin=" + pin;
 
 			let msg = `Welcome to RaidParty!<br />
 				Your account has been created and is now awaiting your activation. Please click on the activation link below to activate your RaidParty Indie Developer account.<br /><br />
@@ -260,7 +260,7 @@ module.exports = {
 
 			await Developer.update({ id: developer.id }, { pin: pin });
 
-			let activationLink = "https://app.raidparty.io/reset-password?developer=" + developer.developerId + "&pin=" + pin;
+			let activationLink = sails.config.APP_HOST + "/app/developer/activate?developer=" + developer.developerId + "&pin=" + pin;
 
 			let msg = `Welcome to RaidParty!<br />
 				A password reset request was made. Please visit the link below to update your password.<br /><br />
@@ -424,7 +424,7 @@ module.exports = {
 
 				let avatarBase64Data = await new Buffer(fs.readFileSync(file[0].fd)).toString("base64");
 
-				let addGame = await Game.create({ title: gameTitle, description: description, active: active, link: link, avatar: avatarBase64Data, platform: platform, developer: developer.id });
+				let addGame = await Game.create({ title: gameTitle, description: description, active: active, link: link, avatar: avatarBase64Data, platform: platform, developer: developer.developerId });
 
 				if (!addGame) {
 					throw new CustomError('Could not add that game due to a technical issue. Please try again later.', { status: 400 });
@@ -450,9 +450,9 @@ module.exports = {
 				gameTitle = req.param("title"),
 				description = req.param("description"),
 				platform = req.param("platform"),
-				link = req.param("link");
-
-			let addGame = await Game.update({ gameId: gameId, developer: developer.id }, { title: gameTitle, description: description, link: link, platform: platform });
+				link = req.param("link"),
+				active = req.param("activeStatus");
+			let addGame = await Game.update({ gameId: gameId, developer: developer.developerId }, { title: gameTitle, description: description, link: link, platform: platform, active: active });
 
 			if (!addGame) {
 				throw new CustomError('Could not update that game due to a technical issue. Please try again later.', { status: 400 });
@@ -475,7 +475,7 @@ module.exports = {
 			let gameId = req.param("gameId"),
 				gameTitle = req.param("title");
 
-			let game = await Game.findOne({ id: gameId, developer: developer.id });
+			let game = await Game.findOne({ gameId: gameId, developer: developer.developerId });
 
 			if (!game) {
 				throw new CustomError('You do not have relevant permissions to delete that game.', { status: 501 });
@@ -486,7 +486,7 @@ module.exports = {
 				throw new CustomError('You entered the game title incorrectly, that game could not be deleted. Please check the game title and try again.', { status: 400 });
 			}
 
-			let gameDeleted = await Game.destroy({ id: game.id });
+			let gameDeleted = await Game.destroy({ gameId: game.gameId });
 
 			if (!gameDeleted) {
 				throw new CustomError('There was a technical problem while deleting the game.', { status: 400 });
@@ -505,9 +505,9 @@ module.exports = {
 	async getGame(req, res) {
 		try {
 			let developer = req.developer,
-				gameId = req.param("game_id");
+				gameId = req.param("gameId");
 
-			let game = await Game.findOne({ developer: developer.id, gameId: gameId });
+			let game = await Game.findOne({ gameId: gameId, developer: developer.developerId });
 
 			if (!game) {
 				throw new CustomError('That game could not be found.', { status: 400 });
@@ -526,8 +526,8 @@ module.exports = {
 	*/
 	async updatePassword(req, res) {
 		try {
-			let currentPassword = req.param("current_password"),
-				newPassword = req.param("new_password");
+			let currentPassword = req.param("currentPassword"),
+				newPassword = req.param("newPassword");
 
 			// Validate sent params
 			if (!currentPassword || !newPassword) {
@@ -538,7 +538,7 @@ module.exports = {
 				throw new CustomError('You entered the same password as your current password', { status: 400 });
 			}
 
-			let developer = await developer.findOne({ id: req.token.user.id });
+			let developer = await Developer.findOne({ developerId: req.developer.developerId });
 
 			// Could not find that account
 			if (!developer) {
@@ -551,7 +551,7 @@ module.exports = {
 			}
 
 			// Check current password entered is valid
-			let validPassword = await developer.validatePassword(currentPassword, developer.password);
+			let validPassword = await Developer.validatePassword(currentPassword, developer.password);
 
 			// Invalid current password given
 			if (!validPassword) {
@@ -559,7 +559,7 @@ module.exports = {
 			}
 
 			// Current password was correct, enter new password
-			let updatedPassword = await developer.update({ id: developer.id }, { password: newPassword });
+			let updatedPassword = await Developer.update({ developerId: developer.developerId }, { password: newPassword });
 
 			return res.ok({ "success": true, "msg": "Your password has been updated successfully" });
 		} catch (err) {

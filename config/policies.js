@@ -35,6 +35,7 @@ module.exports.policies = {
     DeveloperController: {
         '*': 'isDeveloper',
         signupDeveloper: true,
+        activateDeveloper: true,
         loginDeveloper: true,
         resetPassword: true,
         changePassword: true,

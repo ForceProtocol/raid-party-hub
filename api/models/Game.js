@@ -54,7 +54,7 @@ module.exports = {
 			type: 'text',
 			required: true
 		},
-
+		
 		publicKey: {
             type: 'string',
 			unique: true,

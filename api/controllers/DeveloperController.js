@@ -183,7 +183,7 @@ module.exports = {
 
 				// If too many PIN attempts made, block their account, send email notifying user
 				if (developer.pinAttempts > 6) {
-					let updatedPinAttempt = await Developer.update({ id: developer.id }, { accountStatus: 0 });
+					let updatedPinAttempt = await Developer.update({ developerId: developer.developerId }, { accountStatus: 0 });
 
 					// Send developer an email that their account has been blocked
 					let msg = `Hi<br />
@@ -205,12 +205,12 @@ module.exports = {
 					throw new CustomError('You have made too many incorrect PIN attempts. Your account has been locked.', { status: 403, err_code: "blocked" });
 				}
 
-				let updatedPinAttempt = await Developer.update({ id: developer.id }, { pinAttempts: developer.pinAttempts + 1 });
+				let updatedPinAttempt = await Developer.update({ developerId: developer.developerId }, { pinAttempts: developer.pinAttempts + 1 });
 				throw new CustomError('The PIN provided was invalid', { status: 401, err_code: "invalid_pin" });
 			}
 
 			// PIN is correct and developer is allowed to enter
-			let updatedPinAttempt = await Developer.update({ id: developer.id }, { accountStatus: 2, pinAttempts: 0, pin: 0 });
+			let updatedPinAttempt = await Developer.update({ developerId: developer.developerId }, { accountStatus: 2, pinAttempts: 0, pin: 0 });
 
 			const rsp = {
 				developer: developer,
@@ -367,7 +367,7 @@ module.exports = {
 	async getGames(req, res) {
 		try {
 			let developer = req.developer;
-			let games = await Game.findOne({ developer: developer.id });
+			let games = await Game.findOne({ developer: developer.developerId });
 			return res.ok({ games: games });
 		} catch (err) {
 			return util.errorResponse(err, res);

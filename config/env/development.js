@@ -29,7 +29,8 @@ module.exports = {
         }
     },
     models: {
-        connection: 'mysqlDbDev' 
+        connection: 'mysqlDbDev', 
+        migrate: 'alter'
     },
 	
     MANDRILL_KEY: '57Ev-Hbw1O4KoVnCT3UfnQ', 	// TEST KEY

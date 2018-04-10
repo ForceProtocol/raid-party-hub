@@ -14,6 +14,7 @@ module.exports = {
 
 		developerId: {
 			type: 'string',
+			primaryKey: true,
 			unique: true,
 			size: 40,
 			defaultsTo: function () {

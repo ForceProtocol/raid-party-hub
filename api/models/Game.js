@@ -74,7 +74,7 @@ module.exports = {
         },
 		
 		developer: {
-			type: 'string',
+			model: 'developer'
 		},
 		
 		players: {

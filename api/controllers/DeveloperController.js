@@ -258,7 +258,7 @@ module.exports = {
 			// Create activation PIN
 			let pin = util.randomFixedInteger(6);
 
-			await Developer.update({ id: developer.id }, { pin: pin });
+			await Developer.update({ developerId: developer.developerId }, { pin: pin });
 
 			let activationLink = sails.config.APP_HOST + "/app/developer/activate?developer=" + developer.developerId + "&pin=" + pin;
 
@@ -323,7 +323,7 @@ module.exports = {
 
 				// If too many PIN attempts made, block their account, send email notifying user
 				if (developer.pinAttempts > 6) {
-					let updatedPinAttempt = await Developer.update({ id: developer.id }, { accountStatus: 0 });
+					let updatedPinAttempt = await Developer.update({ developerId: developer.developerId }, { accountStatus: 0 });
 
 					// Send developer an email that their account has been blocked
 					let msg = `Hi<br />
@@ -345,14 +345,14 @@ module.exports = {
 					throw new CustomError('You have made too many incorrect PIN attempts. Your account has been locked.', { status: 403, err_code: "blocked" });
 				}
 
-				let updatedPinAttempt = await Developer.update({ id: developer.id }, { pinAttempts: developer.pinAttempts + 1 });
+				let updatedPinAttempt = await Developer.update({ developerId: developer.developerId }, { pinAttempts: developer.pinAttempts + 1 });
 				throw new CustomError('The PIN provided was invalid', { status: 401, err_code: "invalid_pin" });
 			}
 
 			// TODO: Make sure password is valid
 
 			// PIN is correct and developer can change their password
-			let updatedPassword = await Developer.update({ id: developer.id }, { password: newPassword, pinAttempts: 0, pin: 0 });
+			let updatedPassword = await Developer.update({ developerId: developer.developerId }, { password: newPassword, pinAttempts: 0, pin: 0 });
 
 			return res.ok({ "success": true, "msg": "Your new password has been set, please login to your account" });
 		} catch (err) {

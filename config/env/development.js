@@ -1,9 +1,7 @@
-
-
 /**
- * Production environment settings
+ * Development environment settings
  *
- * This file can include shared settings for a production environment,
+ * This file can include shared settings for a development team,
  * such as API keys or remote database passwords.  If you're using
  * a version control solution for your Sails app, this file will
  * be committed to your repository unless you add it to your .gitignore
@@ -31,14 +29,12 @@ module.exports = {
         }
     },
     models: {
-        connection: 'mysqlDbDev',
-		migrate: 'safe'
+        connection: 'mysqlDbDev', 
+        migrate: 'alter'
     },
-
-	MANDRILL_KEY: 'EHaaGsImRCQrLW9vrWSedA',		// PRODUCTION KEY
+	
+    MANDRILL_KEY: '57Ev-Hbw1O4KoVnCT3UfnQ', 	// TEST KEY
 
     hookTimeout: 120000,
-    API_HOST: 'http://localhost:1337/',
-    APP_HOST: 'http://localhost:4200/'
 
 };

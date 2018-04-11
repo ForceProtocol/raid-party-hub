@@ -43,12 +43,13 @@
     "sails-mysql": "^0.11.5",
     "sanitize-html": "^1.18.2",
     "sha1": "^1.1.1",
+    "skipper": "^0.8.5",
     "uuid": "^3.2.1",
     "validator": "^9.4.1"
   },
   "scripts": {
     "debug": "node debug app.js",
-    "start": "node app.js"
+    "start": "nodemon app.js"
   },
   "main": "app.js",
   "repository": {
@@ -59,6 +60,7 @@
   "license": "",
   "devDependencies": {
     "fast-csv": "^2.4.1",
+    "nodemon": "^1.17.3",
     "sails-hook-autoreload-offshore": "^0.1.0"
   }
 }

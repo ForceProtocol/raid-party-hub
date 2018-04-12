@@ -19,7 +19,7 @@ module.exports = {
 		try {
 			let publicKey = req.param('public_key'),
 				authKey = req.param('auth_key'),
-				playerEmail = req.param('user_id'),
+				playerCode = req.param('user_id'),
 				developersPlayerId = req.param('my_id');
 				
 			// Ensure Auth Key is set and a valid key format
@@ -30,7 +30,7 @@ module.exports = {
 			}
 				
 			// Make sure valid information was sent
-			if(typeof playerEmail == 'undefined' || playerEmail.length < 1){
+			if(typeof playerCode == 'undefined' || playerCode.length < 1){
 				sails.log.debug("trackerPlayer : No valid user_id provided");
 				return res.json('400',{'reason':'You did not provide a valid user_id of the player'});
 			}
@@ -46,7 +46,7 @@ module.exports = {
 			
 			
 			// Authenticate the request
-			if(!SdkAuth.validAuthKey(authKey,publicKey,game.privateKey,'/sdk/player/track',playerEmail)){
+			if(!SdkAuth.validAuthKey(authKey,publicKey,game.privateKey,'/sdk/player/track',playerCode)){
 				sails.log.debug("trackerPlayer : Invalid auth_key was sent");
 				// TODO: add a log that a bad request was made
 				return res.json('400',{'reason':'You did not provide a valid request'});
@@ -54,13 +54,13 @@ module.exports = {
 			
 			
 			// Attempt to find this player
-			let player = await Player.findOne({email:playerEmail}).populate('games');
+			let player = await Player.findOne({code:playerCode}).populate('games');
 			
 			// Player not found - invite them to use RaidParty
 			if(!player){
 				// TODO: Send email to player inviting to RaidParty
-				sails.log.debug("trackerPlayer : Player not found in RaidParty network. Inviting player to join.");
-				return res.json('202',{'reason':'Player is not within RaidParty network. They have been invited.'});
+				sails.log.debug("trackerPlayer : Player not found in RaidParty network.");
+				return res.json('202',{'reason':'Player is not within RaidParty network.'});
 			}
 			
 			// Check to see if this player is already registered against this game
@@ -114,7 +114,7 @@ module.exports = {
 		try {
 			let publicKey = req.param('public_key'),
 				authKey = req.param('auth_key'),
-				playerEmail = req.param('user_id'),
+				playerCode = req.param('user_id'),
 				eventName = req.param('event_name'),
 				eventDescription = req.param('event_description'),
 				eventValue = req.param('event_value'),
@@ -128,7 +128,7 @@ module.exports = {
 			}
 				
 			// Make sure valid information was sent
-			if(typeof playerEmail == 'undefined' || playerEmail.length < 1){
+			if(typeof playerCode == 'undefined' || playerCode.length < 1){
 				sails.log.debug("PlayerController.trackerEvent: No valid user_id provided");
 				return res.json('400',{'reason':'You did not provide a valid user_id of the player'});
 			}
@@ -156,7 +156,7 @@ module.exports = {
 			
 			
 			// Authenticate the request
-			if(!SdkAuth.validAuthKey(authKey,publicKey,game.privateKey,'/sdk/game/event',playerEmail + ':' + eventName)){
+			if(!SdkAuth.validAuthKey(authKey,publicKey,game.privateKey,'/sdk/game/event',playerCode + ':' + eventName)){
 				sails.log.debug("PlayerController.trackerEvent: Invalid auth_key was sent");
 				// TODO: add a log that a bad request was made
 				return res.json('400',{'reason':'You did not provide a valid request'});
@@ -164,7 +164,7 @@ module.exports = {
 			
 			
 			// Attempt to find this player
-			let player = await Player.findOne({email:playerEmail}).populate('games');
+			let player = await Player.findOne({code:playerCode}).populate('games');
 			
 			// Player not found - invite them to use RaidParty
 			if(!player){

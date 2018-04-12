@@ -8,6 +8,7 @@
     "bcrypt-nodejs": "0.0.3",
     "bcryptjs": "^2.4.3",
     "bignumber.js": "^6.0.0",
+    "commander": "^2.15.1",
     "crypto": "^1.0.1",
     "ejs": "^2.5.7",
     "grunt": "1.0.1",

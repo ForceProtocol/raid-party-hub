@@ -75,7 +75,7 @@ module.exports = {
                 toName: player.email,
                 subject: 'Welcome to RaidParty! Activate your account to start earning rewards',
                 body: msg
-            })
+            });
 			
 			return res.ok({
                 msg: 'Please check your email inbox for a 6 digit pin and enter below to activate your account',
@@ -556,6 +556,37 @@ module.exports = {
 			});
 			
 			return res.ok({rewards:rewards});
+		}catch(err){
+			return util.errorResponse(err, res);
+		}
+	},
+	
+	
+	/**
+	* Get player code
+	*/
+	async getPlayerCode(req, res) {
+		try {
+		
+			// Get games we need for this device
+			let player = await Player.findOne({id:req.token.user.id});
+			let playerCode = '';
+			
+			if(!player){
+				throw new CustomError('Could not find that player.', {status: 401,err_code:"not_found"});
+			}
+			
+			if(!player.code || player.code.length == 0 || player.code == ''){
+				playerCode = await PlayerService.generatePlayerSdkCode(player.id,0);
+				
+				if(!playerCode){
+					throw new CustomError('Could not generate a new unique code for that player at this time.', {status: 401,err_code:"server_err"});
+				}
+				
+				player.code = playerCode;
+			}
+			
+			return res.ok({code:player.code});
 		}catch(err){
 			return util.errorResponse(err, res);
 		}

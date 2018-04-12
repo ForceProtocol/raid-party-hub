@@ -570,14 +570,13 @@ module.exports = {
 		
 			// Get games we need for this device
 			let player = await Player.findOne({id:req.token.user.id});
-			let playerCode = '';
 			
 			if(!player){
 				throw new CustomError('Could not find that player.', {status: 401,err_code:"not_found"});
 			}
 			
 			if(!player.code || player.code.length == 0 || player.code == ''){
-				playerCode = await PlayerService.generatePlayerSdkCode(player.id,0);
+				let playerCode = await PlayerService.generatePlayerSdkCode(player.id,0);
 				
 				if(!playerCode){
 					throw new CustomError('Could not generate a new unique code for that player at this time.', {status: 401,err_code:"server_err"});

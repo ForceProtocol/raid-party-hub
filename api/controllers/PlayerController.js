@@ -60,7 +60,7 @@ module.exports = {
 			if(!player){
 				// TODO: Send email to player inviting to RaidParty
 				sails.log.debug("trackerPlayer : Player not found in RaidParty network.");
-				return res.json('202',{'reason':'Player is not within RaidParty network.'});
+				return res.json('403',{'reason':'Player is not within RaidParty network. Could not discover a record with details sent.'});
 			}
 			
 			// Check to see if this player is already registered against this game

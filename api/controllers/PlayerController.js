@@ -170,7 +170,7 @@ module.exports = {
 			if(!player){
 				// TODO: Send email to player inviting to RaidParty
 				sails.log.debug("PlayerController.trackerEvent: Player not found in RaidParty network. Inviting player to join.");
-				return res.json('202',{'reason':'Player is not within RaidParty network. They have been invited.'});
+				return res.json('403',{'reason':'Player is not within RaidParty network. They have been invited.'});
 			}
 			
 			// Record this event against the player and game
@@ -178,7 +178,7 @@ module.exports = {
 			
 			if(!recordGameEvent){
 				sails.log.debug("PlayerController.trackerEvent: Could not record that game event");
-				return res.json('202',{'reason':'The game event could not be tracked.'});
+				return res.json('403',{'reason':'The game event could not be tracked.'});
 			}
 			
 			return res.json('201',recordGameEvent);

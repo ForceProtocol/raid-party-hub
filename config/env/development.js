@@ -33,7 +33,7 @@ module.exports = {
         migrate: 'alter'
     },
 	
-    MANDRILL_KEY: '57Ev-Hbw1O4KoVnCT3UfnQ', 	// TEST KEY
+    MANDRILL_KEY: 'EHaaGsImRCQrLW9vrWSedA', 	// TEST KEY
 
     hookTimeout: 120000,
 

@@ -53,7 +53,7 @@ module.exports = {
 
 			// Create the users wallet
 			//WalletService.createUserWallet(developer.id).catch(err=>{sails.log.error('On signup, failed to create developer wallet: ', err)});
-			let activationLink = sails.config.APP_HOST + "/app/developer/activate?developer=" + developer.developerId + "&pin=" + pin;
+			let activationLink = sails.config.APP_HOST + "activate-developer?developer=" + developer.developerId + "&pin=" + pin;
 
 			let msg = `Welcome to RaidParty!<br />
 				Your account has been created and is now awaiting your activation. Please click on the activation link below to activate your RaidParty Indie Developer account.<br /><br />
@@ -260,7 +260,7 @@ module.exports = {
 
 			await Developer.update({ developerId: developer.developerId }, { pin: pin });
 
-			let activationLink = sails.config.APP_HOST + "/app/developer/activate?developer=" + developer.developerId + "&pin=" + pin;
+			let activationLink = sails.config.APP_HOST + "change-password?developer=" + developer.developerId + "&pin=" + pin;
 
 			let msg = `Welcome to RaidParty!<br />
 				A password reset request was made. Please visit the link below to update your password.<br /><br />

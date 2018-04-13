@@ -35,6 +35,10 @@ module.exports = {
 	
     MANDRILL_KEY: 'EHaaGsImRCQrLW9vrWSedA', 	// TEST KEY
 
+    API_HOST: 'http://localhost:1337/',
+    APP_HOST: 'http://localhost:4200/',
+
+
     hookTimeout: 120000,
 
 };

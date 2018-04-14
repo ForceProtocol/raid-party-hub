@@ -38,7 +38,7 @@ module.exports = {
 	MANDRILL_KEY: 'EHaaGsImRCQrLW9vrWSedA',		// PRODUCTION KEY
 
     hookTimeout: 120000,
-    API_HOST: 'http://localhost:1337/',
-    APP_HOST: 'http://localhost:4200/'
+    API_HOST: 'https://hub.raidparty.io',
+    APP_HOST: 'https://app.raidparty.io'
 
 };

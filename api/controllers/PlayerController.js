@@ -115,10 +115,8 @@ module.exports = {
 			let publicKey = req.param('public_key'),
 				authKey = req.param('auth_key'),
 				playerCode = req.param('user_id'),
-				eventName = req.param('event_name'),
-				eventDescription = req.param('event_description'),
-				eventValue = req.param('event_value'),
-				developersPlayerId = req.param('my_id');
+				eventId = req.param('event_id'),
+				eventValue = req.param('event_value');
 				
 			// Ensure Auth Key is set and a valid key format
 			if(typeof authKey == 'undefined' || authKey.length < 40){
@@ -133,16 +131,10 @@ module.exports = {
 				return res.json('400',{'reason':'You did not provide a valid user_id of the player'});
 			}
 			
-			// Event Name is required
-			if(typeof eventName == 'undefined' || eventName.length < 2){
-				sails.log.debug("PlayerController.trackerEvent: Invalid event name");
-				return res.json('400',{'reason':'Invalid event name. Event Name is required.'});
-			}
-			
-			// Event Description is required
-			if(typeof eventDescription == 'undefined' || eventDescription.length < 2){
-				sails.log.debug("PlayerController.trackerEvent: Invalid event Description");
-				return res.json('400',{'reason':'Invalid event description. Event Description is required.'});
+			// Event ID is required
+			if(typeof eventId == 'undefined' || eventId.length < 1){
+				sails.log.debug("PlayerController.trackerEvent: Invalid event ID");
+				return res.json('400',{'reason':'Invalid event ID. Event ID is required.'});
 			}
 			
 			// Authenticate the request - is this really from the developers game?
@@ -156,7 +148,7 @@ module.exports = {
 			
 			
 			// Authenticate the request
-			if(!SdkAuth.validAuthKey(authKey,publicKey,game.privateKey,'/sdk/game/event',playerCode + ':' + eventName)){
+			if(!SdkAuth.validAuthKey(authKey,publicKey,game.privateKey,'/sdk/game/event',playerCode + ':' + eventId)){
 				sails.log.debug("PlayerController.trackerEvent: Invalid auth_key was sent");
 				// TODO: add a log that a bad request was made
 				return res.json('400',{'reason':'You did not provide a valid request'});
@@ -174,7 +166,7 @@ module.exports = {
 			}
 			
 			// Record this event against the player and game
-			let recordGameEvent = await PlayerToGameEvent.create({game:game.id,player:player.id,eventName:eventName,eventDescription:eventDescription,eventValue:eventValue});
+			let recordGameEvent = await PlayerToGameEvent.create({player:player.id,gameEvent:eventId,eventValue:eventValue});
 			
 			if(!recordGameEvent){
 				sails.log.debug("PlayerController.trackerEvent: Could not record that game event");

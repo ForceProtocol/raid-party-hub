@@ -93,8 +93,8 @@ module.exports = {
 			through: 'playertogame'
 		},
 		
-		playerToGameEvent: {
-			collection: 'playertogameevent',
+		gameEvent: {
+			collection: 'gameevent',
 			via: 'game'
 		},
 		

@@ -45,6 +45,16 @@ module.exports = {
 			required: true
         },
 		
+		jackpot: {
+			type: 'text',
+			defaultsTo: '',
+        },
+		
+		bannerContent: {
+			type: 'text',
+			defaultsTo: '',
+        },
+		
 		platform: {
 			type: 'string',
 			enum: ['android', 'ios', 'pc', 'console']
@@ -83,8 +93,8 @@ module.exports = {
 			through: 'playertogame'
 		},
 		
-		playerToGameEvent: {
-			collection: 'playertogameevent',
+		gameEvent: {
+			collection: 'gameevent',
 			via: 'game'
 		},
 		

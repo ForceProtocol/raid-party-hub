@@ -22,6 +22,12 @@ module.exports = {
 			}
         },
 		
+		code: {
+			type: 'string',
+			size: 7,
+			unique: true
+		},
+		
 		firstName: {
             type: 'string'
         },

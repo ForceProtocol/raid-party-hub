@@ -8,16 +8,6 @@
 module.exports = {
 
     attributes: {
-	
-		eventName: {
-			type: 'string',
-			required: true
-		},
-		
-		eventDescription: {
-			type: 'string',
-			required: true
-		},
 		
 		eventValue: {
 			type: 'string'
@@ -27,8 +17,8 @@ module.exports = {
 			model: 'player'
 		},
 		
-		game: {
-			model: 'game'
+		gameEvent: {
+			model: 'gameevent'
 		},
 		
     },

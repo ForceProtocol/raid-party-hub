@@ -26,15 +26,13 @@ module.exports.routes = {
 	
 	
 	/** SDK PLAYER ROUTES */
-	'GET /sdk/player/:playerId': 'PlayerController.getPlayer',
 	'POST /sdk/player/track': 'PlayerController.trackPlayer',
-	
-	/** SDK GAME ROUTES */
 	'POST /sdk/game/event': 'PlayerController.trackEvent',
 	
 	
 	/** OUR OWN MOBILE APPLICATION API ROUTES **/
 	'GET /mob/player/dashboard': 'MobileAppPlayerController.getPlayerDashboard',
+	'GET /mob/player/code': 'MobileAppPlayerController.getPlayerCode',
 	'GET /mob/player/games': 'MobileAppPlayerController.getGames',
 	'GET /mob/player/rewards': 'MobileAppPlayerController.getRewards',
 	'POST /mob/player/signup': 'MobileAppPlayerController.signupPlayer',

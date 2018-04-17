@@ -452,13 +452,29 @@ module.exports = {
 				platform = req.param("platform"),
 				link = req.param("link"),
 				active = req.param("activeStatus");
-			let addGame = await Game.update({ gameId: gameId, developer: developer.developerId }, { title: gameTitle, description: description, link: link, platform: platform, active: active });
 
-			if (!addGame) {
-				throw new CustomError('Could not update that game due to a technical issue. Please try again later.', { status: 400 });
+			let updatedGame;
+			if (req._fileparser.upstreams.length) {
+
+				req.file('avatar').upload({ maxBytes: 10000000 }, async function (err, file) {
+					if (!file) {
+						throw new CustomError('Error Uploading image file.', { status: 401 });
+					}
+					let avatarBase64Data = await new Buffer(fs.readFileSync(file[0].fd)).toString("base64");
+					updatedGame = await Game.update({ gameId: gameId, developer: developer.developerId }, { title: gameTitle, description: description, link: link, platform: platform, active: active, avatar: avatarBase64Data });
+					if (!updatedGame) {
+						throw new CustomError('Could not update that game due to a technical issue. Please try again later.', { status: 400 });
+					}
+					return res.ok({ game: updatedGame });
+				})
+			} else {
+				updatedGame = await Game.update({ gameId: gameId, developer: developer.developerId }, { title: gameTitle, description: description, link: link, platform: platform, active: active });
+				if (!updatedGame) {
+					throw new CustomError('Could not update that game due to a technical issue. Please try again later.', { status: 400 });
+				}
+				return res.ok({ game: updatedGame });
 			}
 
-			return res.ok({ game: addGame });
 		} catch (err) {
 			return util.errorResponse(err, res);
 		}

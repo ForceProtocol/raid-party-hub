@@ -14,9 +14,16 @@ module.exports = {
             type: 'string'
         },
 		
-        force: {
-            type: 'integer'
+        amount: {
+            type: 'string',
+			required: true
         },
+		
+		currency: {
+			type: 'string',
+			defaultsTo: 'FORCE',
+			required: true
+		},
 		
 		type: {
 			type: 'string',

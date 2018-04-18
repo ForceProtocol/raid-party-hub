@@ -94,19 +94,21 @@ module.exports = {
 			through: 'playertogame'
 		},
 		
-		playerToGameEvent: {
-			collection: 'playertogameevent',
-			via: 'player'
+		gameEvent: {
+			collection: 'gameevent',
+			via: 'players',
+			through: 'playertogameevent'
 		},
 		
-		rewards: {
-			collection: 'playerrewards',
-			via: 'player'
+		rewardCampaign: {
+			collection: 'rewardcampaign',
+			via: 'players',
+			through: 'playerrewards'
 		},
 		
 		transactions: {
 			collection: 'playertransactions',
-			via: 'player'
+			via: 'players'
 		},
 		
 		toJSON: function () {

@@ -44,6 +44,10 @@ module.exports = {
 			model: 'player',
 		},
 		
+		rewardCampaign: {
+			model: 'rewardCampaign',
+		},
+		
 	},
 	
 };

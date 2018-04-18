@@ -1,5 +1,5 @@
 /**
- * GameEvent.js
+ * RewardCampaign.js
  *
  * @description :: A model definition.  Represents a database table/collection/etc.
  * @docs        :: https://sailsjs.com/docs/concepts/models-and-orm/models
@@ -9,39 +9,42 @@ module.exports = {
 
     attributes: {
 		
-		eventName: {
-			type: 'string',
-			required: true
-		},
-		
-		eventDescription: {
-			type: 'string',
-			required: true
-		},
-		
-		eventValue: {
+		valueMin: {
 			type: 'string',
 			defaultsTo: ''
 		},
 		
-		eventValueMin: {
+		valueMax: {
 			type: 'string',
 			defaultsTo: ''
 		},
 		
-		eventValueMax: {
+		greaterThan: {
 			type: 'string',
 			defaultsTo: ''
 		},
 		
-		players: {
-			collection: 'player',
-			via: 'gameEvent',
-			through: 'playertogameevent'
+		lessThan: {
+			type: 'string',
+			defaultsTo: ''
 		},
 		
-		game: {
-			model: 'game'
+		equalTo: {
+			type: 'string',
+			defaultsTo: ''
+		},
+		
+		points: {
+			type: 'integer',
+			defaultsTo: 1
+		},
+		
+		rewardCampaign: {
+			model: 'rewardcampaign'
+		},
+		
+		gameEvent: {
+			model: 'gameevent'
 		},
 		
     },

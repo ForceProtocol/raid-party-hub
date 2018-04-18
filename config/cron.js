@@ -1,11 +1,15 @@
 module.exports.cron = {
 
-	artemisCheckIndividual: {
-		schedule: '*/15 * * * *',  // every 5 minute
+	emailPlayerQualifiers: {
+		schedule: '*/15 * * * *',  // every 15 minute
 
-		onTick: function () {
+		onTick: async function() {
 		
-			//ArtemisApiService.checkIndividualStatus();
+			// Obtain list of reward events that are currently live
+			let dateNow = new Date();
+			
+			let liveRewardCampaigns = await RewardCampaign.find({startDate: {'>=':dateNow},endDate: {'<=': dateNow}});
+		
 		}
 	},
 

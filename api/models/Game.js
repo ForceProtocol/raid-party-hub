@@ -98,6 +98,11 @@ module.exports = {
 			via: 'game'
 		},
 		
+		rewardCampaign: {
+			collection: 'rewardcampaign',
+			via: 'game'
+		},
+		
 		rewards: {
 			collection: 'playerrewards',
 			via: 'game'

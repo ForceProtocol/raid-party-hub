@@ -30,7 +30,7 @@ module.exports = {
 			enum: ['withdraw', 'deposit']
 		},
 		
-		player: {
+		players: {
 			model: 'player',
 		},
 		

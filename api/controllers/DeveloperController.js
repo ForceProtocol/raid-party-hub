@@ -410,7 +410,6 @@ module.exports = {
 			let gameTitle = req.param("title"),
 				description = req.param("description"),
 				platform = req.param("platform"),
-				link = req.param("link"),
 				active = req.param('activeStatus')
 
 			if (!req.file('avatar')) {
@@ -421,10 +420,14 @@ module.exports = {
 				if (!file) {
 					throw new CustomError('Error Uploading image file.', { status: 401 });
 				}
-
+				let isAndroid, isIos;
+				_.map(JSON.parse(platform), (pfObject) => {
+					isAndroid = pfObject.name === 'android' ? true : false;
+					isIos = pfObject.name === 'ios' ? true : false;
+				});
 				let avatarBase64Data = await new Buffer(fs.readFileSync(file[0].fd)).toString("base64");
 
-				let addGame = await Game.create({ title: gameTitle, description: description, active: active, link: link, avatar: avatarBase64Data, platform: platform, developer: developer.developerId });
+				let addGame = await Game.create({ title: gameTitle, description: description, active: active, avatar: avatarBase64Data, isAndroid: isAndroid, isIos: isIos, platform: platform, developer: developer.developerId });
 
 				if (!addGame) {
 					throw new CustomError('Could not add that game due to a technical issue. Please try again later.', { status: 400 });
@@ -450,7 +453,6 @@ module.exports = {
 				gameTitle = req.param("title"),
 				description = req.param("description"),
 				platform = req.param("platform"),
-				link = req.param("link"),
 				active = req.param("activeStatus");
 
 			let updatedGame;
@@ -460,15 +462,20 @@ module.exports = {
 					if (!file) {
 						throw new CustomError('Error Uploading image file.', { status: 401 });
 					}
+					let isAndroid, isIos;
+					_.map(JSON.parse(platform), (pfObject) => {
+						isAndroid = pfObject.name === 'android' ? true : false;
+						isIos = pfObject.name === 'ios' ? true : false;
+					});
 					let avatarBase64Data = await new Buffer(fs.readFileSync(file[0].fd)).toString("base64");
-					updatedGame = await Game.update({ gameId: gameId, developer: developer.developerId }, { title: gameTitle, description: description, link: link, platform: platform, active: active, avatar: avatarBase64Data });
+					updatedGame = await Game.update({ gameId: gameId, developer: developer.developerId }, { title: gameTitle, description: description, platform: platform, isAndroid: isAndroid, isIos: isIos, active: active, avatar: avatarBase64Data });
 					if (!updatedGame) {
 						throw new CustomError('Could not update that game due to a technical issue. Please try again later.', { status: 400 });
 					}
 					return res.ok({ game: updatedGame });
 				})
 			} else {
-				updatedGame = await Game.update({ gameId: gameId, developer: developer.developerId }, { title: gameTitle, description: description, link: link, platform: platform, active: active });
+				updatedGame = await Game.update({ gameId: gameId, developer: developer.developerId }, { title: gameTitle, description: description, platform: platform, isAndroid: isAndroid, isIos: isIos, active: active });
 				if (!updatedGame) {
 					throw new CustomError('Could not update that game due to a technical issue. Please try again later.', { status: 400 });
 				}

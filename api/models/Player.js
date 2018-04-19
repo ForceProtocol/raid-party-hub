@@ -111,6 +111,11 @@ module.exports = {
 			via: 'players'
 		},
 		
+		playerCompletedEvents: {
+			collection: 'playercompletedevent',
+			via: 'player'
+		},
+		
 		toJSON: function () {
 			let obj = this.toObject();
 			delete obj.id;

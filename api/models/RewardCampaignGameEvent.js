@@ -10,33 +10,23 @@ module.exports = {
     attributes: {
 		
 		valueMin: {
-			type: 'string',
-			defaultsTo: ''
+			type: 'integer',
+			defaultsTo: 0
 		},
 		
 		valueMax: {
-			type: 'string',
-			defaultsTo: ''
-		},
-		
-		greaterThan: {
-			type: 'string',
-			defaultsTo: ''
-		},
-		
-		lessThan: {
-			type: 'string',
-			defaultsTo: ''
+			type: 'integer',
+			defaultsTo: 0
 		},
 		
 		equalTo: {
-			type: 'string',
-			defaultsTo: ''
+			type: 'integer',
+			defaultsTo: 0
 		},
 		
 		points: {
 			type: 'integer',
-			defaultsTo: 1
+			defaultsTo: 0
 		},
 		
 		rewardCampaign: {
@@ -45,6 +35,11 @@ module.exports = {
 		
 		gameEvent: {
 			model: 'gameevent'
+		},
+		
+		playerCompletedEvents: {
+			collection: 'playercompletedevent',
+			via: 'rewardCampaignGameEvent'
 		},
 		
     },

@@ -25,13 +25,13 @@ module.exports = {
 		},
 		
 		eventValueMin: {
-			type: 'string',
-			defaultsTo: ''
+			type: 'integer',
+			defaultsTo: 0
 		},
 		
 		eventValueMax: {
-			type: 'string',
-			defaultsTo: ''
+			type: 'integer',
+			defaultsTo: 0
 		},
 		
 		players: {

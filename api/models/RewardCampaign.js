@@ -69,6 +69,11 @@ module.exports = {
 			model: 'game'
 		},
 		
+		rewardCampaignGameEvents: {
+			collection: 'rewardcampaigngameevent',
+			via: 'rewardCampaign'
+		},
+		
 		gameEvent: {
 			collection: 'gameevent',
 			via: 'rewardCampaign',

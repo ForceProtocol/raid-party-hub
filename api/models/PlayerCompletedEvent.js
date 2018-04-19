@@ -9,7 +9,7 @@ module.exports = {
 
     attributes: {
 		
-		eventValue: {
+		points: {
 			type: 'integer',
 			defaultsTo: 0
 		},
@@ -18,8 +18,8 @@ module.exports = {
 			model: 'player'
 		},
 		
-		gameEvent: {
-			model: 'gameevent'
+		rewardCampaignGameEvent: {
+			model: 'rewardcampaigngameevent'
 		},
 		
     },

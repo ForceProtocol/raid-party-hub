@@ -14,13 +14,18 @@ module.exports = {
 			defaultsTo: 0
 		},
 		
+		confirmed: {
+			type: 'boolean',
+			defaultsTo: false
+		},
+		
 		player: {
 			model: 'player'
 		},
 		
 		gameEvent: {
 			model: 'gameevent'
-		},
+		}
 		
     },
 	

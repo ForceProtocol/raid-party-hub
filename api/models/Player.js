@@ -111,6 +111,11 @@ module.exports = {
 			via: 'players'
 		},
 		
+		qualifiedPlayer: {
+			collection: 'qualifiedplayer',
+			via: 'players'
+		},
+		
 		playerCompletedEvents: {
 			collection: 'playercompletedevent',
 			via: 'player'

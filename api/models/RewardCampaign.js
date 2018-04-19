@@ -23,6 +23,11 @@ module.exports = {
 			}
 		},
 		
+		reason: {
+			type: 'string',
+			defaultsTo: ''
+		},
+		
 		jackpotValue: {
 			type: 'string',
 			defaultsTo: ''
@@ -48,6 +53,11 @@ module.exports = {
 			defaultsTo: ''
 		},
 		
+		rewardTypeId: {
+			type: 'integer',
+			defaultsTo: 1
+		},
+		
 		banners: {
 			type: 'string',
 			defaultsTo: ''
@@ -71,6 +81,11 @@ module.exports = {
 		
 		rewardCampaignGameEvents: {
 			collection: 'rewardcampaigngameevent',
+			via: 'rewardCampaign'
+		},
+		
+		qualifiedPlayers: {
+			collection: 'qualifiedplayers',
 			via: 'rewardCampaign'
 		},
 		

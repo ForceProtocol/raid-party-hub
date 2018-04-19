@@ -24,12 +24,17 @@ module.exports = {
 			defaultsTo: false
 		},
 		
-		player: {
+		isWinner: {
+			type: 'boolean',
+			defaultsTo: false
+		},
+		
+		players: {
 			model: 'player'
 		},
 		
-		rewardCampaignGameEvent: {
-			model: 'rewardcampaigngameevent'
+		rewardCampaign: {
+			model: 'rewardcampaign'
 		},
 		
     },

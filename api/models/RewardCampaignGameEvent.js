@@ -19,11 +19,6 @@ module.exports = {
 			defaultsTo: 0
 		},
 		
-		equalTo: {
-			type: 'integer',
-			defaultsTo: 0
-		},
-		
 		points: {
 			type: 'integer',
 			defaultsTo: 0

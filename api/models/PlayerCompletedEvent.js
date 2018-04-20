@@ -14,7 +14,7 @@ module.exports = {
 			defaultsTo: 0
 		},
 		
-		qualifiedEmailSent: {
+		qualifiedEvent: {
 			type: 'boolean',
 			defaultsTo: false
 		},

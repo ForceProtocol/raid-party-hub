@@ -1,12 +1,14 @@
 module.exports.cron = {
 
 	confirmJackpotQualifyingPlayers: {
-		schedule: '2 * * * *',  // Run this every 15-20 mins
+		schedule: '*/20 * * * * *',  // Run this every 15-20 mins
 
 		onTick: async function() {
 		
 			try {
 			
+				sails.log.debug("Running cron task confirmJackpotQualifyingPlayers");
+				
 				// REWARD CAMPAIGN TYPE ID: 1
 				// This reward type processes for rewards that have big jackpot at the end of a campaign
 				// Obtain list of reward events that are currently live
@@ -43,7 +45,7 @@ module.exports.cron = {
 						
 						// Insert each qualifying event against the reward campaign for processing later
 						for(const playerQualifiedEvent of playerCompletedEvents){
-							console.log("player qualified event of: ",qualifyingEvent.id);
+							sails.log.debug("player qualified event of: ",qualifyingEvent.id);
 							
 							let insertedEvent = await PlayerCompletedEvent.create({player:playerQualifiedEvent.player,rewardCampaignGameEvent:qualifyingEvent.id,points:qualifyingEvent.points});
 							
@@ -65,24 +67,29 @@ module.exports.cron = {
 					// And send a notification to their mobile about it
 					let qualifyingRewardEventsArr = rewardCampaign.rewardCampaignGameEvents.map(a => a.id);
 					
+					if(!qualifyingRewardEventsArr){
+						return;
+					}
+					
 					// Query to find qualifying players for this reward campaign
 					// So they can be sent email about being entered
-					PlayerCompletedEvent.query("select a.id, SUM(a.points) AS totalPoints, c.id AS playerId, c.email, c.firstName, c.lastName from playercompletedevent AS a LEFT JOIN rewardcampaigngameevent AS b ON a.rewardCampaignGameEvent = b.id LEFT JOIN players AS c ON a.player = c.id where a.rewardCampaignGameEvent in (" + qualifyingRewardEventsArr.join(",") + ") && a.qualifiedEmailSent = 0 group by a.player having count(distinct a.rewardCampaignGameEvent) = " + qualifyingRewardEventsArr.length, function(err, rawResult){
+					PlayerCompletedEvent.query("select a.id, a.rewardCampaignGameEvent, SUM(a.points) AS totalPoints, c.id AS playerId, c.email, c.firstName, c.lastName from playercompletedevent AS a LEFT JOIN rewardcampaigngameevent AS b ON a.rewardCampaignGameEvent = b.id LEFT JOIN players AS c ON a.player = c.id where a.rewardCampaignGameEvent in (" + qualifyingRewardEventsArr.join(",") + ") && a.qualifiedEvent = 0 group by a.player having count(distinct a.rewardCampaignGameEvent) = " + qualifyingRewardEventsArr.length, function(err, rawResult){
 						if(err){
-							sails.log.error("Error retrieving players to send email about being entered into competition");
-						}else{
-							console.log("raw result data: ",rawResult);
-							
-							
-							// TODO: Send Each Player an email about the reward prize they have been entered into
-							// TODO: Send each player a mobile notification through the app about being entered into prize draw
-							for(const playerData of rawResult.RowPacketData){
-								let subject = "Congrats! You have been entered into a prize draw!";
-								let message = `Hi playerData.firstName,
-								You have completed all the required events to be entered into the prize draw to win: `;
+							sails.log.error("Error retrieving qualifying players",err);
+						}else if(rawResult){
+							sails.log.debug("Qualifying players found to enter into qualifying table:",rawResult);
+							// Enter each qualifying player into the qualifiedPlayers table against the reward campaign
+							for(const playerData of rawResult){
+								QualifiedPlayers.create({players:playerData.playerId,points:playerData.totalPoints,rewardCampaign:rewardCampaign.id,game:rewardCampaign.game}).exec(function(err,created){
+									if(err){
+										sails.log.error("failed to insert qualified player on cron task:",err);
+									}else{
+										PlayerCompletedEvent.update({player:playerData.playerId,rewardCampaignGameEvent: playerData.rewardCampaignGameEvent},{qualifiedEvent:true}).exec(function(err,updated){});
+									}
+								});
 							}
-							
-							// TODO: When email has been sent, we need to update the table playercompletedevent that qualifiedEmailSent = true, so we do not send another email to them
+						}else{
+							sails.log.debug("Did not find any qualifying players to enter qualification table");
 						}
 					});
 					
@@ -91,21 +98,69 @@ module.exports.cron = {
 			}catch(err){
 				sails.log.error("Failed to process reward campaign game events against player events on cron task: ",err);
 			}
+			
 		
 		}
 	},
 	
 	
 	/**
-	* This will find winners for the big jackpot prizes that get run at the end of a game campaign
+	* Notify players who qualified for prize draw
+	* Send email to that player and push notification
+	* to mobile device
 	*/
-	confirmJackpotWinners: {
-		schedule: '*/15 * * * * *',  // Run this every 15-20 mins
+	notifyQualifiedPlayers: {
+		schedule: '*/25 * * * * *',  // Run this every 15-20 mins
 
 		onTick: async function() {
 		
 			try {
 			
+				sails.log.debug("Running cron task notifyQualifiedPlayers");
+				
+				// Find qualified players that have not been notified yet
+				let qualifiedPlayersToNotify = await QualifiedPlayers.find({qualifiedEmailSent:false,wonEmailSent:false}).populate('players').populate('rewardCampaign').populate('game');
+				
+				// Update straight away we have notified these players for simplicity - need to improve this later
+				await QualifiedPlayers.update({qualifiedEmailSent:false,wonEmailSent:false},{qualifiedEmailSent:true});
+				
+				// Cycle through list of qualified players to send email and mobile push notification
+				let message = "";
+				for(const qualifiedPlayers of qualifiedPlayersToNotify){
+					sails.log.debug("Qualified players cron:",qualifiedPlayers);
+					message = "Well done! You have entered into the reward prize draw for " + qualifiedPlayers.rewardCampaign.value + " " + qualifiedPlayers.rewardCampaign.currency + " for playing " + qualifiedPlayers.game.title;
+					PlayerNotifications.create({message:message,players:qualifiedPlayers.players.id});
+					
+					// TODO: Send Email to player they have been entered into the prize draw
+					// TODO: Send push notification through service
+				}
+				
+			
+			}catch(err){
+				sails.log.error("Failed to notify qualified players cron task: ",err);
+			}
+			
+		}
+	},
+	
+	
+	/**
+	* This will find winners for the big jackpot prizes that get run at the end of a game campaign
+	* This must select big jackpot type reward campaigns
+	* Find qualified players
+	* Select winner(s)
+	* Add their reward and reduce from winnings / close the reward campaign
+	* Send email and push notification to winners
+	*/
+	selectJackpotWinners: {
+		schedule: '*/30 * * * * *',  // Run this every 15-20 mins
+
+		onTick: async function() {
+		
+			try {
+			
+				sails.log.debug("Running cron task selectJackpotWinners");
+				
 				// This reward type processes for rewards that have big jackpot at the end of a campaign
 				// Obtain list of reward events that are currently live
 				let dateNow = new Date();
@@ -114,65 +169,92 @@ module.exports.cron = {
 				
 				for(const rewardCampaign of liveRewardCampaigns){
 				
-					let qualifyingRewardEventsArr = rewardCampaign.rewardCampaignGameEvents.map(a => a.id);
+					sails.log.debug("rewardCampaign for selecting Jackpot winners is: ",rewardCampaign);
 					
-					// Find all qualifying players for this reward entry
-					PlayerCompletedEvent.query("select a.id, SUM(a.points) AS totalPoints, c.id AS playerId, c.email, c.firstName, c.lastName from playercompletedevent AS a LEFT JOIN rewardcampaigngameevent AS b ON a.rewardCampaignGameEvent = b.id LEFT JOIN players AS c ON a.player = c.id where a.rewardCampaignGameEvent in (" + qualifyingRewardEventsArr.join(",") + ") group by a.player having count(distinct a.rewardCampaignGameEvent) = " + qualifyingRewardEventsArr.length, function(err, rawResult){
-						if(err){
-							sails.log.error("Error retrieving players to send email about being entered into competition");
-						}else{
+					let qualifyingPlayers = await QualifiedPlayers.find({rewardCampaign:rewardCampaign.id}).populate('players');
+
+					// Confirm how many winners need to be selected
+					let maxWinners = rewardCampaign.maxWinningPlayers,
+					totalEntrants = qualifyingPlayers.length,
+					prizeValue = rewardCampaign.value,
+					prizeCurrency = rewardCampaign.currency,
+					gameId = rewardCampaign.game,
+					rewardReason = rewardCampaign.reason,
+					selectedWinner = 0, winningPlayer, playerPrize;
+					
+					// No winners to select. possibly an issue
+					if(totalEntrants < 1){
+						sails.log.error("Failed to pick a winner for the following reward campaign: ",rewardCampaign.id);
+						await RewardCampaign.update({id: rewardCampaign.id},{rewardProcessed:true,rewardProcessedDate:new Date()});
+						return;
+					}
+					
+					// Update the prize has been issued
+					await RewardCampaign.update({id:rewardCampaign.id},{rewardProcessed:true,rewardProcessedDate:new Date()});
+					
+					// Only 1 winner to select
+					if(maxWinners == 1){
+						// TODO: Need to update this so the points earned increase the players chances of winning
+						selectedWinner = util.getRandomInt(0, totalEntrants - 1);
+						winningPlayer = qualifyingPlayers[selectedWinner];
 						
-							// Confirm how many winners need to be selected
-							let maxWinners = rewardCampaign.maxWinningPlayers;
-							let totalEntrants = rawResult.length; // total number of players that qualified
-							let prizeValue = rewardCampaign.jackpotValue,
-							prizeCurrency = rewardCampaign.jackpotCurrency,
-							gameId = rewardCampaign.game,
-							rewardReason = rewardCampaign.reason;
-							let selectedWinner = 0, winningPlayer, playerPrize;
-							
-							// No winners to select. possibly an issue
-							if(totalEntrants < 1){
-								sails.log.error("Failed to pick a winner for the following reward campaign: ",rewardCampaign.id);
-								//RewardCampaign.update({id: rewardCampaign.id},{rewardProcessed:true,rewardProcessedDate:new Date()});
-								return;
-							}
-							
-							// Only 1 winner to select
-							if(maxWinners == 1){
-								// TODO: Need to update this so the points earned increase the players chances of winning
-								selectedWinner = util.getRandomInt(0, totalEntrants - 1);
-								winningPlayer = rawResult[selectedWinner].RawPacketData;
-								
-								// Update player reward table for this winner, check the reward campaign as completed
-								console.log("The winner is: ",winningPlayer);
-								
-								let awardPrize = await PlayerRewards.create({player:winningPlayer.id,amount:prizeValue,currency:prizeCurrency,game:gameId,reason:rewardReason,rewardCampaign:rewardCampaign.id});
-								
-								// Failed to award the prize
-								if(!awardPrize){
-									sails.log.error("Failed to award the prize for the reward campaign: ",rewardCampaign.id);
-									return;
-								}
-							}
-							
-							// More than 1 winner to select
-							else{
-							
-								// There are too many winners for entrants, award to all players
-								if(maxWinners > totalEntrants){
-									playerPrize = Math.floor(prizeValue / totalEntrants);
-									
-									
-								}
-								
-							}
-							
-							// Mark the reward campaign as completed
-							//RewardCampaign.update({id: rewardCampaign.id},{rewardProcessed:true,rewardProcessedDate:new Date()});
-							
+						// Update player reward table for this winner, check the reward campaign as completed
+						sails.log.debug("The winner is: ",winningPlayer);
+						
+						let awardPrize = await PlayerRewards.create({player:winningPlayer.players.id,amount:prizeValue,currency:prizeCurrency,game:gameId,reason:rewardReason,rewardCampaign:rewardCampaign.id});
+						
+						// Failed to award the prize
+						if(!awardPrize){
+							sails.log.error("Failed to award the prize for the reward campaign: ",rewardCampaign.id);
+							return;
 						}
-					});
+						
+						await QualifiedPlayers.update({players: winningPlayer.players.id,rewardCampaign:rewardCampaign.id},{isWinner:true,wonEmailSent:true});
+						
+						// TODO: Send won email to this player
+						// TODO: notify all other players they didn't win this time, but x player won
+					}
+					
+					// More than 1 winner to select
+					else{
+					
+						// There are too many winners for entrants, award to all players
+						if(maxWinners > totalEntrants){
+							sails.log.debug("There are less players than potential winners, everyone wins!");
+							playerPrize = parseFloat(prizeValue / totalEntrants).toFixed(4) - 0.0001;
+							
+							for(const qualifyingPlayer of qualifyingPlayers){
+								await PlayerRewards.create({player:qualifyingPlayer.players.id,amount:playerPrize,currency:prizeCurrency,game:gameId,reason:rewardReason,rewardCampaign:rewardCampaign.id});
+								await QualifiedPlayers.update({players: qualifyingPlayer.players.id,rewardCampaign:rewardCampaign.id},{isWinner:true,wonEmailSent:true});
+								
+								// TODO: Send email to players that they won
+								// TODO: Send push notification to players they won
+							}
+						}
+						// Need to select multiple winners from potential winners
+						else{
+							sails.log.debug("Selecting multiple winners from qualified players");
+							playerPrize = parseFloat(prizeValue / maxWinners).toFixed(4) - 0.0001;
+							let qualifiedPlayersArr = qualifyingPlayers;
+							
+							// Go through and select winners
+							for(var i = 0;i < maxWinners;i++){
+							
+								selectedWinner = util.getRandomInt(0, qualifiedPlayersArr.length - 1);
+								winningPlayer = qualifiedPlayersArr[selectedWinner];
+								await PlayerRewards.create({player:winningPlayer.players.id,amount:playerPrize,currency:prizeCurrency,game:gameId,reason:rewardReason,rewardCampaign:rewardCampaign.id});
+								await QualifiedPlayers.update({players:winningPlayer.players.id,rewardCampaign:rewardCampaign.id},{isWinner:true,wonEmailSent:true});
+								
+								// TODO: Send email to player that they won
+								// TODO: Send push notification to player they won
+								
+								// Remove this winner from the qualifying Players array
+								qualifiedPlayersArr.splice(selectedWinner,1);
+							}
+						
+						}
+						
+					}
 					
 				}
 				

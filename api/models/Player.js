@@ -111,8 +111,13 @@ module.exports = {
 			via: 'players'
 		},
 		
+		notifications: {
+			collection: 'playernotifications',
+			via: 'players'
+		},
+		
 		qualifiedPlayer: {
-			collection: 'qualifiedplayer',
+			collection: 'qualifiedplayers',
 			via: 'players'
 		},
 		
@@ -123,7 +128,6 @@ module.exports = {
 		
 		toJSON: function () {
 			let obj = this.toObject();
-			delete obj.id;
 			delete obj.password;
 			delete obj.pin;
 			delete obj.pinAttempts;

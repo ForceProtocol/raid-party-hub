@@ -116,7 +116,8 @@ module.exports = {
 				authKey = req.param('auth_key'),
 				playerCode = req.param('user_id'),
 				eventId = req.param('event_id'),
-				eventValue = req.param('event_value');
+				eventValue = req.param('event_value'),
+				eventTypeId = req.param('event_type_id');
 				
 			// Ensure Auth Key is set and a valid key format
 			if(typeof authKey == 'undefined' || authKey.length < 40){
@@ -171,6 +172,38 @@ module.exports = {
 			if(!recordGameEvent){
 				sails.log.debug("PlayerController.trackerEvent: Could not record that game event");
 				return res.json('403',{'reason':'The game event could not be tracked.'});
+			}
+			
+			// Check if this event is attached to a reward campaign event of type 2 (instant win, but one time)
+			if(!eventTypeId){
+				RewardCampaignGameEvent.findOne({gameEventId:eventId,valueMin: {'<=': eventValue},valueMax: {'>=':eventValue}})
+				.populate('rewardCampaign')
+				.populate('playerCompletedEvents')
+				.exec(function(err,rewardCampaignGameEvent){
+				
+					if(err){
+						sails.log.error("PlayerController.trackerEvent: Query error on rewardcampaigngameevent find: ",err);
+						return;
+					}
+					
+					if(!rewardCampaignGameEvent || rewardCampaignGameEvent.rewardCampaign.rewardTypeId != 2){
+						sails.log.debug("PlayerController.trackerEvent: No reward campaign game events found for that.");
+						return;
+					}
+					
+					// Found a reward campaign game event
+					// Check to see if the player already triggered this event
+					// Check if this is a repeatable reward or one time
+					// If one-time and triggered already, ignore
+					// If repeatable reward, check the lockout period and time last triggered
+					// If it qualifies, issue the reward and email, push notification the player
+					// Reduce thee available force on that reward
+					
+				});
+			}
+			
+			// If eventTypeId is 2, it means it is an instant win
+			if(eventTypeId == 2){
 			}
 			
 			return res.json('201',recordGameEvent);

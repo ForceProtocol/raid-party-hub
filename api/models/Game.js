@@ -108,6 +108,11 @@ module.exports = {
 			via: 'game'
 		},
 		
+		qualifiedPlayers: {
+			collection: 'qualifiedplayers',
+			via: 'game'
+		},
+		
     },
 	
 	customToJSON: function () {

@@ -33,6 +33,10 @@ module.exports = {
 			model: 'player'
 		},
 		
+		game: {
+			model: 'game'
+		},
+		
 		rewardCampaign: {
 			model: 'rewardcampaign'
 		},

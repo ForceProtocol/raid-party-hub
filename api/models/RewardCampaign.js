@@ -28,17 +28,12 @@ module.exports = {
 			defaultsTo: ''
 		},
 		
-		jackpotValue: {
+		value: {
 			type: 'string',
 			defaultsTo: ''
 		},
 		
-		jackpotCurrency: {
-			type: 'string',
-			defaultsTo: ''
-		},
-		
-		jackpotText: {
+		currency: {
 			type: 'string',
 			defaultsTo: ''
 		},
@@ -60,6 +55,11 @@ module.exports = {
 		
 		banners: {
 			type: 'string',
+			defaultsTo: ''
+		},
+		
+		rules: {
+			type: 'text',
 			defaultsTo: ''
 		},
 		

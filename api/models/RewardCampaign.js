@@ -53,6 +53,11 @@ module.exports = {
 			defaultsTo: 1
 		},
 		
+		lockoutPeriod: {
+			type: 'integer',
+			defaultsTo: 0
+		},
+		
 		banners: {
 			type: 'string',
 			defaultsTo: ''

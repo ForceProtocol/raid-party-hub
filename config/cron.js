@@ -1,7 +1,9 @@
+const moment = require('moment');
+
 module.exports.cron = {
 
 	confirmJackpotQualifyingPlayers: {
-		schedule: '*/20 * * * * *',  // Run this every 15-20 mins
+		schedule: '1 * * * *',  // Run this every 15-20 mins
 
 		onTick: async function() {
 		
@@ -22,10 +24,10 @@ module.exports.cron = {
 				// a particular reward event, for later processing
 				for(const rewardCampaign of liveRewardCampaigns){
 				
-					console.log("reward campaign:",rewardCampaign.id);
+					sails.log.debug("reward campaign:",rewardCampaign.id);
 					
 					for(const qualifyingEvent of rewardCampaign.rewardCampaignGameEvents){
-						console.log("qualifying event ID:",qualifyingEvent.id);
+						sails.log.debug("qualifying event ID:",qualifyingEvent.id);
 						
 						// Form the search query to find qualifying players
 						let campaignEventQuery = {};
@@ -40,8 +42,12 @@ module.exports.cron = {
 							campaignEventQuery['>='] = qualifyingEvent.valueMin;
 						}
 						
+						if(campaignEventQuery.length == 0){
+							campaignEventQuery = 0;
+						}
+						
 						// Find player events that completed this event
-						let playerCompletedEvents = await PlayerToGameEvent.find({eventValue:campaignEventQuery,confirmed:false});
+						let playerCompletedEvents = await PlayerToGameEvent.find({eventValue:campaignEventQuery,gameEvent:qualifyingEvent.gameEvent,createdAt: {'>=': rewardCampaign.startDate},confirmed:false});
 						
 						// Insert each qualifying event against the reward campaign for processing later
 						for(const playerQualifiedEvent of playerCompletedEvents){
@@ -110,7 +116,7 @@ module.exports.cron = {
 	* to mobile device
 	*/
 	notifyQualifiedPlayers: {
-		schedule: '*/25 * * * * *',  // Run this every 15-20 mins
+		schedule: '1 * * * *',  // Run this every 15-20 mins
 
 		onTick: async function() {
 		
@@ -153,7 +159,7 @@ module.exports.cron = {
 	* Send email and push notification to winners
 	*/
 	selectJackpotWinners: {
-		schedule: '*/30 * * * * *',  // Run this every 15-20 mins
+		schedule: '1 * * * *',  // Run this every 15-20 mins
 
 		onTick: async function() {
 		
@@ -262,6 +268,163 @@ module.exports.cron = {
 			}catch(err){
 				sails.log.error("Failed to process reward campaign game events against player events on cron task: ",err);
 			}
+		
+		}
+	},
+	
+	
+	
+	
+	confirmType4RewardQualifyingPlayers: {
+		schedule: '*/10 * * * * *',  // Run this every 15-20 mins
+
+		onTick: async function() {
+		
+			try {
+			
+				sails.log.debug("Running cron task confirmType4RewardQualifyingPlayers");
+				
+				// REWARD CAMPAIGN TYPE ID: 4
+				// Big jackpot prize at end of campaign
+				// But includes a reward event lockout period
+				// and the reward event needs to be repeated x times to qualify
+				// Usefull for creating a campaign where players have to complete an event
+				// multiple times during the reward campaign
+				let dateNow = new Date();
+				
+				let liveRewardCampaigns = await RewardCampaign.find({rewardTypeId: 4,rewardProcessed: false, startDate: {'<=':dateNow},endDate: {'>=': dateNow}}).populate('rewardCampaignGameEvents');
+				
+				
+				// First we find the live campaign qualifying events,
+				// match any player events and record that they qualified on
+				// a particular reward event, for later processing
+				for(const rewardCampaign of liveRewardCampaigns){
+				
+					sails.log.debug("reward campaign:",rewardCampaign.id);
+					
+					for(const qualifyingEvent of rewardCampaign.rewardCampaignGameEvents){
+						sails.log.debug("qualifying event ID:",qualifyingEvent.id);
+						
+						// Form the search query to find qualifying players
+						let campaignEventQuery = {},
+						totalQualifyingEventsRequired = qualifyingEvent.repeated;
+						
+						// Maximum Value Required
+						if(qualifyingEvent.valueMax != 0){
+							campaignEventQuery['<='] = qualifyingEvent.valueMax;
+						}
+						
+						// Minimum Value required
+						if(qualifyingEvent.valueMin != 0){
+							campaignEventQuery['>='] = qualifyingEvent.valueMin;
+						}
+						
+						if(campaignEventQuery.length == 0){
+							campaignEventQuery = 0;
+						}
+						
+						// Find player events that completed this event
+						let playerCompletedEvents = await PlayerToGameEvent.find({eventValue:campaignEventQuery,gameEvent:qualifyingEvent.gameEvent,createdAt: {'>=': rewardCampaign.startDate},confirmed:false});
+						
+						
+						// NEED TO GROUP COUNT BY PLAYERS TO DETERMINE WHICH PLAYERS HAVE COMPLETED THIS
+						let playerGroupedEvents = await _.groupBy(playerCompletedEvents,'player');
+						
+						for(let playerGroup of Object.values(playerGroupedEvents)){
+							sails.log.debug("Individual Player -> grouped qualifying events -> ",playerGroup[0],playerGroup.length);
+							
+							// Check the player has not already qualified for this reward
+							let playerQualified = await QualifiedPlayers.findOne({players:playerGroup[0].player,rewardCampaign:rewardCampaign.id});
+							
+							if(playerQualified){
+								// Record this player game event has been confirmed as qualified
+								sails.log.debug("This player has already qualified for this reward campaign",playerQualified);
+								for(let event of playerGroup){
+									await PlayerToGameEvent.update({id:event.id},{confirmed:true});
+								}
+							}
+							
+							// The player has not completed enough events to qualify yet
+							if(playerGroup.length < totalQualifyingEventsRequired){
+								sails.log.debug("player did not complete enough of these events to qualify.");
+								// TODO: Update a progress stat of the player to how close to completing they are on this reward
+								// Send email to players as they get closer to reaching goal
+								continue;
+							}
+							
+							
+							// There is no lockout period on this qualifying event
+							if(rewardCampaign.lockoutPeriod < 1){
+								// The player has qualified to be entered to this reward campaign
+								// Record the player completed this event
+								await PlayerCompletedEvent.create({player:playerGroup[0].player,rewardCampaignGameEvent:qualifyingEvent.id,points:qualifyingEvent.points,qualifiedEvent:true});
+								
+								// Record this player game event has been confirmed as qualified
+								for(let event of playerGroup){
+									await PlayerToGameEvent.update({id:event.id},{confirmed:true});
+								}
+								
+								await QualifiedPlayers.create({players:playerGroup[0].player,points:qualifyingEvent.points,rewardCampaign:rewardCampaign.id,game:rewardCampaign.game});
+								
+								continue;
+							}
+							
+							// There is a lockout period on this
+							// Need to exclude any events that occured inside the lockout period compared with
+							// the last qualifying event
+							else{
+								sails.log.debug("This reward event has a lockout period for repeating events.");
+								
+								playerGroup = _.sortBy(playerGroup, function(o) { return new moment(o.createdAt); });
+								
+								let lastEventCreatedAt = '',
+								lastEventCreatedAtUnix,
+								currentCreatedAtUnix,
+								qualifiedEvents = [];
+								
+								// Work out what events qualify for this player
+								for(let event of playerGroup){
+									if(lastEventCreatedAt.length == 0){
+										lastEventCreatedAt = event.createdAt;
+										qualifiedEvents.push(event);
+									}else{
+										lastEventCreatedAtUnix = moment(lastEventCreatedAt).unix();
+										currentCreatedAtUnix = moment(event.createdAt).unix();
+										eventDifference = currentCreatedAtUnix - lastEventCreatedAtUnix;
+										
+										// This event qualifies, add to list
+										if(eventDifference >= rewardCampaign.lockoutPeriod){
+											qualifiedEvents.push(event);
+										}
+									}
+								}
+								
+								// Check if the player has now completed enough qualifying events
+								// Add them to qualified table
+								sails.log.debug("qualified events length: ", qualifiedEvents.length);
+								
+								if(qualifiedEvents.length >= totalQualifyingEventsRequired){
+									sails.log.debug("Player has qualified for this reward campaign: ",playerGroup);
+									await PlayerCompletedEvent.create({player:playerGroup[0].player,rewardCampaignGameEvent:qualifyingEvent.id,points:qualifyingEvent.points,qualifiedEvent:true});
+								
+									// Record this player game event has been confirmed as qualified
+									for(let event of playerGroup){
+										await PlayerToGameEvent.update({id:event.id},{confirmed:true});
+									}
+									
+									await QualifiedPlayers.create({players:playerGroup[0].player,points:qualifyingEvent.points,rewardCampaign:rewardCampaign.id,game:rewardCampaign.game});
+								}
+							}
+							
+							
+						}
+					}
+				}
+				
+			}catch(err){
+				sails.log.error("Failed to process reward campaign game events against player events on cron task: ",err);
+			}
+			
 		
 		}
 	},

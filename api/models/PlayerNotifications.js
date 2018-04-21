@@ -10,8 +10,14 @@ module.exports = {
 
     attributes: {
 		
+		title: {
+			type: 'string',
+			defaultsTo: ''
+		},
+		
 		message: {
-            type: 'string'
+            type: 'string',
+			defaultsTo: ''
         },
 		
 		players: {

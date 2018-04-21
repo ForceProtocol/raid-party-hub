@@ -20,3 +20,11 @@ auth_key is: a6139a8b8b0eea65a138715e2f1008e09f512c67
 2) Instant win from pot, but claimed once
 3) Instant win, claim multiple times but lockout period -> alert player they could claim new prize
 4) Big jackpot entry, win once, have to complete event on specific days during campaign period
+
+
+# Lockout Period for Reward Campaigns
+Defined in seconds.
+Lockout period means the player can only complete an event once until the lockout period expires since
+the last time they completed that event.
+E.g. player completes event at 10:00pm, 10:15pm, 10:30pm but the lockout period is 1800 (30 mins). This means the second event at 
+10:15pm will be excluded from qualifying. 

@@ -24,6 +24,11 @@ module.exports = {
 			defaultsTo: 0
 		},
 		
+		repeated: {
+			type: 'integer',
+			defaultsTo: 0
+		},
+		
 		rewardCampaign: {
 			model: 'rewardcampaign'
 		},

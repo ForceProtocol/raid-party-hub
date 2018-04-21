@@ -197,7 +197,7 @@ module.exports = {
 					// If one-time and triggered already, ignore
 					// If repeatable reward, check the lockout period and time last triggered
 					// If it qualifies, issue the reward and email, push notification the player
-					// Reduce thee available force on that reward
+					// Reduce the available force on that reward
 					
 				});
 			}

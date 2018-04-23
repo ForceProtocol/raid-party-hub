@@ -125,7 +125,7 @@ module.exports.cron = {
 				sails.log.debug("Running cron task notifyQualifiedPlayers");
 				
 				// Find qualified players that have not been notified yet
-				let qualifiedPlayersToNotify = await QualifiedPlayers.find({qualifiedEmailSent:false,wonEmailSent:false}).populate('players').populate('rewardCampaign').populate('game');
+				let qualifiedPlayersToNotify = await QualifiedPlayers.find({qualifiedEmailSent:false,wonEmailSent:false,isWinner:false}).populate('players').populate('rewardCampaign').populate('game');
 				
 				// Update straight away we have notified these players for simplicity - need to improve this later
 				await QualifiedPlayers.update({qualifiedEmailSent:false,wonEmailSent:false},{qualifiedEmailSent:true});
@@ -133,9 +133,9 @@ module.exports.cron = {
 				// Cycle through list of qualified players to send email and mobile push notification
 				let message = "";
 				for(const qualifiedPlayers of qualifiedPlayersToNotify){
-					sails.log.debug("Qualified players cron:",qualifiedPlayers);
+				
 					message = "Well done! You have entered into the reward prize draw for " + qualifiedPlayers.rewardCampaign.value + " " + qualifiedPlayers.rewardCampaign.currency + " for playing " + qualifiedPlayers.game.title;
-					PlayerNotifications.create({message:message,players:qualifiedPlayers.players.id});
+					await PlayerNotifications.create({title: "Entered into prize draw",message:message,players:qualifiedPlayers.players.id});
 					
 					// TODO: Send Email to player they have been entered into the prize draw
 					// TODO: Send push notification through service
@@ -177,7 +177,7 @@ module.exports.cron = {
 				
 					sails.log.debug("rewardCampaign for selecting Jackpot winners is: ",rewardCampaign);
 					
-					let qualifyingPlayers = await QualifiedPlayers.find({rewardCampaign:rewardCampaign.id}).populate('players');
+					let qualifyingPlayers = await QualifiedPlayers.find({rewardCampaign:rewardCampaign.id,isWinner:false}).populate('players');
 
 					// Confirm how many winners need to be selected
 					let maxWinners = rewardCampaign.maxWinningPlayers,
@@ -276,7 +276,7 @@ module.exports.cron = {
 	
 	
 	confirmType4RewardQualifyingPlayers: {
-		schedule: '*/10 * * * * *',  // Run this every 15-20 mins
+		schedule: '1 * * * *',  // Run this every 15-20 mins
 
 		onTick: async function() {
 		

@@ -28,3 +28,13 @@ Lockout period means the player can only complete an event once until the lockou
 the last time they completed that event.
 E.g. player completes event at 10:00pm, 10:15pm, 10:30pm but the lockout period is 1800 (30 mins). This means the second event at 
 10:15pm will be excluded from qualifying. 
+
+
+# Creating a TYPE 1 Reward
+## Big Jackpot Prize, win once between multiple players or one player
+This is won at the end of the reward campaign
+
+
+# Creating a TYPE 2 Reward
+Ensure that the reward value is set PER player, not the entire amount being given away!
+For example, 50,000 FORCE pot for 1,000 players would mean setting the value to 50 and maxWinningPlayers to 1000

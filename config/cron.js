@@ -138,7 +138,7 @@ module.exports.cron = {
 					await PlayerNotifications.create({title: "Entered into prize draw",message:message,players:qualifiedPlayers.players.id});
 					
 					// TODO: Send Email to player they have been entered into the prize draw
-					// TODO: Send push notification through service
+					// TODO: Send push notification through service https://onesignal.com/
 				}
 				
 			

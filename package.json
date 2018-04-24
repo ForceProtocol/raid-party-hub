@@ -27,6 +27,7 @@
     "include-all": "^1.0.0",
     "joi": "^13.1.2",
     "jsonwebtoken": "^8.2.0",
+    "lodash": "^4.17.5",
     "mailchimp-api-v3": "^1.7.0",
     "moment": "^2.22.1",
     "node-mandrill": "^1.0.1",

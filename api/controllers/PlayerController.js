@@ -277,15 +277,6 @@ module.exports = {
 							if(rewardCampaignEvent.valueMin <= eventValue && rewardCampaignEvent.valueMax >= eventValue){
 								sails.log.debug("The player has completed an event for reward: ");
 								playerCompletedEvents++;
-							
-								// Check if we have recorded already this player achieved this event
-								let playerCompletedEvent = await PlayerCompletedEvent.findOne({player:player.id,rewardCampaignGameEvent:rewardCampaignEvent.id});
-								
-								// Player has not been recorded as completing this event
-								if(!playerCompletedEvent){
-									sails.log.debug("The player has not been checked as completed this game event: ",rewardCampaignEvent);
-									PlayerCompletedEvent.create({player:player.id,rewardCampaignGameEvent:rewardCampaignEvent.id,points:rewardCampaignEvent.points}).exec(function(err,created){});
-								}
 							}
 						}
 						

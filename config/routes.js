@@ -2,6 +2,8 @@ module.exports.routes = {
 
 	/** Public Routes */
 	'GET /': 'PagesController.getHomePage',
+	'POST /app/subscribe': 'PagesController.postSubscribe',
+	'GET /players/count': 'PlayerController.getPlayerCount',
 	
 	/** Developer Login and Signups */
 	'POST /app/developer': 'DeveloperController.signupDeveloper',
@@ -11,7 +13,6 @@ module.exports.routes = {
 	'GET /player/:playerId': 'PlayerController.getPlayer',
 	'POST /player/track': 'PlayerController.trackPlayer',
 	'POST /player/reward': 'PlayerController.rewardPlayer',
-	
 	
 	/** Developer Games Management */
 	'GET /app/developer/games': 'DeveloperController.getGames',
@@ -23,6 +24,10 @@ module.exports.routes = {
 	'POST /app/developer/reset-password': 'DeveloperController.resetPassword',
 	'POST /app/developer/change-password': 'DeveloperController.changePassword',
 	'POST /app/developer/update-password': 'DeveloperController.updatePassword',
+	
+	
+	/** Player Routes */
+	'POST /app/player': 'PlayerController.signupPlayer',
 	
 	
 	/** SDK PLAYER ROUTES */

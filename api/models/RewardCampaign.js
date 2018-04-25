@@ -40,12 +40,12 @@ module.exports = {
 		
 		maxQualifyingPlayers: {
 			type: 'integer',
-			defaultsTo: ''
+			defaultsTo: 0
 		},
 		
 		maxWinningPlayers: {
 			type: 'integer',
-			defaultsTo: ''
+			defaultsTo: 0
 		},
 		
 		rewardTypeId: {

@@ -40,5 +40,13 @@ module.exports.policies = {
         loginDeveloper: true,
         resetPassword: true,
         changePassword: true,
+    },
+
+    PlayerController: {
+        '*': true
+    },
+	
+	PagesController: {
+        '*': true
     }
 };

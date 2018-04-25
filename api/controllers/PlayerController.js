@@ -10,6 +10,69 @@ var sha1 = require('sha1');
 module.exports = {
 
 
+	async signupPlayer(req,res){
+	
+		const email = req.param("email"),
+				firstName = req.param("firstName"),
+				lastName = req.param("lastName"),
+				password = req.param("password"),
+				deviceType = req.param("device_type"),
+				locale = req.param("locale");
+				
+        try {
+					
+			// Validate sent params
+			if(!deviceType || !email || !password){
+				throw new CustomError('You did not provide all signup details required.', {status: 400});
+			}
+			
+			if(!locale){
+				locale = 'en';
+			}
+						
+			let existingPlayerDevice = await Player.findOne({email: email});
+
+			// Player already exists
+            if(existingPlayerDevice){
+				throw new CustomError('This email is already registered with another account. Please login to your account using the following email: ' + existingPlayerDevice.email, {status: 400});
+            }
+			
+			// Create activation PIN
+			let pin = util.randomFixedInteger(6);
+			
+			// Create new player account
+			// AccountStatus: 0 = blocked, 1 = pending activation, 2 = activated
+			let player = await Player.create({
+				email: email,
+				password: password,
+				deviceType: deviceType,
+				pin: pin,
+				accountStatus: 1,
+				forceBalance: '0',
+				firstName: firstName,
+				lastName: lastName
+			});
+			
+			// Create the users wallet
+			//WalletService.createUserWallet(player.id).catch(err=>{sails.log.error('On signup, failed to create player wallet: ', err)});
+			
+			/** Add to normal subscriber list **/
+			MailchimpService.addSubscriber("bb2455ea6e", email, firstName, lastName, "pending",locale).then(function(addResponse){
+			}).catch(function(err) {
+				sails.log.debug("new subscriber not added due to error: ", err);
+			});
+			
+			return res.ok({
+                success: true,
+            });
+
+        } catch(err) {
+            return util.errorResponse(err, res);
+        }
+	},
+
+	
+	
 	/**
 	* Track a player request from a game using their device ID
 	* Route: /sdk/player/track
@@ -257,6 +320,16 @@ module.exports = {
     },
 	
 	
+	
+	async getPlayerCount(req,res){
+		try {
+			let totalPlayers = await Player.count();
+			return res.ok({totalPlayers});
+		}catch(err){
+			sails.log.debug("Get Player Count fired error: ",err);
+			return res.serverError();
+		}
+	}
 
 
 };

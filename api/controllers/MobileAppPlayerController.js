@@ -5,7 +5,7 @@
  * @help        :: See http://links.sailsjs.org/docs/controllers
  */
 
-const BigNumber = require('bignumber.js');
+const BigNumber = require('bignumber.js'), moment = require('moment');
  
 module.exports = {
 	
@@ -27,13 +27,6 @@ module.exports = {
 			if(!deviceType || !email || !password){
 				throw new CustomError('You did not provide all signup details required.', {status: 400});
 			}
-				
-            let existingPlayer = await Player.findOne({email: email});
-
-			// Player already exists
-            if(existingPlayer){
-				throw new CustomError('This email is already registered with another account. Please login to your account.', {status: 400});
-            }
 			
 			let existingPlayerDevice = await Player.findOne({email: email});
 
@@ -522,20 +515,37 @@ module.exports = {
 	async getGames(req, res) {
 		try {
 			let deviceType = req.param("device_type").toLowerCase(),
-			excludePlatform = 'android';
+			excludePlatform = 'android',
+			game, prizeList, prize, reward, gameItem;
 			
 			if(deviceType == 'android'){
 				excludePlatform = 'ios';
 			}
 			
 			// Get games we need for this device
-			let games = await Game.find({active:true,platform:deviceType,platform: { '!' : excludePlatform}});
+			let games = await Game.find({active:true,platform:deviceType,platform: { '!' : excludePlatform}}).populate('rewardCampaign');
 			
-			games = _.map(games, function(game){
-				return {game_id:game.gameId,title:game.title,reward:game.rewardAvailable,description:game.description,jackpot:game.jackpot,bannerContent:game.bannerContent,link:game.link,platform:game.platform,avatar:game.avatar};
-			});
+			finalGamesList = [];
+			for(game of games){
+				
+				// Prepare the prizes list
+				prizeList = [];
+				for(reward of game.rewardCampaign){
+					// Make sure reward campaign is live and valid
+					//TODO
+					
+					prize = {id:reward.id,value:reward.value,currency:reward.currency,rules:reward.rules,maxQualifyingPlayers:reward.maxQualifyingPlayers,maxWinningPlayers:reward.maxWinningPlayers};
+					prizeList.push(prize);
+				}
+				
+				gameItem = {game_id:game.gameId,title:game.title,reward:game.rewardAvailable,description:game.description,jackpot:game.jackpot,bannerContent:game.bannerContent,link:game.link,platform:game.platform,avatar:game.avatar,prizes:prizeList};
+				
+				finalGamesList.push(gameItem);
+			}
 			
-			return res.ok({games:games});
+			sails.log.debug("Final games list: ",finalGamesList);
+			
+			return res.ok({games:finalGamesList});
 		}catch(err){
 			return util.errorResponse(err, res);
 		}

@@ -50,5 +50,13 @@ module.exports = {
 		
 	},
 	
+	afterCreate: function(reward,cb){
+		sails.sockets.blast('players/rewarded', {
+			msg: 'Someone just got rewarded ' + reward.amount + ' ' + reward.currency + '!'
+		});
+		
+		cb(null,reward);
+	},
+	
 };
 

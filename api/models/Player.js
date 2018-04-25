@@ -170,6 +170,15 @@ module.exports = {
 		}else cb(null, user);
 	},
 	
+	
+	afterCreate: function(user,cb){
+		sails.sockets.blast('players/joined', {
+			msg: 'A new player just joined the party!'
+		});
+		
+		cb(null,user);
+	},
+	
 	customToJSON: function () {
         return _.omit(this, ['password', 'activatePin', 'pinCreatedAt', 'createdAt', 'updatedAt'])
     }

@@ -40,6 +40,8 @@ module.exports.routes = {
 	'GET /mob/player/code': 'MobileAppPlayerController.getPlayerCode',
 	'GET /mob/player/games': 'MobileAppPlayerController.getGames',
 	'GET /mob/player/rewards': 'MobileAppPlayerController.getRewards',
+	'GET /mob/player/notifications': 'MobileAppPlayerController.getNotifications',
+	'POST /mob/player/notification/delete': 'MobileAppPlayerController.deleteNotification',
 	'POST /mob/player/signup': 'MobileAppPlayerController.signupPlayer',
 	'POST /mob/player/login': 'MobileAppPlayerController.loginPlayer',
 	'POST /mob/player/activate': 'MobileAppPlayerController.activatePlayer',

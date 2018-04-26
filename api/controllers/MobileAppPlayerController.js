@@ -603,5 +603,59 @@ module.exports = {
 	
 	
 	
+	/**
+	* Get notifications against a player
+	*/
+	async getNotifications(req, res) {
+		try {
+		
+			// Get games we need for this device
+			let player = await Player.findOne({id:req.token.user.id}).populate('notifications', { sort: 'createdAt DESC' }));
+			
+			if(!player){
+				throw new CustomError('Could not find that player.', {status: 401,err_code:"not_found"});
+			}
+			
+			return res.ok({notifications:player.notifications});
+		}catch(err){
+			return util.errorResponse(err, res);
+		}
+	},
+	
+	
+	
+	/**
+	* Delete a player notification
+	*/
+	async deleteNotification(req, res) {
+		try {
+		
+			let notificationId = req.param('notification_id');
+			
+			if(!notificationId){
+				throw new CustomError('Could not find that notification.', {status: 401,err_code:"not_found"});
+			}
+			
+			// Get games we need for this device
+			let player = await Player.findOne({id:req.token.user.id});
+			
+			if(!player){
+				throw new CustomError('Could not find that player.', {status: 401,err_code:"not_found"});
+			}
+			
+			let deleted = await PlayerNotifications.destroy({players:player.id,id:notificationId});
+			
+			if(deleted){
+				return res.ok({success:true});
+			}else{
+				return res.ok({success:false});
+			}
+		}catch(err){
+			return util.errorResponse(err, res);
+		}
+	},
+	
+	
+	
 	
 };

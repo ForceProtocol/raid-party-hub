@@ -612,7 +612,7 @@ module.exports = {
 		try {
 		
 			// Get games we need for this device
-			let player = await Player.findOne({id:req.token.user.id}).populate('notifications', { sort: 'createdAt DESC' }));
+			let player = await Player.findOne({id:req.token.user.id}).populate('notifications', { sort: 'createdAt DESC' });
 			
 			if(!player){
 				throw new CustomError('Could not find that player.', {status: 401,err_code:"not_found"});

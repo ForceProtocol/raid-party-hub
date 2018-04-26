@@ -42,7 +42,7 @@ module.exports = {
     APP_HOST: 'https://app.raidparty.io',
 
     oneSignal: {
-        userAuthKey: '',
+        userAuthKey: 'YzBhY2IwNGYtNGVhZS00YjZjLWFiNTctYzViODZkZDQ0OGRh',
         appAuthKey: 'YzU0NzFlMGMtNGI5Zi00ZTZkLWFlN2QtODYxZDI4MGIyOWZm',
         appId: '28142d5f-8d0d-463e-aa33-26de871f9591'
     },

@@ -54,8 +54,8 @@ module.exports = {
 
 		deviceId: {
 			type: 'string',
-			required: true
 		},
+		
 		accountStatus: {
 			type: 'integer',
 			defaultsTo: 0

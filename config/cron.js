@@ -139,27 +139,26 @@ module.exports.cron = {
 
 					message = "Well done! You have entered into the reward prize draw for " + qualifiedPlayers.rewardCampaign.value + " " + qualifiedPlayers.rewardCampaign.currency + " for playing " + qualifiedPlayers.game.title;
 					await PlayerNotifications.create({ title: "Entered into prize draw", message: message, players: qualifiedPlayers.players.id });
-
+					
 					// Send Email to player they have been entered into the prize draw.
 					deviceIds.push(qualifiedPlayers.players.deviceId);
 					await EmailService.sendEmail({
 						fromEmail: 'support@raidparty.io',
-						fromName: 'RaidParty Admin',
+						fromName: 'RaidParty Support',
 						toEmail: qualifiedPlayers.players.email,
 						toName: qualifiedPlayers.players.email,
 						subject: 'Successfull Entry into Jackpot reward contest',
 						body: message
 					});
 
-
 					await QualifiedPlayers.update({ players: qualifiedPlayers.players.id }, { qualifiedEmailSent: true });
-
-					// TODO: Send push notification through service https://onesignal.com/
 				}
-
+				
 				// Send batch Notification to qualified players.
-				await OneSignalService.sendNotificationsToMultipleDevices({ deviceIds: deviceIds, text: "Well done! You have entered into the reward prize draw for playing a game through raidparty. Tap to know more." });
-
+				if(deviceIds.length > 0){
+					await OneSignalService.sendNotificationsToMultipleDevices({ deviceIds: deviceIds, text: "Well done! You have entered into the reward prize draw for playing a game through raidparty. Tap to know more." });
+				}
+				
 			} catch (err) {
 				sails.log.error("Failed to notify qualified players cron task: ", err);
 			}

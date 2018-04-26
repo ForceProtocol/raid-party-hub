@@ -18,13 +18,14 @@ module.exports = {
 		const email = req.param("email"),
 				password = req.param("password"),
 				deviceType = req.param("device_type"),
+				deviceId = req.param("device_id"),
 				longitude = req.param("lon"),
 				latitude = req.param("lat");
 				
         try {
 					
 			// Validate sent params
-			if(!deviceType || !email || !password){
+			if(!deviceType || !email || !password || !deviceId){
 				throw new CustomError('You did not provide all signup details required.', {status: 400});
 			}
 			
@@ -44,10 +45,11 @@ module.exports = {
 				email: email,
 				password: password,
 				deviceType: deviceType,
+				deviceId: deviceId,
 				pin: pin,
 				accountStatus: 1,
 				forceBalance: '0',
-				latitude: latitude,
+				latitude: latitude, 
 				longitude: longitude
 			});
 			

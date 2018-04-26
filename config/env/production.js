@@ -39,6 +39,12 @@ module.exports = {
 
     hookTimeout: 120000,
     API_HOST: 'https://hub.raidparty.io',
-    APP_HOST: 'https://app.raidparty.io'
+    APP_HOST: 'https://app.raidparty.io',
+
+    oneSignal: {
+        userAuthKey: '',
+        appAuthKey: 'YzU0NzFlMGMtNGI5Zi00ZTZkLWFlN2QtODYxZDI4MGIyOWZm',
+        appId: '28142d5f-8d0d-463e-aa33-26de871f9591'
+    },
 
 };

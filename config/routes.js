@@ -4,6 +4,7 @@ module.exports.routes = {
 	'GET /': 'PagesController.getHomePage',
 	'POST /app/subscribe': 'PagesController.postSubscribe',
 	'GET /players/count': 'PlayerController.getPlayerCount',
+	'GET /games/active': 'GameController.getActiveGames',
 	
 	/** Developer Login and Signups */
 	'POST /app/developer': 'DeveloperController.signupDeveloper',

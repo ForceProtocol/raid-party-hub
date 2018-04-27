@@ -40,6 +40,11 @@ module.exports = {
 			required: true
         },
 		
+		rules: {
+			type: 'text',
+			defaultsTo: ''
+		},
+		
 		link: {
             type: 'text',
 			required: true
@@ -54,6 +59,11 @@ module.exports = {
 			type: 'text',
 			defaultsTo: '',
         },
+		
+		featured: {
+			type: 'boolean',
+			defaultsTo: false
+		},
 		
 		platform: {
 			type: 'string',

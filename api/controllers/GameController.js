@@ -5,6 +5,7 @@
  * @help        :: See http://links.sailsjs.org/docs/controllers
  */
 
+const moment = require('moment');
 
 module.exports = {
 
@@ -22,33 +23,60 @@ module.exports = {
 	
 	
 	
-	asycn getActiveGames(req,res){
+	async getActiveGames(req,res){
 		
 		try{
-			let games = await Game.find({active:true}).populate('rewardCampaign').sort('createdAt ASC');
+			let dateNow = new Date();
+			let games = await Game.find({active:true}).populate('rewardCampaign').populate('gamePlatforms').sort('createdAt ASC');
 			let gameList = [],
-			platforms,
 			rules,
+			ruleLocale,
 			gameIndex = 0,
-			locale = res.getLocale();
+			locale = req.param("locale");
+			
+			if(!locale){
+				locale = 'en';
+			}
 			
 			for(const game of games){
-				gameList.push(game);
-				
-				// Set defaults
-				platforms = JSON.parse(game.platform);
-				game.platform = platform;
+			
+				game.isLive = false;
 				
 				// Ensure we set the correct language for the rules
-				rules = JSON.parse(game.rules);
+				rules = util.stringToJson(game.rules);
 				
-				if(game.rules.hasOwnProperty(locale)){
-					game.rules = game.rules[locale];
-				}else if(game.rules.en){
-					game.rules = game.rules.en;
-				}else{
-					game.rules = game.rules;
+				if(rules){
+					ruleLocale = rules.find(function (obj) { return obj.hasOwnProperty(locale); });
+					
+					if(!ruleLocale){
+						locale = 'en';
+						game.rules = rules.find(function (obj) { return obj.hasOwnProperty(locale); });
+						game.rules = game.rules['en'];
+					}else{
+						game.rules = ruleLocale[locale];
+					}
 				}
+				
+				if(!game.rules){
+					game.rules = rules;
+				}
+				
+				// Display campaign ending date
+				// This campaign is now LIVE
+				
+				if(moment().isSameOrAfter(game.startDate) && !moment().isSameOrAfter(game.endDate)){
+					game.isLive = true;
+					game.timeRemaining = moment(game.endDate).fromNow();
+				}else if(moment().isSameOrAfter(game.startDate)){
+					game.isLive = false;
+					game.timeRemaining = "Rewards Ended";
+				}else{
+					game.isLive = false;
+					game.timeRemaining = "Starts " + moment(game.startDate).fromNow() + "!";
+				}
+				
+				// Insert refactored object to array
+				gameList.push(game);
 				
 				// Increment game list
 				gameIndex++;

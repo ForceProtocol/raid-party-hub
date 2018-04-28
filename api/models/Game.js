@@ -55,6 +55,20 @@ module.exports = {
 			defaultsTo: '',
         },
 		
+		startDate: {
+			type: 'datetime',
+			defaultsTo: function() {
+				return new Date()
+			}
+		},
+		
+		endDate: {
+			type: 'datetime',
+			defaultsTo: function() {
+				return new Date()
+			}
+		},
+		
 		bannerContent: {
 			type: 'text',
 			defaultsTo: '',
@@ -63,10 +77,6 @@ module.exports = {
 		featured: {
 			type: 'boolean',
 			defaultsTo: false
-		},
-		
-		platform: {
-			type: 'string',
 		},
 		
 		avatar: {
@@ -104,6 +114,11 @@ module.exports = {
 		
 		gameEvent: {
 			collection: 'gameevent',
+			via: 'game'
+		},
+		
+		gamePlatforms: {
+			collection: 'gameplatforms',
 			via: 'game'
 		},
 		

@@ -517,26 +517,80 @@ module.exports = {
 	async getGames(req, res) {
 		try {
 			let deviceType = req.param("device_type").toLowerCase(),
+			locale = req.param('locale'),
 			excludePlatform = 'android',
-			game, prizeList, prize, reward, gameItem;
+			game, prizeList, prize, reward, gameItem, platformAvailable,
+			rules,
+			ruleLocale;
 			
 			if(deviceType == 'android'){
 				excludePlatform = 'ios';
 			}
 			
+			if(!locale){
+				locale = 'en';
+			}
+			
 			// Get games we need for this device
-			let games = await Game.find({active:true,platform:deviceType,platform: { '!' : excludePlatform}}).populate('rewardCampaign');
+			let games = await Game.find({active:true,startDate: {'<=':new Date()},endDate: {'>=':new Date()}}).populate('rewardCampaign').populate('gamePlatforms');
 			
 			finalGamesList = [];
 			for(game of games){
+			
+				// Go through each platform to check this is available on their platform
+				platformAvailable = false;
+				for(const platform of game.gamePlatforms){
+					if(platform.type == deviceType){
+						platformAvailable = true;
+						game.link = platform.link;
+						game.platform = platform.type;
+					}
+				}
+				
+				if(!platformAvailable){
+					continue;
+				}
 				
 				// Prepare the prizes list
 				prizeList = [];
 				for(reward of game.rewardCampaign){
-					// Make sure reward campaign is live and valid
-					//TODO
+					// TODO: Whether the player has qualified for this reward
+					// TODO: ?? Ionic might be fine displaying html ?? Strip HTML out of rules, for display purposes in mobile app
 					
-					prize = {id:reward.id,value:reward.value,currency:reward.currency,rules:reward.rules,maxQualifyingPlayers:reward.maxQualifyingPlayers,maxWinningPlayers:reward.maxWinningPlayers};
+					// Reward is not currently live - skip listing it
+					if(moment().isSameOrBefore(reward.startDate) || moment().isSameOrAfter(reward.endDate)){
+						continue;
+					}
+					
+					// Reward has no more entries available
+					if(reward.maxQualifyingPlayers < 1){
+						continue;
+					}
+					
+					if(reward.value <= 0){
+						continue;
+					}
+					
+					// Ensure we set the correct language for the rules
+					rules = util.stringToJson(reward.rules);
+					
+					if(rules){
+						ruleLocale = rules.find(function (obj) { return obj.hasOwnProperty(locale); });
+						
+						if(!ruleLocale){
+							locale = 'en';
+							reward.rules = rules.find(function (obj) { return obj.hasOwnProperty(locale); });
+							reward.rules = reward.rules['en'];
+						}else{
+							reward.rules = ruleLocale[locale];
+						}
+					}
+					
+					if(!reward.rules){
+						reward.rules = rules;
+					}
+					
+					prize = {id:reward.id,value:reward.value,currency:reward.currency,rules:reward.rules,maxQualifyingPlayers:reward.maxQualifyingPlayers,maxWinningPlayers:reward.maxWinningPlayers,startDate:reward.startDate,endDate:reward.endDate};
 					prizeList.push(prize);
 				}
 				
@@ -549,6 +603,7 @@ module.exports = {
 			
 			return res.ok({games:finalGamesList});
 		}catch(err){
+			sails.debug.log("this is an err",err);
 			return util.errorResponse(err, res);
 		}
 	},

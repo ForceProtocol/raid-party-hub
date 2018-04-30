@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const SALT_ROUND = 10;
 const BigNumber = require('bignumber.js');
+const passwordValidator = require('password-validator');
 
 module.exports = {
 
@@ -148,5 +149,21 @@ module.exports = {
 		}
 
 		return false;
-	}
+	},
+	
+	
+	isValidPassword: function(password){
+		var schema = new passwordValidator();
+ 
+		// Add properties to it
+		schema
+		.is().min(7)                                    // Minimum length 8
+		.is().max(100)                                  // Maximum length 100
+		.has().uppercase()                              // Must have uppercase letters
+		.has().lowercase()                              // Must have lowercase letters
+		.has().digits()                                 // Must have digits
+		.has().not().spaces();							// Should not have spaces
+		
+		return schema.validate(password);
+	},
 };

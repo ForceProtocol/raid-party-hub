@@ -5,7 +5,7 @@
  * @help        :: See http://links.sailsjs.org/docs/controllers
  */
 
-var sha1 = require('sha1');
+const sha1 = require('sha1');
 
 module.exports = {
 
@@ -23,18 +23,23 @@ module.exports = {
 
 			// Validate sent params
 			if (!deviceType || !email || !password) {
-				throw new CustomError('You did not provide all signup details required.', { status: 400 });
+				throw new CustomError(sails.__("You did not provide all signup details required."), { status: 400 });
 			}
 
 			if (!locale) {
 				locale = 'en';
+			}
+			
+			// Validate against a password string
+			if(!util.isValidPassword(password)){
+				throw new CustomError(sails.__("You did not provide a valid password. It must be greater than 6 characters, contain one uppercase character and at least one digit"), { status: 400 });
 			}
 
 			let existingPlayerDevice = await Player.findOne({ email: email });
 
 			// Player already exists
 			if (existingPlayerDevice) {
-				throw new CustomError('This email is already registered with another account. Please login to your account using the following email: ' + existingPlayerDevice.email, { status: 400 });
+				throw new CustomError(sails.__("This email is already registered with another account. Please login to your account using the following email: ") + existingPlayerDevice.email, { status: 400 });
 			}
 
 			// Create activation PIN

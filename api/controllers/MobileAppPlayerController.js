@@ -26,14 +26,14 @@ module.exports = {
 					
 			// Validate sent params
 			if(!deviceType || !email || !password || !deviceId){
-				throw new CustomError('You did not provide all signup details required.', {status: 400});
+				throw new CustomError(sails.__("You did not provide all signup details required."), {status: 400});
 			}
 			
 			let existingPlayerDevice = await Player.findOne({email: email});
 
 			// Player already exists
             if(existingPlayerDevice){
-				throw new CustomError('This email is already registered with another account. Please login to your account using the following email: ' + existingPlayerDevice.email, {status: 400});
+				throw new CustomError(sails.__("This email is already registered with another account. Please login to your account using the following email: ") + existingPlayerDevice.email, {status: 400});
             }
 			
 			// Create activation PIN
@@ -71,6 +71,12 @@ module.exports = {
                 subject: 'Welcome to RaidParty! Activate your account to start earning rewards',
                 body: msg
             });
+			
+			/** Add to normal subscriber list **/
+			MailchimpService.addSubscriber("bb2455ea6e", email, "", "", "pending", locale).then(function (addResponse) {
+			}).catch(function (err) {
+				sails.log.debug("new subscriber not added due to error: ", err);
+			});
 			
 			return res.ok({
                 msg: 'Please check your email inbox for a 6 digit pin and enter below to activate your account',

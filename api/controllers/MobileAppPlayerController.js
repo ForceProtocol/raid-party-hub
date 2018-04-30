@@ -20,7 +20,8 @@ module.exports = {
 				deviceType = req.param("device_type"),
 				deviceId = req.param("device_id"),
 				longitude = req.param("lon"),
-				latitude = req.param("lat");
+				latitude = req.param("lat"),
+				locale = req.param("locale");
 				
         try {
 					
@@ -71,6 +72,10 @@ module.exports = {
                 subject: 'Welcome to RaidParty! Activate your account to start earning rewards',
                 body: msg
             });
+			
+			if(!locale){
+				locale = 'en';
+			}
 			
 			/** Add to normal subscriber list **/
 			MailchimpService.addSubscriber("bb2455ea6e", email, "", "", "pending", locale).then(function (addResponse) {

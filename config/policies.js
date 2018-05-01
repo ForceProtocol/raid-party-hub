@@ -31,6 +31,8 @@ module.exports.policies = {
         getPlayerCode: 'tokenAuth',
         getRewards: 'tokenAuth',
         updatePassword: 'tokenAuth',
+        getNotifications: 'tokenAuth',
+        deleteNotification: 'tokenAuth',
     },
 
     DeveloperController: {

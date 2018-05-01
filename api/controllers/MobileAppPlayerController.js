@@ -15,7 +15,7 @@ module.exports = {
 	*/
 	async signupPlayer(req, res) {
 	
-		const email = req.param("email"),
+		let email = req.param("email"),
 				password = req.param("password"),
 				deviceType = req.param("device_type"),
 				deviceId = req.param("device_id"),

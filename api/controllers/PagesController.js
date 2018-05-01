@@ -62,6 +62,72 @@ module.exports = {
 		return res.ok({
 			success: true,
 		});
-    }
+    },
+	
+	
+	
+	
+	/**
+	* Insert airdrop users from tft database
+	*/
+	async addAirdropUsers(req, res) {
+		
+		let playerCode = '',
+		password = '';
+		
+		try {
+	
+			/**
+			let usersPromise = new Promise(function(resolve,reject){
+				Game.query("SELECT a.id, a.email, a.reward, a.createdAt, a.updatedAt FROM triforcetokens_live.airdropusers AS a",function(err,users){
+					if(err){
+						return reject(err);
+					}else{
+						return resolve(users);
+					}
+				});
+			});
+			*/
+			
+			let users = await new Promise(function(resolve,reject){
+				Game.query("SELECT a.id, a.email, a.reward, a.createdAt, a.updatedAt FROM triforcetokens_live.airdropusers AS a",function(err,users){
+					if(err){
+						return reject(err);
+					}else{
+						return resolve(users);
+					}
+				});
+			});
+			
+			// Get existing users
+			for(const user of users){
+				
+				sails.log.debug("going throuig this user: ",user);
+				playerCode = util.getPlayerGameCode(7);
+				password = util.getPlayerGameCode(8);
+				
+				let createdPlayer = await Player.create({email:user.email,deviceType:'unknown',deviceId:'',accountStatus:2,password:password,code:playerCode,forceBalance:user.reward,createdAt:user.createdAt,updatedAt:user.updatedAt});
+						
+				let playerUpdated = await new Promise(function(resolve,reject){
+					Player.query("UPDATE triforcetokens_live.airdropusers AS a SET a.tempPassword = '" + password + "' WHERE a.id = " + user.id,function(err,users){
+						if(err){
+							return reject(err);
+						}else{
+							return resolve(users);
+						}
+					});
+				});
+			}
+		}
+		catch(err){
+			sails.log.debug("error for this is:",err);
+		}
+		
+		return res.view('public/home', {
+			layout: 'public/layout',
+			title: 'RaidParty',
+			metaDescription: '',
+		});
+    },
 
 };

@@ -34,6 +34,9 @@ module.exports = {
         connection: 'mysqlDbStage',
 		migrate: 'safe'
     },
+	log: {
+		level: 'error'
+	},
 
 	MANDRILL_KEY: 'EHaaGsImRCQrLW9vrWSedA',		// PRODUCTION KEY
 

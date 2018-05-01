@@ -22,24 +22,24 @@ module.exports = {
             password: 'ji4Zr56Bu72FY',
             database: 'raidparty_live'
         },
-        mysqlDbDev: {
+		mysqlDbStage: {
             adapter: 'sails-mysql',
-            host: 'localhost',
-            user: 'root',
-            password: 'root',
-            database: 'raidparty_dev'
-        }
+            host: '178.62.109.184',
+            user: 'triforcer236',
+            password: 'ji4Zr56Bu72FY',
+            database: 'raidparty_stage'
+        },
     },
     models: {
-        connection: 'mysqlDbDev',
+        connection: 'mysqlDbStage',
 		migrate: 'safe'
     },
 
 	MANDRILL_KEY: 'EHaaGsImRCQrLW9vrWSedA',		// PRODUCTION KEY
 
     hookTimeout: 120000,
-    API_HOST: 'https://hub.raidparty.io',
-    APP_HOST: 'https://app.raidparty.io',
+    API_HOST: 'https://staging.hub.raidparty.io',
+    APP_HOST: 'https://appstaging.raidparty.io',
 
     oneSignal: {
         userAuthKey: 'YzBhY2IwNGYtNGVhZS00YjZjLWFiNTctYzViODZkZDQ0OGRh',

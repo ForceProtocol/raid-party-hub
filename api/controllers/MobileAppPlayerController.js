@@ -610,11 +610,9 @@ module.exports = {
 				finalGamesList.push(gameItem);
 			}
 			
-			sails.log.debug("Final games list: ",finalGamesList);
-			
 			return res.ok({games:finalGamesList});
 		}catch(err){
-			sails.debug.log("this is an err",err);
+			sails.log.debug("this is an err",err);
 			return util.errorResponse(err, res);
 		}
 	},

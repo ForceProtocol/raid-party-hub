@@ -31,12 +31,16 @@ module.exports = {
 			let gameList = [],
 			rules,
 			ruleLocale,
+			description,
+			descriptionLocale,
 			gameIndex = 0,
 			locale = req.param("locale");
 			
 			if(!locale){
 				locale = 'en';
 			}
+			
+			moment.locale(locale);
 			
 			for(const game of games){
 			
@@ -49,8 +53,7 @@ module.exports = {
 					ruleLocale = rules.find(function (obj) { return obj.hasOwnProperty(locale); });
 					
 					if(!ruleLocale){
-						locale = 'en';
-						game.rules = rules.find(function (obj) { return obj.hasOwnProperty(locale); });
+						game.rules = rules.find(function (obj) { return obj.hasOwnProperty('en'); });
 						game.rules = game.rules['en'];
 					}else{
 						game.rules = ruleLocale[locale];
@@ -61,6 +64,25 @@ module.exports = {
 					game.rules = rules;
 				}
 				
+				// Ensure we set the correct language for the rules
+				description = util.stringToJson(game.description);
+				
+				if(description){
+					descriptionLocale = description.find(function (obj) { return obj.hasOwnProperty(locale); });
+					
+					if(!descriptionLocale){
+						game.description = description.find(function (obj) { return obj.hasOwnProperty('en'); });
+						game.description = game.description['en'];
+					}else{
+						game.description = descriptionLocale[locale];
+					}
+				}
+				
+				if(!game.description){
+					game.description = description;
+				}
+				
+				
 				// Display campaign ending date
 				// This campaign is now LIVE
 				
@@ -69,10 +91,10 @@ module.exports = {
 					game.timeRemaining = moment(game.endDate).fromNow();
 				}else if(moment().isSameOrAfter(game.startDate)){
 					game.isLive = false;
-					game.timeRemaining = "Rewards Ended";
+					game.timeRemaining = sails.__("Rewards Ended");
 				}else{
 					game.isLive = false;
-					game.timeRemaining = "Starts " + moment(game.startDate).fromNow() + "!";
+					game.timeRemaining = sails.__("Starts ") + moment(game.startDate).fromNow() + "!";
 				}
 				
 				// Insert refactored object to array

@@ -51,8 +51,4 @@ module.exports.routes = {
 	'POST /mob/player/change-password': 'MobileAppPlayerController.changePassword',
 	'POST /mob/player/update-password': 'MobileAppPlayerController.updatePassword',
 	
-	
-	
-	'GET /airdrop/insertthem2348': 'PagesController.addAirdropUsers',
-	
 };

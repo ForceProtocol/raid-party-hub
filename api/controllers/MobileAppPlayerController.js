@@ -899,7 +899,9 @@ module.exports = {
 			excludePlatform = 'android',
 			game, prizeList, prize, reward, gameItem, platformAvailable,
 			rules,
-			ruleLocale;
+			ruleLocale,
+			description,
+			descriptionLocale;
 			
 			if(deviceType == 'android'){
 				excludePlatform = 'ios';
@@ -908,6 +910,8 @@ module.exports = {
 			if(!locale){
 				locale = 'en';
 			}
+			
+			moment.locale(locale);
 			
 			// Get games we need for this device
 			let games = await Game.find({active:true,startDate: {'<=':new Date()},endDate: {'>=':new Date()}}).populate('rewardCampaign').populate('gamePlatforms');
@@ -956,8 +960,7 @@ module.exports = {
 						ruleLocale = rules.find(function (obj) { return obj.hasOwnProperty(locale); });
 						
 						if(!ruleLocale){
-							locale = 'en';
-							reward.rules = rules.find(function (obj) { return obj.hasOwnProperty(locale); });
+							reward.rules = rules.find(function (obj) { return obj.hasOwnProperty('en'); });
 							reward.rules = reward.rules['en'];
 						}else{
 							reward.rules = ruleLocale[locale];
@@ -968,8 +971,44 @@ module.exports = {
 						reward.rules = rules;
 					}
 					
+					// Ensure we set the correct language for the rules
+					description = util.stringToJson(reward.description);
+					
+					if(description){
+						descriptionLocale = description.find(function (obj) { return obj.hasOwnProperty(locale); });
+						
+						if(!descriptionLocale){
+							reward.description = reward.find(function (obj) { return obj.hasOwnProperty('en'); });
+							reward.description = reward.description['en'];
+						}else{
+							reward.description = descriptionLocale[locale];
+						}
+					}
+					
+					if(!reward.description){
+						reward.description = description;
+					}
+					
 					prize = {id:reward.id,value:reward.value,currency:reward.currency,rules:reward.rules,maxQualifyingPlayers:reward.maxQualifyingPlayers,maxWinningPlayers:reward.maxWinningPlayers,startDate:reward.startDate,endDate:reward.endDate};
 					prizeList.push(prize);
+				}
+				
+				// Ensure we set the correct language for the rules
+				description = util.stringToJson(game.description);
+				
+				if(description){
+					descriptionLocale = description.find(function (obj) { return obj.hasOwnProperty(locale); });
+					
+					if(!descriptionLocale){
+						game.description = description.find(function (obj) { return obj.hasOwnProperty('en'); });
+						game.description = game.description['en'];
+					}else{
+						game.description = descriptionLocale[locale];
+					}
+				}
+				
+				if(!game.description){
+					game.description = description;
 				}
 				
 				gameItem = {game_id:game.gameId,title:game.title,reward:game.rewardAvailable,description:game.description,jackpot:game.jackpot,bannerContent:game.bannerContent,link:game.link,platform:game.platform,avatar:game.avatar,prizes:prizeList};

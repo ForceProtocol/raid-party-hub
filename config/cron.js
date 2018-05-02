@@ -4,7 +4,7 @@ const _ = require('lodash');
 module.exports.cron = {
 
 	confirmJackpotQualifyingPlayers: {
-		schedule: '* * * * *',  // Run this every 15-20 mins
+		schedule: '*/15 * * * *',  // Run this every 15-20 mins
 		onTick: async function () {
 
 			try {
@@ -118,7 +118,7 @@ module.exports.cron = {
 	* to mobile device
 	*/
 	notifyQualifiedPlayers: {
-		schedule: '* * * * *',  // Run this every 15-20 mins
+		schedule: '*/20 * * * *',  // Run this every 15-20 mins
 
 		onTick: async function () {
 
@@ -142,14 +142,14 @@ module.exports.cron = {
 
 					// Send Email to player they have been entered into the prize draw.
 					deviceIds.push(qualifiedPlayers.players.deviceId);
-					await EmailService.sendEmail({
+					/**await EmailService.sendEmail({
 						fromEmail: 'support@raidparty.io',
 						fromName: 'RaidParty Support',
 						toEmail: qualifiedPlayers.players.email,
 						toName: qualifiedPlayers.players.email,
 						subject: 'Successfull Entry into Jackpot reward contest',
 						body: message
-					});
+					});*/
 
 					await QualifiedPlayers.update({ players: qualifiedPlayers.players.id }, { qualifiedEmailSent: true });
 				}
@@ -176,7 +176,7 @@ module.exports.cron = {
 	* Send email and push notification to winners
 	*/
 	selectJackpotWinners: {
-		schedule: '1 * * * *',  // Run this every 15-20 mins
+		schedule: '*/30 * * * *',  // Run this every 15-20 mins
 
 		onTick: async function () {
 
@@ -320,7 +320,7 @@ module.exports.cron = {
 
 
 	confirmType4RewardQualifyingPlayers: {
-		schedule: '* * * * *',  // Run this every 15-20 mins
+		schedule: '*/13 * * * *',  // Run this every 15-20 mins
 
 		onTick: async function () {
 

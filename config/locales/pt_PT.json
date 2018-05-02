@@ -1,1 +1,5 @@
-{}
+{
+    "This email is already registered with another account. Please login to your account using the following email:": "Este email já foi cadastrado em outra conta. Por favor faça login usando o seguinte email:",
+    "You did not provide all signup details required.": "Não introduziu todos os dados necessários para cadastro.",
+    "You did not provide a valid password. It must be greater than 6 characters, contain one uppercase character and at least one digit": "Você não forneceu uma senha válida. Deve ser maior que 6 caracteres, conter um caractere maiúsculo e pelo menos um dígito"
+}

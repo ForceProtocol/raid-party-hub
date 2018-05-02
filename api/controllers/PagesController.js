@@ -106,6 +106,13 @@ module.exports = {
 				playerCode = util.getPlayerGameCode(7);
 				password = util.getPlayerGameCode(8);
 				
+				// Make sure player does not exist
+				let playerExists = await Player.findOne({email:user.email});
+				
+				if(playerExists){
+					continue;
+				}
+			
 				let createdPlayer = await Player.create({email:user.email,deviceType:'unknown',deviceId:'',accountStatus:2,password:password,code:playerCode,forceBalance:user.reward,createdAt:user.createdAt,updatedAt:user.updatedAt});
 						
 				let playerUpdated = await new Promise(function(resolve,reject){

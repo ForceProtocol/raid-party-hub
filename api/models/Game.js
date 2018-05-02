@@ -45,11 +45,6 @@ module.exports = {
 			defaultsTo: ''
 		},
 		
-		link: {
-            type: 'text',
-			required: true
-        },
-		
 		jackpot: {
 			type: 'text',
 			defaultsTo: '',
@@ -79,12 +74,6 @@ module.exports = {
 			defaultsTo: false
 		},
 		
-		isAndroid: {
-			type: 'boolean',
-		},
-		isIos: {
-			type: 'boolean',
-		},
 		avatar: {
 			type: 'text',
 			required: true

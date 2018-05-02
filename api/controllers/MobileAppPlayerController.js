@@ -33,8 +33,8 @@ module.exports = {
 			if(!deviceType || !email || !password || !deviceId){
 				if(locale == 'es' || locale == 'es_ES' || locale == "es-MX"){
 					throw new CustomError("No proporcionó todos los detalles de registro necesarios.", {status: 400});
-				}else if(locale == 'pt' || locale == 'pt_PT'){
-					throw new CustomError("You did not provide all signup details required.", {status: 400});
+				}else if(locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR'){
+					throw new CustomError("Não providenciou todos os detalhes necessários para cadastro.", {status: 400});
 				}else{
 					throw new CustomError("You did not provide all signup details required.", {status: 400});
 				}
@@ -46,8 +46,8 @@ module.exports = {
             if(existingPlayerDevice){
 				if(locale == 'es' || locale == 'es_ES' || locale == 'es-MX'){
 					throw new CustomError("Este correo electrónico ya está registrado en otra cuenta. Inicie sesión en su cuenta con el siguiente correo electrónico: " + existingPlayerDevice.email, {status: 400});
-				}else if(locale == 'pt' || locale == 'pt_PT'){
-					throw new CustomError("This email is already registered with another account. Please login to your account using the following email: " + existingPlayerDevice.email, {status: 400});
+				}else if(locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR'){
+					throw new CustomError("Este email já se encontra cadastrado com outra conta. Por favor efetue o Login usado o email seguinte: " + existingPlayerDevice.email, {status: 400});
 				}else{
 					throw new CustomError("This email is already registered with another account. Please login to your account using the following email: " + existingPlayerDevice.email, {status: 400});
 				}
@@ -87,16 +87,16 @@ module.exports = {
 					<br /><br /> 
 					Mantén la calma, sigue jugando <br />
 					El equipo de éxito de RaidParty`;
-			}else if(locale == 'pt' || locale == 'pt_PT'){
-				let okMsg = "Please check your email inbox for a 6 digit pin and enter below to activate your account";
-				let subject = "Welcome to RaidParty! Activate your account to start earning rewards";
-				let msg = `Welcome to RaidParty!<br />
-					Your account has been created and is now awaiting your activation. Please enter the 6 digit PIN below into the PIN activation screen in the RaidParty mobile app.<br /><br />
+			}else if(locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR'){
+				let okMsg = "Por favor verifique o seu email por um PIN de 6 Digitos e digite a seguir para ativar a sua conta";
+				let subject = "Bem vindo a RaidParty! Ative a sua conta e começe a ganhar recompensas ";
+				let msg = `Bem vindo a  RaidParty!<br />
+					A sua conta foi criada e precisa de ser agora ativada. Por favor digite o PIN de 6 digitos de seguida na tela de ativação de PIN na aplicação RaidParty para celular.<br /><br />
 					<strong>${pin}</strong><br /><br />
-					Also remember to enter your own unique 7 character player ID into the game settings, which you will find in the games list page on the mobile app.<br />
-					This is important so that your game activity can be tracked.<br /><br />
-					Keep calm, keep playing<br />
-					The RaidParty success team`;
+				   Lembre de introduzir o seu ID unico de 7 Digitos na pagina de definições do jogo, os jogos estão listados na aplicação .<br />
+					Este passo é essencial de forma a seguir o seu processo no jogo selecionado.<br /><br />
+					Sem Stress, Continue Jogando<br />
+					A equipe RaidParty`;
 			}else{
 				let okMsg = "Please check your email inbox for a 6 digit pin and enter below to activate your account";
 				let subject = "Welcome to RaidParty! Activate your account to start earning rewards";
@@ -151,8 +151,8 @@ module.exports = {
 			if(!email || !password){
 				if(locale == 'es' || locale == 'es_ES' || locale == 'es-MX'){
 					throw new CustomError('No proporcionó todos los detalles de inicio de sesión requeridos.', {status: 400});
-				}else if(locale == 'pt' || locale == 'pt_PT'){
-					throw new CustomError('You did not provide all login details required.', {status: 400});
+				}else if(locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR'){
+					throw new CustomError('Não providenciou todos os detalhes necessários para Login.', {status: 400});
 				}else{
 					throw new CustomError('You did not provide all login details required.', {status: 400});
 				}
@@ -164,8 +164,8 @@ module.exports = {
             if(!player){
 				if(locale == 'es' || locale == 'es_ES' || locale == 'es-MX'){
 					throw new CustomError('Esa cuenta no existe, verifique los detalles que ingresó', {status: 401,err_code:"not_found"});
-				}else if(locale == 'pt' || locale == 'pt_PT'){
-					throw new CustomError('That account does not exist, please check the details you entered', {status: 401,err_code:"not_found"});
+				}else if(locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR'){
+					throw new CustomError('Essa conta não existe, por favor verifique os detalhes novamente', {status: 401,err_code:"not_found"});
 				}else{
 					throw new CustomError('That account does not exist, please check the details you entered', {status: 401,err_code:"not_found"});
 				}
@@ -181,8 +181,8 @@ module.exports = {
 					sails.log.debug("MobileAppPlayerController.loginPlayer: invalid password given by player.");
 					if(locale == 'es' || locale == 'es_ES' || locale == 'es-MX'){
 						throw new CustomError('No se pudo encontrar una cuenta con esos detalles. Por favor verifique sus detalles y vuelva a intentarlo.', {status: 401,err_code:"not_found"});
-					}else if(locale == 'pt' || locale == 'pt_PT'){
-						throw new CustomError('Could not find an account with those details. Please check your details and try again.', {status: 401,err_code:"not_found"});
+					}else if(locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR'){
+						throw new CustomError('Não foi possivel encontrar uma conta com estes detalhes. Por favor verifique os seus detalhes e tente novamente.', {status: 401,err_code:"not_found"});
 					}else{
 						throw new CustomError('Could not find an account with those details. Please check your details and try again.', {status: 401,err_code:"not_found"});
 					}
@@ -203,8 +203,8 @@ module.exports = {
 			if(player.accountStatus == 0){
 				if(locale == 'es' || locale == 'es_ES' || locale == 'es-MX'){
 					throw new CustomError('Tu cuenta ha sido bloqueada. Por favor contáctenos si cree que esto es un error.', {status: 403,err_code:"blocked"});
-				}else if(locale == 'pt' || locale == 'pt_PT'){
-					throw new CustomError('Your account has been blocked. Please contact us if you feel this is in error.', {status: 403,err_code:"blocked"});
+				}else if(locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR'){
+					throw new CustomError('A sua conta foi bloqueada. Por favor entre em contato caso pense que é um erro.', {status: 403,err_code:"blocked"});
 				}else{
 					throw new CustomError('Your account has been blocked. Please contact us if you feel this is in error.', {status: 403,err_code:"blocked"});
 				}
@@ -214,8 +214,8 @@ module.exports = {
 			if(player.accountStatus == 1){
 				if(locale == 'es' || locale == 'es_ES' || locale == 'es-MX'){
 					throw new CustomError('Su cuenta aún no ha sido activada. Por favor revise su correo electrónico para obtener un código PIN e ingrese para activar su cuenta.', {status: 401,err_code:"activate"});
-				}else if(locale == 'pt' || locale == 'pt_PT'){
-					throw new CustomError('Your account has not yet been activated. Please check your email for a PIN code and enter to activate your account.', {status: 401,err_code:"activate"});
+				}else if(locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR'){
+					throw new CustomError('A sua conta ainda não foi ativada. Por favor verifique o seu email por um PIN para ativar a sua conta.', {status: 401,err_code:"activate"});
 				}else{
 					throw new CustomError('Your account has not yet been activated. Please check your email for a PIN code and enter to activate your account.', {status: 401,err_code:"activate"});
 				}
@@ -242,8 +242,8 @@ module.exports = {
 			if(!pin || !email){
 				if(locale == 'es' || locale == 'es_ES' || locale == 'es-MX'){
 					throw new CustomError('No proporcionó todos los detalles de inicio de sesión requeridos.', {status: 400});
-				}else if(locale == 'pt' || locale == 'pt_PT'){
-					throw new CustomError('You did not provide all login details required.', {status: 400});
+				}else if(locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR'){
+					throw new CustomError('Não providenciou todos os detalhes necessários para Login.', {status: 400});
 				}else{
 					throw new CustomError('You did not provide all login details required.', {status: 400});
 				}
@@ -253,8 +253,8 @@ module.exports = {
 			if(pin.length < 6){
 				if(locale == 'es' || locale == 'es_ES' || locale == 'es-MX'){
 					throw new CustomError('PIN no válido fue proporcionado', {status: 401,err_code:"invalid_pin"});
-				}else if(locale == 'pt' || locale == 'pt_PT'){
-					throw new CustomError('Invalid PIN was provided', {status: 401,err_code:"invalid_pin"});
+				}else if(locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR'){
+					throw new CustomError('Providenciou um PIN Inválido', {status: 401,err_code:"invalid_pin"});
 				}else{
 					throw new CustomError('Invalid PIN was provided', {status: 401,err_code:"invalid_pin"});
 				}
@@ -266,8 +266,8 @@ module.exports = {
 			if(!player){
 				if(locale == 'es' || locale == 'es_ES' || locale == 'es-MX'){
 					throw new CustomError('No se pudo encontrar una cuenta con esos detalles. Por favor verifique sus detalles y vuelva a intentarlo.', {status: 401,err_code:"not_found"});
-				}else if(locale == 'pt' || locale == 'pt_PT'){
-					throw new CustomError('Could not find an account with those details. Please check your details and try again.', {status: 401,err_code:"not_found"});
+				}else if(locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR'){
+					throw new CustomError('Não foi possivel encontrar uma conta com estes detalhes. Por favor verifique os seus detalhes e tente novamente.', {status: 401,err_code:"not_found"});
 				}else{
 					throw new CustomError('Could not find an account with those details. Please check your details and try again.', {status: 401,err_code:"not_found"});
 				}
@@ -277,8 +277,8 @@ module.exports = {
 			if(player.accountStatus == 0){
 				if(locale == 'es' || locale == 'es_ES' || locale == 'es-MX'){
 					throw new CustomError('Tu cuenta ha sido bloqueada.', {status: 403,err_code:"blocked"});
-				}else if(locale == 'pt' || locale == 'pt_PT'){
-					throw new CustomError('Your account has been blocked.', {status: 403,err_code:"blocked"});
+				}else if(locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR'){
+					throw new CustomError('A sua conta foi bloqueada.', {status: 403,err_code:"blocked"});
 				}else{
 					throw new CustomError('Your account has been blocked.', {status: 403,err_code:"blocked"});
 				}
@@ -299,13 +299,13 @@ module.exports = {
 						   Debe responder a este correo electrónico para confirmar su identidad y permitirnos garantizar que su cuenta esté segura. A continiación, reactivaremos su cuenta en función de una evaluación.<br />
 						   Mantén la calma, sigue jugando<br />
 						   El equipo exitoso de RaidParty`;
-					}else if(locale == 'pt' || locale == 'pt_PT'){
-						let subject = "Your RaidParty account has been locked";
-						let msg = `Hi<br />
-							We are sorry to inform you that your account has been locked due to too many incorrect PIN attempts to change your password.<br /><br />
-							You should reply to this email to confirm your identity and allow us to ensure your account is safe. We will then reactivate your account based on an assessment.<br />
-							Keep calm, keep playing<br />
-							The RaidParty success team`;
+					}else if(locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR'){
+						let subject = "A sua conta RaidParty foi bloqueada.";
+						let msg = `Olá<br />
+							   Lamentamos informar que a sua conta foi bloqueada devido a várias tentativas incorretas de alterar a sua palavra passe.<br /><br />
+							   Deverá agora responder a este email de forma a confirmar a sua identidade assegurando que a sua conta está segura. Após verificação podemos desbloquear a conta.<br />
+							   Sem Stress, Continue Jogando<br />
+								A equipe RaidParty`;
 					}else{
 						let subject = "Your RaidParty account has been locked";
 						let msg = `Hi<br />
@@ -327,8 +327,8 @@ module.exports = {
 					
 					if(locale == 'es' || locale == 'es_ES' || locale == 'es-MX'){
 						throw new CustomError('Ha realizado demasiados intentos incorrectos de PIN. Su cuenta ha sido bloqueada.', {status: 403,err_code:"blocked"});
-					}else if(locale == 'pt' || locale == 'pt_PT'){
-						throw new CustomError('You have made too many incorrect PIN attempts. Your account has been locked.', {status: 403,err_code:"blocked"});
+					}else if(locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR'){
+						throw new CustomError('PIN Introduzido erradamente por multiplas vezes.', {status: 403,err_code:"blocked"});
 					}else{
 						throw new CustomError('You have made too many incorrect PIN attempts. Your account has been locked.', {status: 403,err_code:"blocked"});
 					}
@@ -338,8 +338,8 @@ module.exports = {
 				
 				if(locale == 'es' || locale == 'es_ES' || locale == 'es-MX'){
 					throw new CustomError('El PIN proporcionado no era válido', {status: 401,err_code:"invalid_pin"});
-				}else if(locale == 'pt' || locale == 'pt_PT'){
-					throw new CustomError('The PIN provided was invalid', {status: 401,err_code:"invalid_pin"});
+				}else if(locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR'){
+					throw new CustomError('O PIN providenciado é inválido', {status: 401,err_code:"invalid_pin"});
 				}else{
 					throw new CustomError('The PIN provided was invalid', {status: 401,err_code:"invalid_pin"});
 				}
@@ -350,8 +350,8 @@ module.exports = {
 			
 			if(locale == 'es' || locale == 'es_ES' || locale == 'es-MX'){
 				let okMsg = "¡Éxito! Su cuenta ahora está activa";
-			}else if(locale == 'pt' || locale == 'pt_PT'){
-				let okMsg = "Success! Your account is now active";
+			}else if(locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR'){
+				let okMsg = "Sucesso! A sua conta está agora ativa";
 			}else{
 				let okMsg = "Success! Your account is now active";
 			}
@@ -387,8 +387,8 @@ module.exports = {
 			if(!email){
 				if(locale == 'es' || locale == 'es_ES' || locale == 'es-MX'){
 					throw new CustomError('No proporcionó todos los detalles requeridos.', {status: 400});
-				}else if(locale == 'pt' || locale == 'pt_PT'){
-					throw new CustomError('You did not provide all details required.', {status: 400});
+				}else if(locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR'){
+					throw new CustomError('Não providenciou todos os detalhes necessários', {status: 400});
 				}else{
 					throw new CustomError('You did not provide all details required.', {status: 400});
 				}
@@ -400,8 +400,8 @@ module.exports = {
 			if(!player){
 				if(locale == 'es' || locale == 'es_ES' || locale == 'es-MX'){
 					throw new CustomError('No se pudo encontrar una cuenta con esos detalles. Por favor verifique sus detalles y vuelva a intentarlo.', {status: 401,err_code:"not_found"});
-				}else if(locale == 'pt' || locale == 'pt_PT'){
-					throw new CustomError('Could not find an account with those details. Please check your details and try again.', {status: 401,err_code:"not_found"});
+				}else if(locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR'){
+					throw new CustomError('Não foi possivel encontrar uma conta com estes detalhes. Por favor verifique os seus detalhes e tente novamente.', {status: 401,err_code:"not_found"});
 				}else{
 					throw new CustomError('Could not find an account with those details. Please check your details and try again.', {status: 401,err_code:"not_found"});
 				}
@@ -411,8 +411,8 @@ module.exports = {
 			if(player.accountStatus == 0){
 				if(locale == 'es' || locale == 'es_ES' || locale == 'es-MX'){
 					throw new CustomError('Tu cuenta ha sido bloqueada.', {status: 403,err_code:"blocked"});
-				}else if(locale == 'pt' || locale == 'pt_PT'){
-					throw new CustomError('Your account has been blocked.', {status: 403,err_code:"blocked"});
+				}else if(locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR'){
+					throw new CustomError('A sua conta foi bloqueada.', {status: 403,err_code:"blocked"});
 				}else{
 					throw new CustomError('Your account has been blocked.', {status: 403,err_code:"blocked"});
 				}
@@ -431,14 +431,14 @@ module.exports = {
 					<strong>${pin}</strong><br /><br />
 					Mantén la calma, sigue jugando <br />
 					El equipo exitoso de RaidParty`;
-			}else if(locale == 'pt' || locale == 'pt_PT'){
-				let okMsg = 'Please check your inbox to find a 6 digit password reset PIN';
-				let subject = 'Welcome to RaidParty! Reset password requested';
-				let msg = `Hi,<br />
-					You requested a password reset. Please enter the 6 digit PIN below into the PIN activation screen in the RaidParty mobile app to reset your password.<br /><br />
-					<strong>${pin}</strong><br /><br />
-					Keep calm, keep playing<br />
-					The RaidParty success team`;
+			}else if(locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR'){
+				let okMsg = 'Por favor verifique o seu email por um PIN de 6 Digitos para efetuar o reset';
+				let subject = 'Bem vindo a RaidParty! Requer reset da palavra passe';
+				let msg = `Olá,<br />
+					 Pediu que a sua palavra passe fosse alterada. Por favor digite o PIN de 6 digitos na tela de ativação da aplicação RaidParty para efetuar o reset da sua palvra passe.<br /><br />
+					 <strong>${pin}</strong><br /><br />
+					Sem Stress, Continue Jogando<br />
+					A equipe RaidParty`;
 			}else{
 				let okMsg = 'Please check your inbox to find a 6 digit password reset PIN';
 				let subject = 'Welcome to RaidParty! Reset password requested';
@@ -483,8 +483,8 @@ module.exports = {
 			if(!email || !pin){
 				if(locale == 'es' || locale == 'es_ES' || locale == 'es-MX'){
 					throw new CustomError('No proporcionó todos los detalles requeridos.', {status: 400});
-				}else if(locale == 'pt' || locale == 'pt_PT'){
-					throw new CustomError('You did not provide all details required.', {status: 400});
+				}else if(locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR'){
+					throw new CustomError('Não providenciou todos os detalhes necessários', {status: 400});
 				}else{
 					throw new CustomError('You did not provide all details required.', {status: 400});
 				}
@@ -496,8 +496,8 @@ module.exports = {
 			if(!player){
 				if(locale == 'es' || locale == 'es_ES' || locale == 'es-MX'){
 					throw new CustomError('No se pudo encontrar una cuenta con esos detalles. Por favor verifique sus detalles y vuelva a intentarlo.', {status: 401,err_code:"not_found"});
-				}else if(locale == 'pt' || locale == 'pt_PT'){
-					throw new CustomError('Could not find an account with those details. Please check your details and try again.', {status: 401,err_code:"not_found"});
+				}else if(locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR'){
+					throw new CustomError('Não foi possivel encontrar uma conta com estes detalhes. Por favor verifique os seus detalhes e tente novamente.', {status: 401,err_code:"not_found"});
 				}else{
 					throw new CustomError('Could not find an account with those details. Please check your details and try again.', {status: 401,err_code:"not_found"});
 				}
@@ -507,8 +507,8 @@ module.exports = {
 			if(player.accountStatus == 0){
 				if(locale == 'es' || locale == 'es_ES' || locale == 'es-MX'){
 					throw new CustomError('Tu cuenta ha sido bloqueada.', {status: 403,err_code:"blocked"});
-				}else if(locale == 'pt' || locale == 'pt_PT'){
-					throw new CustomError('Your account has been blocked.', {status: 403,err_code:"blocked"});
+				}else if(locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR'){
+					throw new CustomError('A sua conta foi bloqueada.', {status: 403,err_code:"blocked"});
 				}else{
 					throw new CustomError('Your account has been blocked.', {status: 403,err_code:"blocked"});
 				}
@@ -541,14 +541,14 @@ module.exports = {
 						});
 						
 						throw new CustomError('Ha realizado demasiados intentos incorrectos de PIN. Su cuenta ha sido bloqueada.', {status: 403,err_code:"blocked"});
-					}else if(locale == 'pt' || locale == 'pt_PT'){
+					}else if(locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR'){
 						// Send player an email that their account has been blocked
-						let subject = "Your RaidParty account has been locked";
-						let msg = `Hi<br />
-							We are sorry to inform you that your account has been locked due to too many incorrect PIN attempts to change your password.<br /><br />
-							You should reply to this email to confirm your identity and allow us to ensure your account is safe. We will then reactivate your account based on an assessment.<br />
-							Keep calm, keep playing<br />
-							The RaidParty success team`;
+						let subject = "A sua conta RaidParty foi bloqueada.";
+						let msg = `Olá<br />
+						   Lamentamos informar que a sua conta foi bloqueada devido a várias tentativas incorretas de alterar a sua palavra passe.<br /><br />
+						   Deverá agora responder a este email de forma a confirmar a sua identidade assegurando que a sua conta está segura. Após verificação podemos desbloquear a conta.<br />
+						   Sem Stress, Continue Jogando<br />
+						A equipe RaidParty`;
 							
 						// Send activation email/SMS to player to activate their account
 						await EmailService.sendEmail({
@@ -560,7 +560,7 @@ module.exports = {
 							body: msg
 						});
 						
-						throw new CustomError('You have made too many incorrect PIN attempts. Your account has been locked.', {status: 403,err_code:"blocked"});
+						throw new CustomError('PIN Introduzido erradamente por multiplas vezes. A sua conta foi bloqueada.', {status: 403,err_code:"blocked"});
 					}else{
 						// Send player an email that their account has been blocked
 						let subject = "Your RaidParty account has been locked";
@@ -588,8 +588,8 @@ module.exports = {
 				
 				if(locale == 'es' || locale == 'es_ES' || locale == 'es-MX'){
 					throw new CustomError('PIN no válido fue proporcionado', {status: 401,err_code:"invalid_pin"});
-				}else if(locale == 'pt' || locale == 'pt_PT'){
-					throw new CustomError('The PIN provided was invalid', {status: 401,err_code:"invalid_pin"});
+				}else if(locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR'){
+					throw new CustomError('O PIN providenciado é inválido', {status: 401,err_code:"invalid_pin"});
 				}else{
 					throw new CustomError('The PIN provided was invalid', {status: 401,err_code:"invalid_pin"});
 				}
@@ -621,8 +621,8 @@ module.exports = {
 			if(!email || !pin || !newPassword){
 				if(locale == 'es' || locale == 'es_ES' || locale == 'es-MX'){
 					throw new CustomError('No proporcionó todos los detalles requeridos.', {status: 400});
-				}else if(locale == 'pt' || locale == 'pt_PT'){
-					throw new CustomError('You did not provide all details required.', {status: 400});
+				}else if(locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR'){
+					throw new CustomError('Não providenciou todos os detalhes necessários', {status: 400});
 				}else{
 					throw new CustomError('You did not provide all details required.', {status: 400});
 				}
@@ -634,8 +634,8 @@ module.exports = {
 			if(!player){
 				if(locale == 'es' || locale == 'es_ES' || locale == 'es-MX'){
 					throw new CustomError('No se pudo encontrar una cuenta con esos detalles. Por favor verifique sus detalles y vuelva a intentarlo.', {status: 401,err_code:"not_found"});
-				}else if(locale == 'pt' || locale == 'pt_PT'){
-					throw new CustomError('Could not find an account with those details. Please check your details and try again.', {status: 401,err_code:"not_found"});
+				}else if(locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR'){
+					throw new CustomError('Não foi possivel encontrar uma conta com estes detalhes. Por favor verifique os seus detalhes e tente novamente.', {status: 401,err_code:"not_found"});
 				}else{
 					throw new CustomError('Could not find an account with those details. Please check your details and try again.', {status: 401,err_code:"not_found"});
 				}
@@ -645,8 +645,8 @@ module.exports = {
 			if(player.accountStatus == 0){
 				if(locale == 'es' || locale == 'es_ES' || locale == 'es-MX'){
 					throw new CustomError('Tu cuenta ha sido bloqueada.', {status: 403,err_code:"blocked"});
-				}else if(locale == 'pt' || locale == 'pt_PT'){
-					throw new CustomError('Your account has been blocked.', {status: 403,err_code:"blocked"});
+				}else if(locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR'){
+					throw new CustomError('A sua conta foi bloqueada.', {status: 403,err_code:"blocked"});
 				}else{
 					throw new CustomError('Your account has been blocked.', {status: 403,err_code:"blocked"});
 				}
@@ -676,23 +676,23 @@ module.exports = {
 						});
 				
 						throw new CustomError('Ha realizado demasiados intentos incorrectos de PIN. Su cuenta ha sido bloqueada.', {status: 403,err_code:"blocked"});
-					}else if(locale == 'pt' || locale == 'pt_PT'){
-						let msg = `Hi<br />
-							We are sorry to inform you that your account has been locked due to too many incorrect PIN attempts to change your password.<br /><br />
-							You should reply to this email to confirm your identity and allow us to ensure your account is safe. We will then reactivate your account based on an assessment.<br />
-							Keep calm, keep playing<br />
-							The RaidParty success team`;
+					}else if(locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR'){
+						let msg = `Olá<br />
+							   Lamentamos informar que a sua conta foi bloqueada devido a várias tentativas incorretas de alterar a sua palavra passe.<br /><br />
+							   Deverá agora responder a este email de forma a confirmar a sua identidade assegurando que a sua conta está segura. Após verificação podemos desbloquear a conta.<br />
+							   Sem Stress, Continue Jogando<br />
+							A equipe RaidParty`;
 							// Send activation email/SMS to player to activate their account
 						await EmailService.sendEmail({
 							fromEmail: 'support@raidparty.io',
 							fromName: 'Account Team',
 							toEmail: player.email,
 							toName: player.email,
-							subject: 'Your RaidParty account has been locked',
+							subject: 'A sua conta foi bloqueada.',
 							body: msg
 						});
 				
-						throw new CustomError('You have made too many incorrect PIN attempts. Your account has been locked.', {status: 403,err_code:"blocked"});
+						throw new CustomError('PIN Introduzido erradamente por multiplas vezes. A sua conta foi bloqueada.', {status: 403,err_code:"blocked"});
 					}else{
 						let msg = `Hi<br />
 							We are sorry to inform you that your account has been locked due to too many incorrect PIN attempts to change your password.<br /><br />
@@ -717,8 +717,8 @@ module.exports = {
 				
 				if(locale == 'es' || locale == 'es_ES' || locale == 'es-MX'){
 					throw new CustomError('PIN no válido fue proporcionado', {status: 401,err_code:"invalid_pin"});
-				}else if(locale == 'pt' || locale == 'pt_PT'){
-					throw new CustomError('The PIN provided was invalid', {status: 401,err_code:"invalid_pin"});
+				}else if(locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR'){
+					throw new CustomError('O PIN providenciado é inválido', {status: 401,err_code:"invalid_pin"});
 				}else{
 					throw new CustomError('The PIN provided was invalid', {status: 401,err_code:"invalid_pin"});
 				}
@@ -731,8 +731,8 @@ module.exports = {
 			
 			if(locale == 'es' || locale == 'es_ES' || locale == 'es-MX'){
 				return res.ok({"success": true,"msg": "Su nueva contraseña ha sido configurada, ingrese a su cuenta"});
-			}else if(locale == 'pt' || locale == 'pt_PT'){
-				return res.ok({"success": true,"msg": "Your new password has been set, please login to your account"});
+			}else if(locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR'){
+				return res.ok({"success": true,"msg": "Uma nova palavra passe foi efetuada, por favor faça login"});
 			}else{
 				return res.ok({"success": true,"msg": "Your new password has been set, please login to your account"});
 			}
@@ -755,8 +755,8 @@ module.exports = {
 			if(!player){
 				if(locale == 'es' || locale == 'es_ES' || locale == 'es-MX'){
 					throw new CustomError('No se pudo encontrar una cuenta con esos detalles. Por favor verifique sus detalles y vuelva a intentarlo.', {status: 401,err_code:"not_found"});
-				}else if(locale == 'pt' || locale == 'pt_PT'){
-					throw new CustomError('Could not find an account with those details. Please check your details and try again.', {status: 401,err_code:"not_found"});
+				}else if(locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR'){
+					throw new CustomError('Não foi possivel encontrar uma conta com estes detalhes. Por favor verifique os seus detalhes e tente novamente.', {status: 401,err_code:"not_found"});
 				}else{
 					throw new CustomError('Could not find an account with those details. Please check your details and try again.', {status: 401,err_code:"not_found"});
 				}
@@ -766,8 +766,8 @@ module.exports = {
 			if(player.accountStatus == 0){
 				if(locale == 'es' || locale == 'es_ES' || locale == 'es-MX'){
 					throw new CustomError('Tu cuenta ha sido bloqueada.', {status: 403,err_code:"blocked"});
-				}else if(locale == 'pt' || locale == 'pt_PT'){
-					throw new CustomError('Your account has been blocked.', {status: 403,err_code:"blocked"});
+				}else if(locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR'){
+					throw new CustomError('A sua conta foi bloqueada.', {status: 403,err_code:"blocked"});
 				}else{
 					throw new CustomError('Your account has been blocked.', {status: 403,err_code:"blocked"});
 				}
@@ -777,8 +777,8 @@ module.exports = {
 			if(player.accountStatus == 1){
 				if(locale == 'es' || locale == 'es_ES' || locale == 'es-MX'){
 					throw new CustomError('Tu cuenta no ha sido activada todavía. Por favor revise su correo electrónico', {status: 403,err_code:"activate"});
-				}else if(locale == 'pt' || locale == 'pt_PT'){
-					throw new CustomError('Your account has not been activated yet. Please check your email', {status: 403,err_code:"activate"});
+				}else if(locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR'){
+					throw new CustomError('A sua conta ainda não foi ativada. Por favor verifique o seu email ', {status: 403,err_code:"activate"});
 				}else{
 					throw new CustomError('Your account has not been activated yet. Please check your email', {status: 403,err_code:"activate"});
 				}
@@ -815,9 +815,9 @@ module.exports = {
 			// Validate sent params
 			if(!currentPassword || !newPassword){
 				if(locale == 'es' || locale == 'es_ES' || locale == 'es-MX'){
-					throw new CustomError('You did not provide all details required.', {status: 400});
-				}else if(locale == 'pt' || locale == 'pt_PT'){
-					throw new CustomError('You did not provide all details required.', {status: 400});
+					throw new CustomError('No proporcionó todos los detalles requeridos.', {status: 400});
+				}else if(locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR'){
+					throw new CustomError('Não providenciou todos os detalhes necessários', {status: 400});
 				}else{
 					throw new CustomError('You did not provide all details required.', {status: 400});
 				}
@@ -826,8 +826,8 @@ module.exports = {
 			if(currentPassword == newPassword){
 				if(locale == 'es' || locale == 'es_ES' || locale == 'es-MX'){
 					throw new CustomError('No proporcionó todos los detalles requeridos.', {status: 400});
-				}else if(locale == 'pt' || locale == 'pt_PT'){
-					throw new CustomError('You entered the same password as your current password', {status: 400});
+				}else if(locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR'){
+					throw new CustomError('A palavra passe inserida é a palavra passe atual.', {status: 400});
 				}else{
 					throw new CustomError('You entered the same password as your current password', {status: 400});
 				}
@@ -839,8 +839,8 @@ module.exports = {
 			if(!player){
 				if(locale == 'es' || locale == 'es_ES' || locale == 'es-MX'){
 					throw new CustomError('No se pudo encontrar una cuenta con esos detalles. Por favor verifique sus detalles y vuelva a intentarlo.', {status: 401,err_code:"not_found"});
-				}else if(locale == 'pt' || locale == 'pt_PT'){
-					throw new CustomError('Could not find an account with those details. Please check your details and try again.', {status: 401,err_code:"not_found"});
+				}else if(locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR'){
+					throw new CustomError('Não foi possivel encontrar uma conta com estes detalhes. Por favor verifique os seus detalhes e tente novamente.', {status: 401,err_code:"not_found"});
 				}else{
 					throw new CustomError('Could not find an account with those details. Please check your details and try again.', {status: 401,err_code:"not_found"});
 				}
@@ -850,8 +850,8 @@ module.exports = {
 			if(player.accountStatus == 0){
 				if(locale == 'es' || locale == 'es_ES' || locale == 'es-MX'){
 					throw new CustomError('Tu cuenta ha sido bloqueada.', {status: 403,err_code:"blocked"});
-				}else if(locale == 'pt' || locale == 'pt_PT'){
-					throw new CustomError('Your account has been blocked.', {status: 403,err_code:"blocked"});
+				}else if(locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR'){
+					throw new CustomError('A sua conta foi bloqueada.', {status: 403,err_code:"blocked"});
 				}else{
 					throw new CustomError('Your account has been blocked.', {status: 403,err_code:"blocked"});
 				}
@@ -864,8 +864,8 @@ module.exports = {
 			if(!validPassword){
 				if(locale == 'es' || locale == 'es_ES' || locale == 'es-MX'){
 					throw new CustomError('La contraseña actual que ingresaste no era válida', {status: 401,err_code:"invalid_password"});
-				}else if(locale == 'pt' || locale == 'pt_PT'){
-					throw new CustomError('The current password you entered was invalid', {status: 401,err_code:"invalid_password"});
+				}else if(locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR'){
+					throw new CustomError('A palavra passe inserida é inválida', {status: 401,err_code:"invalid_password"});
 				}else{
 					throw new CustomError('The current password you entered was invalid', {status: 401,err_code:"invalid_password"});
 				}
@@ -876,8 +876,8 @@ module.exports = {
 			
 			if(locale == 'es' || locale == 'es_ES' || locale == 'es-MX'){
 				return res.ok({"success": true,"msg": "Su contraseña se ha actualizado correctamente"});
-			}else if(locale == 'pt' || locale == 'pt_PT'){
-				return res.ok({"success": true,"msg": "Your password has been updated successfully"});
+			}else if(locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR'){
+				return res.ok({"success": true,"msg": "A sua palavra passe foi atualizada com sucesso"});
 			}else{
 				return res.ok({"success": true,"msg": "Your password has been updated successfully"});
 			}

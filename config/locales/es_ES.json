@@ -2,4 +2,6 @@
     "This email is already registered with another account. Please login to your account using the following email:": "Este correo electrónico ya está registrado en otra cuenta. Inicie sesión en su cuenta con el siguiente correo electrónico:",
     "You did not provide all signup details required.": "No proporcionó todos los detalles de registro necesarios.",
     "You did not provide a valid password. It must be greater than 6 characters, contain one uppercase character and at least one digit": "Usted no proporcionó una contraseña válida. Debe tener más de 6 caracteres, contener un carácter en mayúscula y al menos un dígito",
+	"Rewards Ended":"Recompensas terminadas",
+	"Starts ":"Empieza "
 }

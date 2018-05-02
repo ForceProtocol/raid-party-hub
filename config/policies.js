@@ -31,6 +31,8 @@ module.exports.policies = {
         getPlayerCode: 'tokenAuth',
         getRewards: 'tokenAuth',
         updatePassword: 'tokenAuth',
+        getNotifications: 'tokenAuth',
+        deleteNotification: 'tokenAuth',
     },
 
     DeveloperController: {
@@ -40,5 +42,13 @@ module.exports.policies = {
         loginDeveloper: true,
         resetPassword: true,
         changePassword: true,
+    },
+
+    PlayerController: {
+        '*': true
+    },
+	
+	PagesController: {
+        '*': true
     }
 };

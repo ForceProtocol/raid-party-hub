@@ -5,7 +5,7 @@
  * @help        :: See http://links.sailsjs.org/docs/controllers
  */
 
-const BigNumber = require('bignumber.js');
+const BigNumber = require('bignumber.js'), moment = require('moment');
  
 module.exports = {
 	
@@ -15,31 +15,26 @@ module.exports = {
 	*/
 	async signupPlayer(req, res) {
 	
-		const email = req.param("email"),
+		let email = req.param("email"),
 				password = req.param("password"),
 				deviceType = req.param("device_type"),
+				deviceId = req.param("device_id"),
 				longitude = req.param("lon"),
-				latitude = req.param("lat");
+				latitude = req.param("lat"),
+				locale = req.param("locale");
 				
         try {
 					
 			// Validate sent params
-			if(!deviceType || !email || !password){
-				throw new CustomError('You did not provide all signup details required.', {status: 400});
+			if(!deviceType || !email || !password || !deviceId){
+				throw new CustomError(sails.__("You did not provide all signup details required."), {status: 400});
 			}
-				
-            let existingPlayer = await Player.findOne({email: email});
-
-			// Player already exists
-            if(existingPlayer){
-				throw new CustomError('This email is already registered with another account. Please login to your account.', {status: 400});
-            }
 			
 			let existingPlayerDevice = await Player.findOne({email: email});
 
 			// Player already exists
             if(existingPlayerDevice){
-				throw new CustomError('This email is already registered with another account. Please login to your account using the following email: ' + existingPlayerDevice.email, {status: 400});
+				throw new CustomError(sails.__("This email is already registered with another account. Please login to your account using the following email: ") + existingPlayerDevice.email, {status: 400});
             }
 			
 			// Create activation PIN
@@ -51,10 +46,11 @@ module.exports = {
 				email: email,
 				password: password,
 				deviceType: deviceType,
+				deviceId: deviceId,
 				pin: pin,
 				accountStatus: 1,
 				forceBalance: '0',
-				latitude: latitude,
+				latitude: latitude, 
 				longitude: longitude
 			});
 			
@@ -76,6 +72,16 @@ module.exports = {
                 subject: 'Welcome to RaidParty! Activate your account to start earning rewards',
                 body: msg
             });
+			
+			if(!locale){
+				locale = 'en';
+			}
+			
+			/** Add to normal subscriber list **/
+			MailchimpService.addSubscriber("bb2455ea6e", email, "", "", "pending", locale).then(function (addResponse) {
+			}).catch(function (err) {
+				sails.log.debug("new subscriber not added due to error: ", err);
+			});
 			
 			return res.ok({
                 msg: 'Please check your email inbox for a 6 digit pin and enter below to activate your account',
@@ -522,21 +528,91 @@ module.exports = {
 	async getGames(req, res) {
 		try {
 			let deviceType = req.param("device_type").toLowerCase(),
-			excludePlatform = 'android';
+			locale = req.param('locale'),
+			excludePlatform = 'android',
+			game, prizeList, prize, reward, gameItem, platformAvailable,
+			rules,
+			ruleLocale;
 			
 			if(deviceType == 'android'){
 				excludePlatform = 'ios';
 			}
 			
+			if(!locale){
+				locale = 'en';
+			}
+			
 			// Get games we need for this device
-			let games = await Game.find({active:true,platform:deviceType,platform: { '!' : excludePlatform}});
+			let games = await Game.find({active:true,startDate: {'<=':new Date()},endDate: {'>=':new Date()}}).populate('rewardCampaign').populate('gamePlatforms');
 			
-			games = _.map(games, function(game){
-				return {game_id:game.gameId,title:game.title,reward:game.rewardAvailable,description:game.description,jackpot:game.jackpot,bannerContent:game.bannerContent,link:game.link,platform:game.platform,avatar:game.avatar};
-			});
+			finalGamesList = [];
+			for(game of games){
 			
-			return res.ok({games:games});
+				// Go through each platform to check this is available on their platform
+				platformAvailable = false;
+				for(const platform of game.gamePlatforms){
+					if(platform.type == deviceType){
+						platformAvailable = true;
+						game.link = platform.link;
+						game.platform = platform.type;
+					}
+				}
+				
+				if(!platformAvailable){
+					continue;
+				}
+				
+				// Prepare the prizes list
+				prizeList = [];
+				for(reward of game.rewardCampaign){
+					// TODO: Whether the player has qualified for this reward
+					// TODO: ?? Ionic might be fine displaying html ?? Strip HTML out of rules, for display purposes in mobile app
+					
+					// Reward is not currently live - skip listing it
+					if(moment().isSameOrBefore(reward.startDate) || moment().isSameOrAfter(reward.endDate)){
+						continue;
+					}
+					
+					// Reward has no more entries available
+					if(reward.maxQualifyingPlayers < 1){
+						continue;
+					}
+					
+					if(reward.value <= 0){
+						continue;
+					}
+					
+					// Ensure we set the correct language for the rules
+					rules = util.stringToJson(reward.rules);
+					
+					if(rules){
+						ruleLocale = rules.find(function (obj) { return obj.hasOwnProperty(locale); });
+						
+						if(!ruleLocale){
+							locale = 'en';
+							reward.rules = rules.find(function (obj) { return obj.hasOwnProperty(locale); });
+							reward.rules = reward.rules['en'];
+						}else{
+							reward.rules = ruleLocale[locale];
+						}
+					}
+					
+					if(!reward.rules){
+						reward.rules = rules;
+					}
+					
+					prize = {id:reward.id,value:reward.value,currency:reward.currency,rules:reward.rules,maxQualifyingPlayers:reward.maxQualifyingPlayers,maxWinningPlayers:reward.maxWinningPlayers,startDate:reward.startDate,endDate:reward.endDate};
+					prizeList.push(prize);
+				}
+				
+				gameItem = {game_id:game.gameId,title:game.title,reward:game.rewardAvailable,description:game.description,jackpot:game.jackpot,bannerContent:game.bannerContent,link:game.link,platform:game.platform,avatar:game.avatar,prizes:prizeList};
+				
+				finalGamesList.push(gameItem);
+			}
+			
+			return res.ok({games:finalGamesList});
 		}catch(err){
+			sails.log.debug("this is an err",err);
 			return util.errorResponse(err, res);
 		}
 	},
@@ -586,6 +662,60 @@ module.exports = {
 			}
 			
 			return res.ok({code:player.code});
+		}catch(err){
+			return util.errorResponse(err, res);
+		}
+	},
+	
+	
+	
+	/**
+	* Get notifications against a player
+	*/
+	async getNotifications(req, res) {
+		try {
+		
+			// Get games we need for this device
+			let player = await Player.findOne({id:req.token.user.id}).populate('notifications', { sort: 'createdAt DESC' });
+			
+			if(!player){
+				throw new CustomError('Could not find that player.', {status: 401,err_code:"not_found"});
+			}
+			
+			return res.ok({notifications:player.notifications});
+		}catch(err){
+			return util.errorResponse(err, res);
+		}
+	},
+	
+	
+	
+	/**
+	* Delete a player notification
+	*/
+	async deleteNotification(req, res) {
+		try {
+		
+			let notificationId = req.param('notification_id');
+			
+			if(!notificationId){
+				throw new CustomError('Could not find that notification.', {status: 401,err_code:"not_found"});
+			}
+			
+			// Get games we need for this device
+			let player = await Player.findOne({id:req.token.user.id});
+			
+			if(!player){
+				throw new CustomError('Could not find that player.', {status: 401,err_code:"not_found"});
+			}
+			
+			let deleted = await PlayerNotifications.destroy({players:player.id,id:notificationId});
+			
+			if(deleted){
+				return res.ok({success:true});
+			}else{
+				return res.ok({success:false});
+			}
 		}catch(err){
 			return util.errorResponse(err, res);
 		}

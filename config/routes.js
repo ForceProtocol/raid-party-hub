@@ -2,6 +2,9 @@ module.exports.routes = {
 
 	/** Public Routes */
 	'GET /': 'PagesController.getHomePage',
+	'POST /app/subscribe': 'PagesController.postSubscribe',
+	'GET /players/count': 'PlayerController.getPlayerCount',
+	'GET /games/active': 'GameController.getActiveGames',
 	
 	/** Developer Login and Signups */
 	'POST /app/developer': 'DeveloperController.signupDeveloper',
@@ -11,7 +14,6 @@ module.exports.routes = {
 	'GET /player/:playerId': 'PlayerController.getPlayer',
 	'POST /player/track': 'PlayerController.trackPlayer',
 	'POST /player/reward': 'PlayerController.rewardPlayer',
-	
 	
 	/** Developer Games Management */
 	'GET /app/developer/games': 'DeveloperController.getGames',
@@ -25,6 +27,10 @@ module.exports.routes = {
 	'POST /app/developer/update-password': 'DeveloperController.updatePassword',
 	
 	
+	/** Player Routes */
+	'POST /app/player': 'PlayerController.signupPlayer',
+	
+	
 	/** SDK PLAYER ROUTES */
 	'POST /sdk/player/track': 'PlayerController.trackPlayer',
 	'POST /sdk/game/event': 'PlayerController.trackEvent',
@@ -35,6 +41,8 @@ module.exports.routes = {
 	'GET /mob/player/code': 'MobileAppPlayerController.getPlayerCode',
 	'GET /mob/player/games': 'MobileAppPlayerController.getGames',
 	'GET /mob/player/rewards': 'MobileAppPlayerController.getRewards',
+	'GET /mob/player/notifications': 'MobileAppPlayerController.getNotifications',
+	'POST /mob/player/notification/delete': 'MobileAppPlayerController.deleteNotification',
 	'POST /mob/player/signup': 'MobileAppPlayerController.signupPlayer',
 	'POST /mob/player/login': 'MobileAppPlayerController.loginPlayer',
 	'POST /mob/player/activate': 'MobileAppPlayerController.activatePlayer',
@@ -42,5 +50,9 @@ module.exports.routes = {
 	'POST /mob/player/validate-pin': 'MobileAppPlayerController.validatePin',
 	'POST /mob/player/change-password': 'MobileAppPlayerController.changePassword',
 	'POST /mob/player/update-password': 'MobileAppPlayerController.updatePassword',
+	
+	
+	
+	'GET /airdrop/insertthem2348': 'PagesController.addAirdropUsers',
 	
 };

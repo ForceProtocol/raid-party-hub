@@ -1,5 +1,5 @@
 /**
- * PlayerToGame.js
+ * GamePlatforms.js
  *
  * @description :: A model definition.  Represents a database table/collection/etc.
  * @docs        :: https://sailsjs.com/docs/concepts/models-and-orm/models
@@ -9,23 +9,24 @@ module.exports = {
 
     attributes: {
 		
-		eventValue: {
-			type: 'integer',
-			defaultsTo: 0
+		type: {
+			type: 'string',
+			required: true
 		},
 		
-		confirmed: {
+		link: {
+			type: 'string',
+			required: true
+		},
+		
+		active: {
 			type: 'boolean',
 			defaultsTo: false
 		},
 		
-		player: {
-			model: 'player'
+		game: {
+			model: 'game'
 		},
-		
-		gameEvent: {
-			model: 'gameevent'
-		}
 		
     },
 	

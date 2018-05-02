@@ -40,18 +40,43 @@ module.exports = {
 			required: true
         },
 		
+		rules: {
+			type: 'text',
+			defaultsTo: ''
+		},
+		
+		link: {
+            type: 'text',
+			required: true
+        },
+		
 		jackpot: {
 			type: 'text',
 			defaultsTo: '',
         },
+		
+		startDate: {
+			type: 'datetime',
+			defaultsTo: function() {
+				return new Date()
+			}
+		},
+		
+		endDate: {
+			type: 'datetime',
+			defaultsTo: function() {
+				return new Date()
+			}
+		},
 		
 		bannerContent: {
 			type: 'text',
 			defaultsTo: '',
         },
 		
-		platform: {
-			type: 'string',
+		featured: {
+			type: 'boolean',
+			defaultsTo: false
 		},
 		
 		isAndroid: {
@@ -98,8 +123,23 @@ module.exports = {
 			via: 'game'
 		},
 		
+		gamePlatforms: {
+			collection: 'gameplatforms',
+			via: 'game'
+		},
+		
+		rewardCampaign: {
+			collection: 'rewardcampaign',
+			via: 'game'
+		},
+		
 		rewards: {
 			collection: 'playerrewards',
+			via: 'game'
+		},
+		
+		qualifiedPlayers: {
+			collection: 'qualifiedplayers',
 			via: 'game'
 		},
 		

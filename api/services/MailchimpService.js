@@ -15,9 +15,13 @@ module.exports = {
 	/**
 	* Add a subscriber to a mailchimp list
 	*/
-	addSubscriber: function (listId,email,firstName,lastName,subscribeStatus) {
+	addSubscriber: function (listId,email,firstName,lastName,subscribeStatus,language) {
 	
 		sails.log.debug("-- addSubscriber mailchimp requested --");
+		
+		if(typeof language === 'undefined' || !language){
+			language = 'en';
+		}
 		
 		return mailchimp.post('/lists/' + listId + '/members', {
 			email_address : email,
@@ -25,7 +29,8 @@ module.exports = {
 			merge_fields: {
 				"FNAME": firstName,
 				"LNAME": lastName
-			}
+			},
+			language: language
 		})
 		.then(function(results) {
 			return results;

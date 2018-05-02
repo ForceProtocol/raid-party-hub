@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const SALT_ROUND = 10;
 const BigNumber = require('bignumber.js');
+const passwordValidator = require('password-validator');
 
 module.exports = {
 
@@ -111,4 +112,58 @@ module.exports = {
 		
 		return text;
     },
+	
+	
+	getRandomInt: function (min, max) {
+		return Math.floor(Math.random() * (max - min + 1)) + min;
+	},
+	
+	groupBy: function (list, keyGetter) {
+		const map = new Map();
+		list.forEach((item) => {
+			const key = keyGetter(item);
+			const collection = map.get(key);
+			if (!collection) {
+				map.set(key, [item]);
+			} else {
+				collection.push(item);
+			}
+		});
+		return map;
+	},
+	
+	
+	
+	
+	stringToJson: function(item) {
+		item = typeof item !== "string" ? JSON.stringify(item) : item;
+
+		try {
+			item = JSON.parse(item);
+		} catch (e) {
+			return false;
+		}
+
+		if (typeof item === "object" && item !== null) {
+			return item;
+		}
+
+		return false;
+	},
+	
+	
+	isValidPassword: function(password){
+		var schema = new passwordValidator();
+ 
+		// Add properties to it
+		schema
+		.is().min(7)                                    // Minimum length 8
+		.is().max(100)                                  // Maximum length 100
+		.has().uppercase()                              // Must have uppercase letters
+		.has().lowercase()                              // Must have lowercase letters
+		.has().digits()                                 // Must have digits
+		.has().not().spaces();							// Should not have spaces
+		
+		return schema.validate(password);
+	},
 };

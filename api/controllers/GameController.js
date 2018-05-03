@@ -108,6 +108,90 @@ module.exports = {
 		}catch(err){
 			return res.serverError(err);
 		}
+	},
+	
+	
+	
+	async getGame(req,res){
+		
+		try{
+			let dateNow = new Date(),
+			gameId = req.param("gameId"),
+			gameList = [],
+			rules,
+			ruleLocale,
+			description,
+			descriptionLocale,
+			gameIndex = 0,
+			locale = req.param("locale");
+			
+			sails.log.debug("is not a number:",gameId);
+			
+			if(!locale){
+				locale = 'en';
+			}
+			
+			moment.locale(locale);
+			
+			let game = await Game.findOne({id:gameId}).populate('rewardCampaign').populate('gamePlatforms');
+			
+			game.isLive = false;
+				
+			// Ensure we set the correct language for the rules
+			rules = util.stringToJson(game.rules);
+			
+			if(rules){
+				ruleLocale = rules.find(function (obj) { return obj.hasOwnProperty(locale); });
+				
+				if(!ruleLocale){
+					game.rules = rules.find(function (obj) { return obj.hasOwnProperty('en'); });
+					game.rules = game.rules['en'];
+				}else{
+					game.rules = ruleLocale[locale];
+				}
+			}
+				
+			if(!game.rules){
+				game.rules = rules;
+			}
+				
+			// Ensure we set the correct language for the rules
+			description = util.stringToJson(game.description);
+			
+			if(description){
+				descriptionLocale = description.find(function (obj) { return obj.hasOwnProperty(locale); });
+				
+				if(!descriptionLocale){
+					game.description = description.find(function (obj) { return obj.hasOwnProperty('en'); });
+					game.description = game.description['en'];
+				}else{
+					game.description = descriptionLocale[locale];
+				}
+			}
+				
+			if(!game.description){
+				game.description = description;
+			}
+				
+				
+			// Display campaign ending date
+			// This campaign is now LIVE
+			
+			if(moment().isSameOrAfter(game.startDate) && !moment().isSameOrAfter(game.endDate)){
+				game.isLive = true;
+				game.timeRemaining = moment(game.endDate).fromNow();
+			}else if(moment().isSameOrAfter(game.startDate)){
+				game.isLive = false;
+				game.timeRemaining = sails.__("Rewards Ended");
+			}else{
+				game.isLive = false;
+				game.timeRemaining = sails.__("Starts ") + moment(game.startDate).fromNow() + "!";
+			}
+			
+			return res.ok(game);
+		}catch(err){
+			return res.serverError(err);
+		}
 	}
 
 

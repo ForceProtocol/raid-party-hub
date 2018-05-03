@@ -6,7 +6,7 @@ const Dropbox = require('dropbox').Dropbox;
 module.exports.cron = {
 
 	confirmJackpotQualifyingPlayers: {
-		schedule: '* * * * *',  // Run this every 15-20 mins
+		schedule: '*/15 * * * *',  // Run this every 15-20 mins
 		onTick: async function () {
 
 			try {
@@ -120,7 +120,7 @@ module.exports.cron = {
 	* to mobile device
 	*/
 	notifyQualifiedPlayers: {
-		schedule: '* * * * *',  // Run this every 15-20 mins
+		schedule: '*/30 * * * *',  // Run this every 15-20 mins
 
 		onTick: async function () {
 
@@ -178,7 +178,7 @@ module.exports.cron = {
 	* Send email and push notification to winners
 	*/
 	selectJackpotWinners: {
-		schedule: '1 * * * *',  // Run this every 15-20 mins
+		schedule: '*/30 * * * *',  // Run this every 15-20 mins
 
 		onTick: async function () {
 
@@ -322,7 +322,7 @@ module.exports.cron = {
 
 
 	confirmType4RewardQualifyingPlayers: {
-		schedule: '* * * * *',  // Run this every 15-20 mins
+		schedule: '*/13 * * * *',  // Run this every 15-20 mins
 
 		onTick: async function () {
 

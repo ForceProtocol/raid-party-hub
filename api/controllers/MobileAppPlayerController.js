@@ -1135,7 +1135,7 @@ module.exports = {
 			return util.errorResponse(err, res);
 		}
 	},
-	
+
 
 	sendEmailsToAirdropUsers: async function (req, res) {
 
@@ -1163,7 +1163,6 @@ module.exports = {
 		
 		// Loop through each airdrop user and player to check if their account is active and exists as a player. 
 		_.each(airdropUsers, async (airdropUser) => {
-			airdropUser.tempPassword = 'XXXXX';
 			_.each(players, async (player) => {
 				if ((player.email === airdropUser.email) && !_.isEmpty(airdropUser.tempPassword) && (player.accountStatus === 2) && !_.isEmpty(player.code)) {
 					const message = `Please find your account details below.\n

@@ -5,6 +5,7 @@
   "description": "a Sails application",
   "keywords": [],
   "dependencies": {
+    "base64-img": "^1.0.4",
     "bcrypt-nodejs": "0.0.3",
     "bcryptjs": "^2.4.3",
     "bignumber.js": "^6.0.0",

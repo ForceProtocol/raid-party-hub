@@ -5,8 +5,8 @@
  * @help        :: See http://links.sailsjs.org/docs/controllers
  */
 
-const BigNumber = require('bignumber.js'), moment = require('moment');
- 
+const BigNumber = require('bignumber.js'), moment = require('moment'), base64Img = require('base64-img');
+
 module.exports = {
 	
 	
@@ -73,10 +73,12 @@ module.exports = {
 			// Create the users wallet
 			//WalletService.createUserWallet(player.id).catch(err=>{sails.log.error('On signup, failed to create player wallet: ', err)});
 			
+			let okMsg, subject, msg;
+			
 			if(locale == 'es' || locale == 'es_ES' || locale == 'es-MX'){
-				let okMsg = "Por favor revise su bandeja de entrada de correo electrónico para un pin de 6 dígitos e ingrese a continuación para activar su cuenta";
-				let subject = "Bienvenido a RaidParty! Activa tu cuenta para comenzar a ganar recompensas";
-				let msg = `¡Bienvenido a RaidParty! <br /> 
+				okMsg = "Por favor revise su bandeja de entrada de correo electrónico para un pin de 6 dígitos e ingrese a continuación para activar su cuenta";
+				subject = "Bienvenido a RaidParty! Activa tu cuenta para comenzar a ganar recompensas";
+				msg = `¡Bienvenido a RaidParty! <br /> 
 					Su cuenta ha sido creada y ahora está esperando su activación. Ingrese el PIN de 6 dígitos a continuación en la pantalla de activación del PIN en la aplicación móvil RaidParty.
 					<br /><br /> 
 					<strong>${pin}</ strong>
@@ -88,9 +90,9 @@ module.exports = {
 					Mantén la calma, sigue jugando <br />
 					El equipo de éxito de RaidParty`;
 			}else if(locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR'){
-				let okMsg = "Por favor verifique o seu email por um PIN de 6 Digitos e digite a seguir para ativar a sua conta";
-				let subject = "Bem vindo a RaidParty! Ative a sua conta e começe a ganhar recompensas ";
-				let msg = `Bem vindo a  RaidParty!<br />
+				okMsg = "Por favor verifique o seu email por um PIN de 6 Digitos e digite a seguir para ativar a sua conta";
+				subject = "Bem vindo a RaidParty! Ative a sua conta e começe a ganhar recompensas ";
+				msg = `Bem vindo a  RaidParty!<br />
 					A sua conta foi criada e precisa de ser agora ativada. Por favor digite o PIN de 6 digitos de seguida na tela de ativação de PIN na aplicação RaidParty para celular.<br /><br />
 					<strong>${pin}</strong><br /><br />
 				   Lembre de introduzir o seu ID unico de 7 Digitos na pagina de definições do jogo, os jogos estão listados na aplicação .<br />
@@ -98,9 +100,9 @@ module.exports = {
 					Sem Stress, Continue Jogando<br />
 					A equipe RaidParty`;
 			}else{
-				let okMsg = "Please check your email inbox for a 6 digit pin and enter below to activate your account";
-				let subject = "Welcome to RaidParty! Activate your account to start earning rewards";
-				let msg = `Welcome to RaidParty!<br />
+				okMsg = "Please check your email inbox for a 6 digit pin and enter below to activate your account";
+				subject = "Welcome to RaidParty! Activate your account to start earning rewards";
+				msg = `Welcome to RaidParty!<br />
 					Your account has been created and is now awaiting your activation. Please enter the 6 digit PIN below into the PIN activation screen in the RaidParty mobile app.<br /><br />
 					<strong>${pin}</strong><br /><br />
 					Also remember to enter your own unique 7 character player ID into the game settings, which you will find in the games list page on the mobile app.<br />
@@ -108,6 +110,7 @@ module.exports = {
 					Keep calm, keep playing<br />
 					The RaidParty success team`;
 			}
+			
 			
 			// Send activation email/SMS to player to activate their account
 			await EmailService.sendEmail({
@@ -290,25 +293,26 @@ module.exports = {
 				// If too many PIN attempts made, block their account, send email notifying user
 				if(player.pinAttempts > 6){
 					let updatedPinAttempt = await Player.update({id:player.id},{accountStatus:0});
+					let okMsg, subject, msg;
 					
 					if(locale == 'es' || locale == 'es_ES' || locale == 'es-MX'){
 						// Send player an email that their account has been blocked
-						let subject = "Su cuenta RaidParty ha sido bloqueada";
-						let msg = `ola<br />
+						subject = "Su cuenta RaidParty ha sido bloqueada";
+						msg = `ola<br />
 						   Lamentamos informarle que su cuenta se ha bloqueado debido a demasiados intentos incorrectos de PIN para cambiar su contraseña.<br /><br />
 						   Debe responder a este correo electrónico para confirmar su identidad y permitirnos garantizar que su cuenta esté segura. A continiación, reactivaremos su cuenta en función de una evaluación.<br />
 						   Mantén la calma, sigue jugando<br />
 						   El equipo exitoso de RaidParty`;
 					}else if(locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR'){
-						let subject = "A sua conta RaidParty foi bloqueada.";
-						let msg = `Olá<br />
+						subject = "A sua conta RaidParty foi bloqueada.";
+						msg = `Olá<br />
 							   Lamentamos informar que a sua conta foi bloqueada devido a várias tentativas incorretas de alterar a sua palavra passe.<br /><br />
 							   Deverá agora responder a este email de forma a confirmar a sua identidade assegurando que a sua conta está segura. Após verificação podemos desbloquear a conta.<br />
 							   Sem Stress, Continue Jogando<br />
 								A equipe RaidParty`;
 					}else{
-						let subject = "Your RaidParty account has been locked";
-						let msg = `Hi<br />
+						subject = "Your RaidParty account has been locked";
+						msg = `Hi<br />
 							We are sorry to inform you that your account has been locked due to too many incorrect PIN attempts to change your password.<br /><br />
 							You should reply to this email to confirm your identity and allow us to ensure your account is safe. We will then reactivate your account based on an assessment.<br />
 							Keep calm, keep playing<br />
@@ -349,11 +353,11 @@ module.exports = {
 			let updatedPinAttempt = await Player.update({id:player.id},{accountStatus:2,pinAttempts:0,pin:0});
 			
 			if(locale == 'es' || locale == 'es_ES' || locale == 'es-MX'){
-				let okMsg = "¡Éxito! Su cuenta ahora está activa";
+				okMsg = "¡Éxito! Su cuenta ahora está activa";
 			}else if(locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR'){
-				let okMsg = "Sucesso! A sua conta está agora ativa";
+				okMsg = "Sucesso! A sua conta está agora ativa";
 			}else{
-				let okMsg = "Success! Your account is now active";
+				okMsg = "Success! Your account is now active";
 			}
 				
 			const rsp = {
@@ -420,29 +424,30 @@ module.exports = {
 			
 			// Create activation PIN
 			let pin = util.randomFixedInteger(6);
+			let okMsg, subject, msg;
 			
 			await Player.update({id:player.id},{pin:pin});
 			
 			if(locale == 'es' || locale == 'es_ES' || locale == 'es-MX'){
-				let okMsg = 'Por favor, revise su bandeja de entrada para encontrar un PIN de restablecimiento de contraseña de 6 dígitos';
-				let subject = 'Bienvenido a RaidParty! Restablecer contraseña solicitada';
-				let msg = `Hola, 
+				okMsg = 'Por favor, revise su bandeja de entrada para encontrar un PIN de restablecimiento de contraseña de 6 dígitos';
+				subject = 'Bienvenido a RaidParty! Restablecer contraseña solicitada';
+				msg = `Hola, 
 					<br /> Usted solicitó un restablecimiento de contraseña. Ingrese el PIN de 6 dígitos a continuación en la pantalla de activación del PIN en la aplicación móvil RaidParty para restablecer su contraseña.<br /><br />
 					<strong>${pin}</strong><br /><br />
 					Mantén la calma, sigue jugando <br />
 					El equipo exitoso de RaidParty`;
 			}else if(locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR'){
-				let okMsg = 'Por favor verifique o seu email por um PIN de 6 Digitos para efetuar o reset';
-				let subject = 'Bem vindo a RaidParty! Requer reset da palavra passe';
-				let msg = `Olá,<br />
+				okMsg = 'Por favor verifique o seu email por um PIN de 6 Digitos para efetuar o reset';
+				subject = 'Bem vindo a RaidParty! Requer reset da palavra passe';
+				msg = `Olá,<br />
 					 Pediu que a sua palavra passe fosse alterada. Por favor digite o PIN de 6 digitos na tela de ativação da aplicação RaidParty para efetuar o reset da sua palvra passe.<br /><br />
 					 <strong>${pin}</strong><br /><br />
 					Sem Stress, Continue Jogando<br />
 					A equipe RaidParty`;
 			}else{
-				let okMsg = 'Please check your inbox to find a 6 digit password reset PIN';
-				let subject = 'Welcome to RaidParty! Reset password requested';
-				let msg = `Hi,<br />
+				okMsg = 'Please check your inbox to find a 6 digit password reset PIN';
+				subject = 'Welcome to RaidParty! Reset password requested';
+				msg = `Hi,<br />
 					You requested a password reset. Please enter the 6 digit PIN below into the PIN activation screen in the RaidParty mobile app to reset your password.<br /><br />
 					<strong>${pin}</strong><br /><br />
 					Keep calm, keep playing<br />
@@ -520,11 +525,12 @@ module.exports = {
 				// If too many PIN attempts made, block their account, send email notifying user
 				if(player.pinAttempts > 5){
 					let updatedPinAttempt = await Player.update({id:player.id},{accountStatus:0});
+					let okMsg, subject, msg;
 					
 					if(locale == 'es' || locale == 'es_ES' || locale == 'es-MX'){
 						// Send player an email that their account has been blocked
-						let subject = "Su cuenta RaidParty ha sido bloqueada";
-						let msg = `Hola<br />
+						subject = "Su cuenta RaidParty ha sido bloqueada";
+						msg = `Hola<br />
 						   Lamentamos informarle que su cuenta se ha bloqueado debido a demasiados intentos incorrectos de PIN para cambiar su contraseña.<br /><br />
 						   Debe responder a este correo electrónico para confirmar su identidad y permitirnos garantizar que su cuenta esté segura. A continiación, reactivaremos su cuenta en función de una evaluación.<br />
 						   Mantén la calma, sigue jugando<br />
@@ -543,8 +549,8 @@ module.exports = {
 						throw new CustomError('Ha realizado demasiados intentos incorrectos de PIN. Su cuenta ha sido bloqueada.', {status: 403,err_code:"blocked"});
 					}else if(locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR'){
 						// Send player an email that their account has been blocked
-						let subject = "A sua conta RaidParty foi bloqueada.";
-						let msg = `Olá<br />
+						subject = "A sua conta RaidParty foi bloqueada.";
+						msg = `Olá<br />
 						   Lamentamos informar que a sua conta foi bloqueada devido a várias tentativas incorretas de alterar a sua palavra passe.<br /><br />
 						   Deverá agora responder a este email de forma a confirmar a sua identidade assegurando que a sua conta está segura. Após verificação podemos desbloquear a conta.<br />
 						   Sem Stress, Continue Jogando<br />
@@ -563,8 +569,8 @@ module.exports = {
 						throw new CustomError('PIN Introduzido erradamente por multiplas vezes. A sua conta foi bloqueada.', {status: 403,err_code:"blocked"});
 					}else{
 						// Send player an email that their account has been blocked
-						let subject = "Your RaidParty account has been locked";
-						let msg = `Hi<br />
+						subject = "Your RaidParty account has been locked";
+						msg = `Hi<br />
 							We are sorry to inform you that your account has been locked due to too many incorrect PIN attempts to change your password.<br /><br />
 							You should reply to this email to confirm your identity and allow us to ensure your account is safe. We will then reactivate your account based on an assessment.<br />
 							Keep calm, keep playing<br />
@@ -1010,6 +1016,9 @@ module.exports = {
 				if(!game.description){
 					game.description = description;
 				}
+				
+				// Convert game avatar to base64 encoded string
+				game.avatar = base64Img.base64Sync(sails.config.appPath + '/assets/images/games/banners/' + game.avatar);
 				
 				gameItem = {game_id:game.gameId,title:game.title,reward:game.rewardAvailable,description:game.description,jackpot:game.jackpot,bannerContent:game.bannerContent,link:game.link,platform:game.platform,avatar:game.avatar,prizes:prizeList};
 				

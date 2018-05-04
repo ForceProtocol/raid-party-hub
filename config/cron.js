@@ -144,14 +144,14 @@ module.exports.cron = {
 
 					// Send Email to player they have been entered into the prize draw.
 					deviceIds.push(qualifiedPlayers.players.deviceId);
-					await EmailService.sendEmail({
-						fromEmail: 'support@raidparty.io',
-						fromName: 'RaidParty Support',
-						toEmail: qualifiedPlayers.players.email,
-						toName: qualifiedPlayers.players.email,
-						subject: 'Successfull Entry into Jackpot reward contest',
-						body: message
-					});
+					// await EmailService.sendEmail({
+					// 	fromEmail: 'support@raidparty.io',
+					// 	fromName: 'RaidParty Support',
+					// 	toEmail: qualifiedPlayers.players.email,
+					// 	toName: qualifiedPlayers.players.email,
+					// 	subject: 'Successfull Entry into Jackpot reward contest',
+					// 	body: message
+					// });
 
 					await QualifiedPlayers.update({ players: qualifiedPlayers.players.id }, { qualifiedEmailSent: true });
 				}
@@ -237,14 +237,14 @@ module.exports.cron = {
 						// TODO: Send won email to this player
 						// TODO: notify all other players they didn't win this time, but x player won
 						deviceIds.push(winningPlayer.players.deviceId);
-						await EmailService.sendEmail({
-							fromEmail: 'support@raidparty.io',
-							fromName: 'RaidParty Support',
-							toEmail: winningPlayer.players.email,
-							toName: winningPlayer.players.email,
-							subject: 'Successfull Entry into Jackpot reward contest',
-							body: message
-						});
+						// await EmailService.sendEmail({
+						// 	fromEmail: 'support@raidparty.io',
+						// 	fromName: 'RaidParty Support',
+						// 	toEmail: winningPlayer.players.email,
+						// 	toName: winningPlayer.players.email,
+						// 	subject: 'Successfull Entry into Jackpot reward contest',
+						// 	body: message
+						// });
 						await QualifiedPlayers.update({ players: winningPlayer.players.id, rewardCampaign: rewardCampaign.id }, { isWinner: true, wonEmailSent: true });
 
 
@@ -265,14 +265,14 @@ module.exports.cron = {
 								// Send email to players that they won
 
 								deviceIds.push(qualifyingPlayer.players.deviceId);
-								await EmailService.sendEmail({
-									fromEmail: 'support@raidparty.io',
-									fromName: 'RaidParty Support',
-									toEmail: qualifyingPlayer.players.email,
-									toName: qualifyingPlayer.players.email,
-									subject: 'Successfull Entry into Jackpot reward contest',
-									body: message
-								});
+								// await EmailService.sendEmail({
+								// 	fromEmail: 'support@raidparty.io',
+								// 	fromName: 'RaidParty Support',
+								// 	toEmail: qualifyingPlayer.players.email,
+								// 	toName: qualifyingPlayer.players.email,
+								// 	subject: 'Successfull Entry into Jackpot reward contest',
+								// 	body: message
+								// });
 							}
 						}
 						// Need to select multiple winners from potential winners
@@ -309,7 +309,7 @@ module.exports.cron = {
 				}
 				// Send batch Notification to qualified players.
 				if (deviceIds.length > 0) {
-					await OneSignalService.sendNotificationsToMultipleDevices({ deviceIds: deviceIds, text: "Congratulations! You have been selected as the winner of the jackport reward draw for playing a game through raidparty. Tap to know more." });
+					// await OneSignalService.sendNotificationsToMultipleDevices({ deviceIds: deviceIds, text: "Congratulations! You have been selected as the winner of the jackport reward draw for playing a game through raidparty. Tap to know more." });
 				}
 			} catch (err) {
 				sails.log.error("Failed to process reward campaign game events against player events on cron task: ", err);

@@ -1060,7 +1060,13 @@ module.exports = {
 		try {
 		
 			// Get games we need for this device
-			let player = await Player.findOne({id:req.token.user.id});
+			let player = await Player.findOne({id:req.token.user.id}),
+			locale = req.param("locale"),
+			pushNotificationMsg;
+			
+			if(!locale){
+				locale = 'en';
+			}
 			
 			if(!player){
 				throw new CustomError('Could not find that player.', {status: 401,err_code:"not_found"});
@@ -1074,6 +1080,17 @@ module.exports = {
 				}
 				
 				player.code = playerCode;
+				
+				// Send push notification to this player about their new generated 7 character code
+				if(locale == 'es' || locale == 'es_ES' || locale == 'es-MX'){
+					pushNotificationMsg = "Su código exclusivo de 7 caracteres es: " + player.code + ". Por favor, utiliza esto en la configuración del juego para entrar en los concursos de juegos";
+				}else if(locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR'){
+					pushNotificationMsg = "Seu código exclusivo de 7 caracteres é: " + player.code + ". Por favor, use isso nas configurações do jogo para entrar nos concursos de jogos";
+				}else{
+					pushNotificationMsg = "Your unique 7 character code is: " + player.code + ". Please use this in the game settings to enter the game contests";
+				}
+				
+				await OneSignalService.sendNotificationsToMultipleDevices({ deviceIds: [player.deviceId], text: pushNotificationMsg });
 			}
 			
 			return res.ok({code:player.code});

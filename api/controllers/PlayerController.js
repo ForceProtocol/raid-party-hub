@@ -235,15 +235,16 @@ module.exports = {
 			}
 
 			// Record this event against the player and game
-					for (const rewardCampaign of activeRewardCampaigns) {
 			let recordGameEvent = await PlayerToGameEvent.create({ player: player.id, gameEvent: eventId, eventValue: eventValue });
 
 			if (!recordGameEvent) {
 				sails.log.debug("PlayerController.trackEvent: Could not record that game event");
 				return res.json('403', { 'reason': 'The game event could not be tracked.' });
 			}
+			
 			// Send the response in advance as API request has done its job.
 			res.json('201', recordGameEvent);
+			
 			// Check if this event is attached to a reward campaign event of type 2 (instant win, but one time)
 			if (!eventTypeId) {
 			}
@@ -252,8 +253,7 @@ module.exports = {
 				let dateNow = new Date();
 				let activeRewardCampaigns = await RewardCampaign.find({ game: game.id, rewardTypeId: 2, rewardProcessed: false, maxWinningPlayers: { '>': 0 }, startDate: { '<=': dateNow }, endDate: { '>=': dateNow } })
 					.populate('rewardCampaignGameEvents');
-
-
+					
 				if (!activeRewardCampaigns) {
 					sails.log.debug("PlayerController.trackEvent: No reward campaign game events found for that.");
 				} else {
@@ -261,7 +261,8 @@ module.exports = {
 					// Cycle through each reward campaign
 					let totalEventsToComplete = 0,
 						playerCompletedEvents = 0;
-
+						
+					for (const rewardCampaign of activeRewardCampaigns) {
 						if (!rewardCampaign.rewardCampaignGameEvents) {
 							sails.log.debug("PlayerController.trackEvent: No reward campaign game events found for this reward campaign.", rewardCampaign);
 							continue;
@@ -304,9 +305,8 @@ module.exports = {
 							await PlayerNotifications.create({ title: "Instant Win", message: message, players: player.id });
 						}
 					}
-
-
 				}
+				
 			}
 
 		} catch (err) {

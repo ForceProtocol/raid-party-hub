@@ -13,12 +13,16 @@ module.exports = {
 			type: 'string',
 			required: true
 		},
-		
 		link: {
 			type: 'string',
 			required: true
 		},
-		
+		isCountrySpecific:{
+			type: 'boolean'
+		},
+		countryLinks: {
+			type: 'string'
+		},
 		active: {
 			type: 'boolean',
 			defaultsTo: false

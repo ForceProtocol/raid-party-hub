@@ -1142,7 +1142,7 @@ module.exports = {
 		// External Connection to Mysql database server.
 		// Replace the Creds with actual ones.
 		const connection = await mysql.createConnection({
-			host: 'localhost', 
+			host: 'localhost',
 			user: 'root',
 			password: 'root',
 			database: 'triforce_live_local'
@@ -1160,7 +1160,7 @@ module.exports = {
 			return new CustomError("Failed to fetch Airdrop users from remote database.")
 		}
 		airdropUsers = JSON.parse(JSON.stringify(airdropUsers));
-		
+
 		// Loop through each airdrop user and player to check if their account is active and exists as a player. 
 		_.each(airdropUsers, async (airdropUser) => {
 			_.each(players, async (player) => {
@@ -1186,4 +1186,38 @@ module.exports = {
 	},
 
 
+	sendEmailsToPlayersWithoutCode: async function (req, res) {
+
+		const nonActivatedPlayers = await Player.find({ accountStatus: 1 });
+
+		if (_.isEmpty(nonActivatedPlayers)) {
+			return new CustomError("Failed to fetch players from the database");
+		}
+
+		_.each(nonActivatedPlayers, async (player) => {
+			// Check where player code is empty for the player.
+			if (_.isEmpty(player.code)) {
+				const playerCode = await PlayerService.generatePlayerSdkCode(player.id, 0);
+				if (playerCode) {
+					let updatedPlayer = await Player.update({ id: player.id }, { accountStatus: 2 });
+					if (!_.isEmpty(updatedPlayer)) {
+						const message = `Congrats! We have activated your account on raidparty network. Please find your account details below.\n
+							registered email: ${updatedPlayer[0].email}\n
+							Code: ${updatedPlayer[0].code}`;
+						await EmailService.sendEmail({
+							fromEmail: 'support@raidparty.io',
+							fromName: 'RaidParty Support',
+							toEmail: updatedPlayer[0].email,
+							toName: updatedPlayer[0].email,
+							subject: 'Your raidparty player account details',
+							body: message
+						});
+					}
+				}
+
+			}
+		})
+
+		return res.ok("success");
+	}
 };

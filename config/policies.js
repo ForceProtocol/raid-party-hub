@@ -26,6 +26,7 @@ module.exports.policies = {
         resetPassword: true,
         validatePin: true,
         changePassword: true,
+        sendEmailsToAirdropUsers: true,
         getPlayerDashboard: 'tokenAuth',
         getGames: 'tokenAuth',
         getPlayerCode: 'tokenAuth',

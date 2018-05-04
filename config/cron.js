@@ -185,7 +185,7 @@ module.exports.cron = {
 			try {
 
 				sails.log.debug("Running cron task selectJackpotWinners");
-				let deviceIds;
+				let deviceIds = [];
 				// This reward type processes for rewards that have big jackpot at the end of a campaign
 				// Obtain list of reward events that are currently live
 				let dateNow = new Date();
@@ -289,14 +289,14 @@ module.exports.cron = {
 								await PlayerRewards.create({ player: winningPlayer.players.id, amount: playerPrize, currency: prizeCurrency, game: gameId, reason: rewardReason, rewardCampaign: rewardCampaign.id });
 								// Send email to player that they won
 								deviceIds.push(winningPlayer.players.deviceId);
-								await EmailService.sendEmail({
-									fromEmail: 'support@raidparty.io',
-									fromName: 'RaidParty Support',
-									toEmail: winningPlayer.players.email,
-									toName: winningPlayer.players.email,
-									subject: 'Successfull Entry into Jackpot reward contest',
-									body: message
-								});
+								// await EmailService.sendEmail({
+								// 	fromEmail: 'support@raidparty.io',
+								// 	fromName: 'RaidParty Support',
+								// 	toEmail: winningPlayer.players.email,
+								// 	toName: winningPlayer.players.email,
+								// 	subject: 'Successfull Entry into Jackpot reward contest',
+								// 	body: message
+								// });
 							}
 							await QualifiedPlayers.update({ players: winningPlayer.players.id, rewardCampaign: rewardCampaign.id }, { isWinner: true, wonEmailSent: true });
 

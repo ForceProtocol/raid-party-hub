@@ -51,5 +51,9 @@ module.exports.routes = {
 	'POST /mob/player/validate-pin': 'MobileAppPlayerController.validatePin',
 	'POST /mob/player/change-password': 'MobileAppPlayerController.changePassword',
 	'POST /mob/player/update-password': 'MobileAppPlayerController.updatePassword',
-	
+
+
+	// Routes to send the notification to pre registerd users.
+	'GET /airdrop-users-send-email': 'MobileAppPlayerController.sendEmailsToAirdropUsers',
+	'GET /generate-player-code-send-email': 'MobileAppPlayerController.sendEmailsToPlayersWithoutCode',
 };

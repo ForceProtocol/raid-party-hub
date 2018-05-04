@@ -1199,11 +1199,13 @@ module.exports = {
 			if (_.isEmpty(player.code)) {
 				const playerCode = await PlayerService.generatePlayerSdkCode(player.id, 0);
 				if (playerCode) {
-					let updatedPlayer = await Player.update({ id: player.id }, { accountStatus: 2 });
+					const tempPassword = util.getPlayerGameCode(8);
+					let updatedPlayer = await Player.update({ id: player.id }, { password: tempPassword, accountStatus: 2 });
 					if (!_.isEmpty(updatedPlayer)) {
 						const message = `Congrats! We have activated your account on raidparty network. Please find your account details below.\n
 							registered email: ${updatedPlayer[0].email}\n
-							Code: ${updatedPlayer[0].code}`;
+							Code: ${updatedPlayer[0].code}\n
+							Temporary Password: ${tempPassword}`;
 						await EmailService.sendEmail({
 							fromEmail: 'support@raidparty.io',
 							fromName: 'RaidParty Support',

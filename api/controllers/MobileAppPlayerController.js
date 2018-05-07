@@ -1142,10 +1142,11 @@ module.exports = {
 		// External Connection to Mysql database server.
 		// Replace the Creds with actual ones.
 		const connection = await mysql.createConnection({
-			host: 'localhost',
-			user: 'root',
-			password: 'root',
-			database: 'triforce_live_local'
+		  adapter: 'sails-mysql',
+		  host: '178.62.109.184',
+		  user: 'triforcer236',
+		  password: 'ji4Zr56Bu72FY',
+		  database: 'triforcetokens_live'
 		});
 
 		const players = await Player.find({ accountStatus: 2 });

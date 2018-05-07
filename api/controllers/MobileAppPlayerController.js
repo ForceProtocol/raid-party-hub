@@ -1165,16 +1165,19 @@ module.exports = {
 		_.each(airdropUsers, async (airdropUser) => {
 			_.each(players, async (player) => {
 				if ((player.email === airdropUser.email) && !_.isEmpty(airdropUser.tempPassword) && (player.accountStatus === 2) && !_.isEmpty(player.code)) {
-					const message = `Please find your account details below.\n
-					registered email: ${player.email}\n
+					const message = `Dear user,\n
+					You pre-registered for a RaidParty account. The app is currently only availabe on Android devices. You will need to download the RaidParty player app
+					on the <a href="https://play.google.com/store/apps/details?id=com.app.Raidparty">google play store here</a>, then use the login details below to access your account:\n
+					Registered email: ${player.email}\n
 					Password: ${airdropUser.tempPassword}\n
-					Code: ${player.code}`;
+					Player Code: ${player.code}\n\n
+					Our team are awaiting approval for listing of our app on iOS. We will send an email once it has gone live.`;
 					await EmailService.sendEmail({
 						fromEmail: 'support@raidparty.io',
 						fromName: 'RaidParty Support',
 						toEmail: player.email,
 						toName: player.email,
-						subject: 'Your raidparty player account details',
+						subject: 'Your RaidParty player account details',
 						body: message
 					});
 				}
@@ -1202,10 +1205,12 @@ module.exports = {
 					const tempPassword = util.getPlayerGameCode(8);
 					let updatedPlayer = await Player.update({ id: player.id }, { password: tempPassword, accountStatus: 2 });
 					if (!_.isEmpty(updatedPlayer)) {
-						const message = `Congrats! We have activated your account on raidparty network. Please find your account details below.\n
-							registered email: ${updatedPlayer[0].email}\n
-							Code: ${updatedPlayer[0].code}\n
-							Temporary Password: ${tempPassword}`;
+						const message = `Congrats! We have activated your account on RaidParty. Please find your account details below to login to the app with.\n
+							Registered email: ${updatedPlayer[0].email}\n
+							Temporary Password: ${tempPassword}\n
+							Player Code: ${updatedPlayer[0].code}\n\n
+							You can download the <a href="https://play.google.com/store/apps/details?id=com.app.Raidparty">RaidParty app for Android here</a>\n\n
+							Our team are awaiting approval for listing of our app on iOS. We will send an email once it has gone live.`;
 						await EmailService.sendEmail({
 							fromEmail: 'support@raidparty.io',
 							fromName: 'RaidParty Support',

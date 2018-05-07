@@ -76,6 +76,7 @@ module.exports = {
 			let okMsg, subject, msg;
 
 			if (locale == 'es' || locale == 'es_ES' || locale == 'es-MX') {
+				await OneSignalService.sendNotificationsToMultipleDevices({ deviceIds: [deviceId], text: pin + " es tu pin de activación"  });
 				okMsg = "Por favor revise su bandeja de entrada de correo electrónico para un pin de 6 dígitos e ingrese a continuación para activar su cuenta";
 				subject = "Bienvenido a RaidParty! Activa tu cuenta para comenzar a ganar recompensas";
 				msg = `¡Bienvenido a RaidParty! <br /> 
@@ -90,6 +91,7 @@ module.exports = {
 					Mantén la calma, sigue jugando <br />
 					El equipo de éxito de RaidParty`;
 			} else if (locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR') {
+				await OneSignalService.sendNotificationsToMultipleDevices({ deviceIds: [deviceId], text: pin + " é o seu pino de ativação"  });
 				okMsg = "Por favor verifique o seu email por um PIN de 6 Digitos e digite a seguir para ativar a sua conta";
 				subject = "Bem vindo a RaidParty! Ative a sua conta e começe a ganhar recompensas ";
 				msg = `Bem vindo a  RaidParty!<br />
@@ -100,6 +102,7 @@ module.exports = {
 					Sem Stress, Continue Jogando<br />
 					A equipe RaidParty`;
 			} else {
+				await OneSignalService.sendNotificationsToMultipleDevices({ deviceIds: [deviceId], text: pin + " is your activation pin"  });
 				okMsg = "Please check your email inbox for a 6 digit pin and enter below to activate your account";
 				subject = "Welcome to RaidParty! Activate your account to start earning rewards";
 				msg = `Welcome to RaidParty!<br />

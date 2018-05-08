@@ -6,23 +6,88 @@ const Dropbox = require('dropbox').Dropbox;
 module.exports.cron = {
 
 	giveAirdropSignupRewards: {
-		schedule: '* * * * *',  // Run this every hour
+		schedule: '* * * *',  // Run this every hour
 		onTick: async function () {
 
 			try {
 				let airdropReward;
 				
-				let airdropUsers = await Players.find({referral:"airdropnotify",referralPaid:false,accountStatus:2});
+				sails.log.debug("running giveAirdropSignupRewards");
+				
+				let airdropUsers = await Player.find({referral:"airdropnotify",referralPaid:false,accountStatus:2});
 				
 				for(const player of airdropUsers){
 					airdropReward = parseFloat(player.forceBalance);
 					airdropReward += 2;
 					
-					await Players.update({id:player.id},{forceBalance:airdropReward,referralPaid:true});
+					await Player.update({id:player.id},{forceBalance:airdropReward,referralPaid:true});
 					
-					await OneSignalService.sendNotificationsToMultipleDevices({ deviceIds: [player.deviceId], text: "You have been issued 2 FORCE tokens as part of the airdrop" });
+					await OneSignalService.sendNotificationsToMultipleDevices({deviceIds: [player.deviceId], text: "You have been issued 2 FORCE tokens as part of the airdrop"});
 					
 					await PlayerNotifications.create({title: "Airdrop Reward", message: "You have been issued 2 FORCE tokens as part of the airdrop", players: player.id});
+				}
+				
+			}catch (err) {
+				sails.log.error("Failed to process reward campaign game events against player events on cron task: ", err);
+			}
+		}
+	},
+	
+	
+	giveAirdropGameRewards: {
+		schedule: '* * * *',  // Run this every hour
+		onTick: async function () {
+
+			try {
+				let airdropReward,
+				startOfDay = moment().subtract(1,'days').startOf('day').toDate(),
+				playerCompletedGame,
+				excludeGames,
+				playerGameEvents;
+				
+				sails.log.debug("running giveAirdropGameRewards",startOfDay);
+				
+				// Find players who were referrals and have been paid for signup
+				let airdropUsers = await Player.find({referral:"airdropnotify",referralPaid:true});
+				
+				for(const player of airdropUsers){
+				
+					airdropReward = 0;
+					
+					// Get list of games player already completed and paid for
+					playerCompletedGame = await PlayerGameEventAirdrops.find({player:player.id,paid:true});
+					
+					// Get list of game IDs the player has been paid for
+					excludeGames = _.map(playerCompletedGame,"game");
+					
+					// Make sure we are not rewarding the player for too many games
+					if(excludeGames.length > 4){
+						continue;
+					}
+					
+					// Get game events player completed excluding games they already completed
+					playerGameEvents = await PlayerToGameEvent.find({player:player.id}).populate("gameEvent",{game: { '!' : excludeGames}});
+					
+					for(const playerGameEvent of playerGameEvents){
+						
+						// Need to skip this record
+						sails.log.debug("game event ID: ",playerGameEvent.gameEvent.game);
+						if(excludeGames.length > 0 && excludeGames.indexOf(playerGameEvent.gameEvent.game) != -1){
+							continue;
+						}
+						
+						// See if this player 
+						airdropReward += 2;
+						
+						await PlayerGameEventAirdrops.create({player:player.id,paid:true,game:playerGameEvent.gameEvent.game});
+						
+						await OneSignalService.sendNotificationsToMultipleDevices({ deviceIds: [player.deviceId], text: "You have been issued 2 FORCE tokens for the airdrop" });
+					
+						await PlayerNotifications.create({title: "Airdrop Reward", message: "You have been issued 2 FORCE tokens as part of the airdrop", players: player.id});
+					}
+					
+					airdropReward += parseFloat(player.forceBalance);
+					await Player.update({id:player.id},{forceBalance:airdropReward});
 				}
 				
 			}catch (err) {
@@ -185,7 +250,7 @@ module.exports.cron = {
 
 				// Send batch Notification to qualified players.
 				if (deviceIds.length > 0) {
-					await OneSignalService.sendNotificationsToMultipleDevices({ deviceIds: deviceIds, text: "Well done! You have entered into the reward prize draw for playing a game through raidparty. Tap to know more." });
+					await OneSignalService.sendNotificationsToMultipleDevices({ deviceIds: deviceIds, text: "Well done! You have entered into the reward prize draw for playing a game through raidparty." });
 				}
 
 			} catch (err) {

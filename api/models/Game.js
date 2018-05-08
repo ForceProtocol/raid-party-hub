@@ -132,6 +132,11 @@ module.exports = {
 			via: 'game'
 		},
 		
+		playerGameEventAirdrops: {
+			collection: 'playergameeventairdrops',
+			via: 'game'
+		},
+		
     },
 	
 	customToJSON: function () {

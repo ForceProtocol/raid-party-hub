@@ -139,6 +139,11 @@ module.exports = {
 			collection: 'playercompletedevent',
 			via: 'player'
 		},
+		
+		playerGameEventAirdrops: {
+			collection: 'playergameeventairdrops',
+			via: 'player'
+		},
 
 		toJSON: function () {
 			let obj = this.toObject();

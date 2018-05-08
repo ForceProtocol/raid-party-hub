@@ -56,6 +56,16 @@ module.exports = {
 			type: 'string',
 		},
 		
+		referral: {
+			type: 'string',
+			defaultsTo: ''
+		},
+		
+		referralPaid: {
+			type: 'boolean',
+			defaultsTo: false
+		},
+		
 		accountStatus: {
 			type: 'integer',
 			defaultsTo: 0

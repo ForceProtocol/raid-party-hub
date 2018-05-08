@@ -5,6 +5,33 @@ const Dropbox = require('dropbox').Dropbox;
 
 module.exports.cron = {
 
+	giveAirdropSignupRewards: {
+		schedule: '* * * * *',  // Run this every hour
+		onTick: async function () {
+
+			try {
+				let airdropReward;
+				
+				let airdropUsers = await Players.find({referral:"airdropnotify",referralPaid:false,accountStatus:2});
+				
+				for(const player of airdropUsers){
+					airdropReward = parseFloat(player.forceBalance);
+					airdropReward += 2;
+					
+					await Players.update({id:player.id},{forceBalance:airdropReward,referralPaid:true});
+					
+					await OneSignalService.sendNotificationsToMultipleDevices({ deviceIds: [player.deviceId], text: "You have been issued 2 FORCE tokens as part of the airdrop" });
+					
+					await PlayerNotifications.create({title: "Airdrop Reward", message: "You have been issued 2 FORCE tokens as part of the airdrop", players: player.id});
+				}
+				
+			}catch (err) {
+				sails.log.error("Failed to process reward campaign game events against player events on cron task: ", err);
+			}
+		}
+	},
+	
+
 	confirmJackpotQualifyingPlayers: {
 		schedule: '*/15 * * * *',  // Run this every 15-20 mins
 		onTick: async function () {

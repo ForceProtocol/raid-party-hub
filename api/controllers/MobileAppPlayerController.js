@@ -152,7 +152,11 @@ module.exports = {
 			let email = req.param("email"),
 				password = req.param("password"),
 				locale = req.param("locale");
-
+				
+			if (!locale) {
+				locale = 'en';
+			}
+				
 			// Validate sent params
 			if (!email || !password) {
 				if (locale == 'es' || locale == 'es_ES' || locale == 'es-MX') {
@@ -243,7 +247,11 @@ module.exports = {
 			let pin = req.param("pin"),
 				email = req.param("email"),
 				locale = req.param("locale");
-
+				
+			if (!locale) {
+				locale = 'en';
+			}
+			
 			// Validate sent params
 			if (!pin || !email) {
 				if (locale == 'es' || locale == 'es_ES' || locale == 'es-MX') {
@@ -389,6 +397,10 @@ module.exports = {
 		try {
 			let email = req.param("email"),
 				locale = req.param("locale");
+				
+			if (!locale) {
+				locale = 'en';
+			}
 
 			// Validate sent params
 			if (!email) {
@@ -486,6 +498,10 @@ module.exports = {
 			let pin = req.param("pin"),
 				email = req.param("email"),
 				locale = req.param("locale");
+				
+			if (!locale) {
+				locale = 'en';
+			}
 
 			// Validate sent params
 			if (!email || !pin) {
@@ -625,6 +641,10 @@ module.exports = {
 				email = req.param("email"),
 				newPassword = req.param("password"),
 				locale = req.param("locale");
+				
+			if (!locale) {
+				locale = 'en';
+			}
 
 			// Validate sent params
 			if (!email || !pin || !newPassword) {
@@ -759,6 +779,10 @@ module.exports = {
 		try {
 			let player = await Player.findOne({ id: req.token.user.id }),
 				locale = req.param("locale");
+				
+			if (!locale) {
+				locale = 'en';
+			}
 
 			// Could not find that account
 			if (!player) {
@@ -819,7 +843,12 @@ module.exports = {
 	async updatePassword(req, res) {
 		try {
 			let currentPassword = req.param("current_password"),
-				newPassword = req.param("new_password");
+				newPassword = req.param("new_password"),
+				locale = req.param("locale");
+				
+			if (!locale) {
+				locale = 'en';
+			}
 
 			// Validate sent params
 			if (!currentPassword || !newPassword) {

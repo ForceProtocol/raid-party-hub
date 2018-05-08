@@ -17,6 +17,7 @@ module.exports = {
 			lastName = req.param("lastName"),
 			password = req.param("password"),
 			deviceType = req.param("device_type"),
+			referral = req.param("referral"),
 			locale = req.param("locale");
 
 		try {
@@ -24,6 +25,10 @@ module.exports = {
 			// Validate sent params
 			if (!deviceType || !email || !password) {
 				throw new CustomError(sails.__("You did not provide all signup details required."), { status: 400 });
+			}
+			
+			if(!referral){
+				referral = "";
 			}
 
 			if (!locale) {
@@ -55,7 +60,8 @@ module.exports = {
 				accountStatus: 1,
 				forceBalance: '0',
 				firstName: firstName,
-				lastName: lastName
+				lastName: lastName,
+				referral: referral
 			});
 
 			// Create the users wallet

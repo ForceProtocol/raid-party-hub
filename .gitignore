@@ -118,3 +118,4 @@ nbproject
 .node_history
 /config/env/development.js
 /assets/images/games/banners
+/config/cron.js

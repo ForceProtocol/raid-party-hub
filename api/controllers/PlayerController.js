@@ -12,7 +12,7 @@ module.exports = {
 
 	async signupPlayer(req, res) {
 
-		const email = req.param("email"),
+		let email = req.param("email"),
 			firstName = req.param("firstName"),
 			lastName = req.param("lastName"),
 			password = req.param("password"),

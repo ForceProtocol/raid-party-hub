@@ -343,7 +343,7 @@ module.exports = {
 						if(rewardCampaign.currency == 'FORCE'){
 							sails.log.debug("FORCE currency to be issued.");
 							forceBalance = parseFloat(player.forceBalance);
-							forceBalance += rewardCampaign.value;
+							forceBalance += parseFloat(rewardCampaign.value);
 							sails.log.debug("FORCE balance is: ",forceBalance);
 							Player.update({id:player.id},{forceBalance:forceBalance}).exec(function(err,updated){
 								if(err){

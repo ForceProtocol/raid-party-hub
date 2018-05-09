@@ -1107,8 +1107,12 @@ module.exports = {
 
 				player.code = playerCode;
 			}
+			
+			if(!player.deviceId){
+				player.deviceId = '';
+			}
 
-			return res.ok({ code: player.code });
+			return res.ok({ code: player.code, device_id: player.deviceId });
 		} catch (err) {
 			return util.errorResponse(err, res);
 		}

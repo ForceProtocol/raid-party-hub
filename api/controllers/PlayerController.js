@@ -358,8 +358,9 @@ module.exports = {
 						await RewardCampaign.update({ id: rewardCampaign.id }, { maxWinningPlayers: rewardCampaign.maxWinningPlayers - 1 });
 
 						// TODO: Send push notification that player won this reward
-						let message = "You got an instant win!";
+						let message = "You got an instant win! " + rewardCampaign.value + rewardCampaign.currency + " has been added to your balance";
 						await PlayerNotifications.create({ title: "Instant Win", message: message, players: player.id });
+						await OneSignalService.sendNotificationsToMultipleDevices({deviceIds: [player.deviceId], text: message});
 					}
 				}
 				

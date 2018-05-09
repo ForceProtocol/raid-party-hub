@@ -302,7 +302,8 @@ module.exports = {
 
 				// Cycle through each reward campaign
 				let totalEventsToComplete = 0,
-					playerCompletedEvents = 0;
+					playerCompletedEvents = 0,
+					forceBalance;
 					
 				for (const rewardCampaign of activeRewardCampaigns) {
 					if (!rewardCampaign.rewardCampaignGameEvents) {
@@ -338,6 +339,20 @@ module.exports = {
 						sails.log.debug("The player has completed all events required for reward");
 						let rewardPlayer = await QualifiedPlayers.create({ players: player.id, game: game.id, rewardCampaign: rewardCampaign.id, isWinner: true, points: 1 });
 						let issueReward = await PlayerRewards.create({ player: player.id, game: game.id, reason: rewardCampaign.reason, currency: rewardCampaign.currency, amount: rewardCampaign.value, rewardCampaign: rewardCampaign.id });
+						
+						if(rewardCampaign.currency == 'FORCE'){
+							sails.log.debug("FORCE currency to be issued.");
+							forceBalance = parseFloat(player.forceBalance);
+							forceBalance += rewardCampaign.value;
+							sails.log.debug("FORCE balance is: ",forceBalance);
+							Player.update({id:player.id},{forceBalance:forceBalance}).exec(function(err,updated){
+								if(err){
+									sails.log.error("trackPlayerEvent update player force balance failed: ",err);
+								}else{
+									sails.log.debug("FORCE balance should have been updated");
+								}
+							});
+						}
 
 						// Reduce total potential winners now
 						await RewardCampaign.update({ id: rewardCampaign.id }, { maxWinningPlayers: rewardCampaign.maxWinningPlayers - 1 });

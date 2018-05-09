@@ -34,6 +34,7 @@ module.exports.policies = {
         updatePassword: 'tokenAuth',
         getNotifications: 'tokenAuth',
         deleteNotification: 'tokenAuth',
+        deviceData: 'tokenAuth',
     },
 
     DeveloperController: {

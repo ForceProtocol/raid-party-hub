@@ -1259,5 +1259,37 @@ module.exports = {
 		})
 
 		return res.ok("success");
-	}
+	},
+	
+	
+	
+	/**
+	* Device Data update player
+	*/
+	async deviceData(req, res) {
+		try {
+			let deviceType = req.param("device_type").toLowerCase(),
+				deviceId = req.param("device_id");
+				
+			if (!locale) {
+				locale = 'en';
+			}
+			
+			// Get games we need for this device
+			let player = await Player.findOne({id: req.token.user.id});
+
+			if (!player) {
+				throw new CustomError('Could not find that player.', { status: 401, err_code: "not_found" });
+			}
+			
+			await Player.update({id:player.id},{deviceId:deviceId,deviceType:deviceType});
+
+			return res.ok({success:true});
+		} catch (err) {
+			return util.errorResponse(err, res);
+		}
+	},
+
+	
+	
 };

@@ -72,33 +72,27 @@ module.exports = {
 			if (locale == 'es' || locale == 'es_ES' || locale == 'es-MX') {
 				subject = "Bienvenido a RaidParty! Activa tu cuenta para comenzar a ganar recompensas";
 				msg = `¡Bienvenido a RaidParty! <br /> 
-					Su cuenta ha sido creada y ahora está esperando su activación. Ingrese el PIN de 6 dígitos a continuación en la pantalla de activación del PIN en la aplicación móvil RaidParty.
-					<br /><br /> 
-					<strong>${pin}</ strong>
+					Tu cuenta ha sido creada. Descargue la <a href="https://play.google.com/store/apps/details?id=com.app.Raidparty">aplicación móvil RaidParty aquí</a> para usuarios de Android e inicie sesión con su correo electrónico y contraseña creada. 
 					<br />
-					<br />
-					Recuerde también ingresar su propia identificación de jugador de 7 caracteres en la configuración del juego, que encontrará en la página de la lista de juegos en la aplicación móvil.
-					<br /> Esto es importante para poder rastrear la actividad de tu juego. 
-					<br /><br /> 
-					Mantén la calma, sigue jugando <br />
+					Si tiene un dispositivo con iOS, espere hasta que nuestro equipo lance la versión de iOS de la aplicación. <br />
+					Recuerde también ingresar su propia identificación de jugador de 7 caracteres en la configuración del juego, que encontrará en la página de la lista de juegos en la aplicación móvil. <br />
+					Esto es importante para poder rastrear la actividad de tu juego. <br /> <br />
 					El equipo de éxito de RaidParty`;
 			} else if (locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR') {
 				subject = "Bem vindo a RaidParty! Ative a sua conta e começe a ganhar recompensas ";
-				msg = `Bem vindo a  RaidParty!<br />
-					A sua conta foi criada e precisa de ser agora ativada. Por favor digite o PIN de 6 digitos de seguida na tela de ativação de PIN na aplicação RaidParty para celular.<br /><br />
-					<strong>${pin}</strong><br /><br />
-				   Lembre de introduzir o seu ID unico de 7 Digitos na pagina de definições do jogo, os jogos estão listados na aplicação .<br />
-					Este passo é essencial de forma a seguir o seu processo no jogo selecionado.<br /><br />
-					Sem Stress, Continue Jogando<br />
-					A equipe RaidParty`;
+				msg = `Bem-vindo ao RaidParty! <br />
+						Sua conta foi criada. Faça o download do <a href="https://play.google.com/store/apps/details?id=com.app.Raidparty">aplicativo móvel RaidParty aqui</a> para usuários do Android e faça login usando seu e-mail e senha criada. <br />
+						Se você tiver um dispositivo iOS, aguarde até que nossa equipe libere a versão iOS do aplicativo. <br />
+						Lembre-se também de inserir seu próprio ID de 7 caracteres exclusivo nas configurações do jogo, que você encontrará na página da lista de jogos no aplicativo móvel. <br />
+						Isso é importante para que sua atividade no jogo possa ser rastreada. <br /> <br />
+						A equipe de sucesso do RaidParty`;
 			} else {
 				subject = "Welcome to RaidParty! Activate your account to start earning rewards";
 				msg = `Welcome to RaidParty!<br />
-					Your account has been created and is now awaiting your activation. Please enter the 6 digit PIN below into the PIN activation screen in the RaidParty mobile app.<br /><br />
-					<strong>${pin}</strong><br /><br />
+					Your account has been created. Please download the <a href="https://play.google.com/store/apps/details?id=com.app.Raidparty">RaidParty mobile app here</a> for Android users and login using your email and password created.<br />
+					If you have an iOS device please wait until our team release the iOS version of the app.<br />
 					Also remember to enter your own unique 7 character player ID into the game settings, which you will find in the games list page on the mobile app.<br />
 					This is important so that your game activity can be tracked.<br /><br />
-					Keep calm, keep playing<br />
 					The RaidParty success team`;
 			}
 

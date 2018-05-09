@@ -66,6 +66,52 @@ module.exports = {
 
 			// Create the users wallet
 			//WalletService.createUserWallet(player.id).catch(err=>{sails.log.error('On signup, failed to create player wallet: ', err)});
+			
+			let subject, msg;
+
+			if (locale == 'es' || locale == 'es_ES' || locale == 'es-MX') {
+				subject = "Bienvenido a RaidParty! Activa tu cuenta para comenzar a ganar recompensas";
+				msg = `¡Bienvenido a RaidParty! <br /> 
+					Su cuenta ha sido creada y ahora está esperando su activación. Ingrese el PIN de 6 dígitos a continuación en la pantalla de activación del PIN en la aplicación móvil RaidParty.
+					<br /><br /> 
+					<strong>${pin}</ strong>
+					<br />
+					<br />
+					Recuerde también ingresar su propia identificación de jugador de 7 caracteres en la configuración del juego, que encontrará en la página de la lista de juegos en la aplicación móvil.
+					<br /> Esto es importante para poder rastrear la actividad de tu juego. 
+					<br /><br /> 
+					Mantén la calma, sigue jugando <br />
+					El equipo de éxito de RaidParty`;
+			} else if (locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR') {
+				subject = "Bem vindo a RaidParty! Ative a sua conta e começe a ganhar recompensas ";
+				msg = `Bem vindo a  RaidParty!<br />
+					A sua conta foi criada e precisa de ser agora ativada. Por favor digite o PIN de 6 digitos de seguida na tela de ativação de PIN na aplicação RaidParty para celular.<br /><br />
+					<strong>${pin}</strong><br /><br />
+				   Lembre de introduzir o seu ID unico de 7 Digitos na pagina de definições do jogo, os jogos estão listados na aplicação .<br />
+					Este passo é essencial de forma a seguir o seu processo no jogo selecionado.<br /><br />
+					Sem Stress, Continue Jogando<br />
+					A equipe RaidParty`;
+			} else {
+				subject = "Welcome to RaidParty! Activate your account to start earning rewards";
+				msg = `Welcome to RaidParty!<br />
+					Your account has been created and is now awaiting your activation. Please enter the 6 digit PIN below into the PIN activation screen in the RaidParty mobile app.<br /><br />
+					<strong>${pin}</strong><br /><br />
+					Also remember to enter your own unique 7 character player ID into the game settings, which you will find in the games list page on the mobile app.<br />
+					This is important so that your game activity can be tracked.<br /><br />
+					Keep calm, keep playing<br />
+					The RaidParty success team`;
+			}
+
+
+			// Send activation email/SMS to player to activate their account
+			await EmailService.sendEmail({
+				fromEmail: 'support@raidparty.io',
+				fromName: 'Success Team',
+				toEmail: player.email,
+				toName: player.email,
+				subject: subject,
+				body: msg
+			});
 
 			/** Add to normal subscriber list **/
 			MailchimpService.addSubscriber("bb2455ea6e", email, firstName, lastName, "pending", locale).then(function (addResponse) {

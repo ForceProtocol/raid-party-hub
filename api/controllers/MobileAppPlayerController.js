@@ -1238,11 +1238,11 @@ module.exports = {
 					const tempPassword = util.getPlayerGameCode(8);
 					let updatedPlayer = await Player.update({ id: player.id }, { password: tempPassword, accountStatus: 2 });
 					if (!_.isEmpty(updatedPlayer)) {
-						const message = `Congrats! We have activated your account on RaidParty. Please find your account details below to login to the app with.\n
-							Registered email: ${updatedPlayer[0].email}\n
-							Temporary Password: ${tempPassword}\n
-							Player Code: ${updatedPlayer[0].code}\n\n
-							You can download the <a href="https://play.google.com/store/apps/details?id=com.app.Raidparty">RaidParty app for Android here</a>\n\n
+						const message = `Congrats! We have activated your account on RaidParty. Please find your account details below to login to the app with.<br />
+							Registered email: ${updatedPlayer[0].email}<br />
+							Temporary Password: ${tempPassword}<br />
+							Player Code: ${updatedPlayer[0].code}<br /><br />
+							You can download the <a href="https://play.google.com/store/apps/details?id=com.app.Raidparty">RaidParty app for Android here</a> and login using the details above.<br />
 							Our team are awaiting approval for listing of our app on iOS. We will send an email once it has gone live.`;
 						await EmailService.sendEmail({
 							fromEmail: 'support@raidparty.io',

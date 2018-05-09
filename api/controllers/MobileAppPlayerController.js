@@ -1271,10 +1271,6 @@ module.exports = {
 			let deviceType = req.param("device_type").toLowerCase(),
 				deviceId = req.param("device_id");
 				
-			if (!locale) {
-				locale = 'en';
-			}
-			
 			// Get games we need for this device
 			let player = await Player.findOne({id: req.token.user.id});
 

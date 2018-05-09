@@ -292,64 +292,59 @@ module.exports = {
 			res.json('201', recordGameEvent);
 			
 			// Check if this event is attached to a reward campaign event of type 2 (instant win, but one time)
-			if (!eventTypeId) {
-			}
-			// If eventTypeId is 2, it means it is an instant win
-			else if (eventTypeId == 2) {
-				let dateNow = new Date();
-				let activeRewardCampaigns = await RewardCampaign.find({ game: game.id, rewardTypeId: 2, rewardProcessed: false, maxWinningPlayers: { '>': 0 }, startDate: { '<=': dateNow }, endDate: { '>=': dateNow } })
-					.populate('rewardCampaignGameEvents');
+			let dateNow = new Date();
+			let activeRewardCampaigns = await RewardCampaign.find({ game: game.id, rewardTypeId: 2, rewardProcessed: false, maxWinningPlayers: { '>': 0 }, startDate: { '<=': dateNow }, endDate: { '>=': dateNow } })
+				.populate('rewardCampaignGameEvents');
+				
+			if (!activeRewardCampaigns) {
+				sails.log.debug("PlayerController.trackEvent: No reward campaign game events found for that.");
+			} else {
+
+				// Cycle through each reward campaign
+				let totalEventsToComplete = 0,
+					playerCompletedEvents = 0;
 					
-				if (!activeRewardCampaigns) {
-					sails.log.debug("PlayerController.trackEvent: No reward campaign game events found for that.");
-				} else {
+				for (const rewardCampaign of activeRewardCampaigns) {
+					if (!rewardCampaign.rewardCampaignGameEvents) {
+						sails.log.debug("PlayerController.trackEvent: No reward campaign game events found for this reward campaign.", rewardCampaign);
+						continue;
+					}
 
-					// Cycle through each reward campaign
-					let totalEventsToComplete = 0,
-						playerCompletedEvents = 0;
-						
-					for (const rewardCampaign of activeRewardCampaigns) {
-						if (!rewardCampaign.rewardCampaignGameEvents) {
-							sails.log.debug("PlayerController.trackEvent: No reward campaign game events found for this reward campaign.", rewardCampaign);
-							continue;
+					totalEventsToComplete = rewardCampaign.rewardCampaignGameEvents.length;
+					playerCompletedEvents = 0;
+
+					// Make sure the player has not already been rewarded this
+					let playerRewardedAlready = await QualifiedPlayers.findOne({ players: player.id, rewardCampaign: rewardCampaign.id, isWinner: true });
+
+					// Player already claimed this reward
+					if (playerRewardedAlready) {
+						sails.log.debug("PlayerController.trackEvent: the player has already been rewarded for this");
+						continue;
+					}
+
+					// Cycle through each reward campaign required event
+					for (const rewardCampaignEvent of rewardCampaign.rewardCampaignGameEvents) {
+
+						// Check if player has achieved this particular event on this occassion
+						if (rewardCampaignEvent.valueMin <= eventValue && rewardCampaignEvent.valueMax >= eventValue) {
+							sails.log.debug("The player has completed an event for reward: ");
+							playerCompletedEvents++;
 						}
+					}
 
-						totalEventsToComplete = rewardCampaign.rewardCampaignGameEvents.length;
-						playerCompletedEvents = 0;
+					// The player has completed all the neccessary events for this reward, 
+					// to be rewarded
+					if (playerCompletedEvents >= totalEventsToComplete) {
+						sails.log.debug("The player has completed all events required for reward");
+						let rewardPlayer = await QualifiedPlayers.create({ players: player.id, game: game.id, rewardCampaign: rewardCampaign.id, isWinner: true, points: 1 });
+						let issueReward = await PlayerRewards.create({ player: player.id, game: game.id, reason: rewardCampaign.reason, currency: rewardCampaign.currency, amount: rewardCampaign.value, rewardCampaign: rewardCampaign.id });
 
-						// Make sure the player has not already been rewarded this
-						let playerRewardedAlready = await QualifiedPlayers.findOne({ players: player.id, rewardCampaign: rewardCampaign.id, isWinner: true });
+						// Reduce total potential winners now
+						await RewardCampaign.update({ id: rewardCampaign.id }, { maxWinningPlayers: rewardCampaign.maxWinningPlayers - 1 });
 
-						// Player already claimed this reward
-						if (playerRewardedAlready) {
-							sails.log.debug("PlayerController.trackEvent: the player has already been rewarded for this");
-							continue;
-						}
-
-						// Cycle through each reward campaign required event
-						for (const rewardCampaignEvent of rewardCampaign.rewardCampaignGameEvents) {
-
-							// Check if player has achieved this particular event on this occassion
-							if (rewardCampaignEvent.valueMin <= eventValue && rewardCampaignEvent.valueMax >= eventValue) {
-								sails.log.debug("The player has completed an event for reward: ");
-								playerCompletedEvents++;
-							}
-						}
-
-						// The player has completed all the neccessary events for this reward, 
-						// to be rewarded
-						if (playerCompletedEvents >= totalEventsToComplete) {
-							sails.log.debug("The player has completed all events required for reward");
-							let rewardPlayer = await QualifiedPlayers.create({ players: player.id, game: game.id, rewardCampaign: rewardCampaign.id, isWinner: true, points: 1 });
-							let issueReward = await PlayerRewards.create({ player: player.id, game: game.id, reason: rewardCampaign.reason, currency: rewardCampaign.currency, amount: rewardCampaign.value, rewardCampaign: rewardCampaign.id });
-
-							// Reduce total potential winners now
-							await RewardCampaign.update({ id: rewardCampaign.id }, { maxWinningPlayers: rewardCampaign.maxWinningPlayers - 1 });
-
-							// TODO: Send push notification that player won this reward
-							let message = "You got an instant win!";
-							await PlayerNotifications.create({ title: "Instant Win", message: message, players: player.id });
-						}
+						// TODO: Send push notification that player won this reward
+						let message = "You got an instant win!";
+						await PlayerNotifications.create({ title: "Instant Win", message: message, players: player.id });
 					}
 				}
 				

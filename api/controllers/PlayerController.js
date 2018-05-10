@@ -57,7 +57,7 @@ module.exports = {
 				password: password,
 				deviceType: deviceType,
 				pin: pin,
-				accountStatus: 1,
+				accountStatus: 2,
 				forceBalance: '0',
 				firstName: firstName,
 				lastName: lastName,

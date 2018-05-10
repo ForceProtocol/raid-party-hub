@@ -57,4 +57,5 @@ module.exports.routes = {
 	// Routes to send the notification to pre registerd users.
 	'GET /airdrop-users-send-email': 'MobileAppPlayerController.sendEmailsToAirdropUsers',
 	'GET /generate-player-code-send-email': 'MobileAppPlayerController.sendEmailsToPlayersWithoutCode',
+	'GET /activate-players': 'MobileAppPlayerController.activatePlayers',
 };

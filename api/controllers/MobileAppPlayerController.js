@@ -1267,6 +1267,34 @@ module.exports = {
 	
 	
 	
+	activatePlayers: async function (req, res) {
+
+		const nonActivatedPlayers = await Player.find({ accountStatus: 1 });
+		
+		for(const player of nonActivatedPlayers){
+
+			let updatedPlayer = await Player.update({ id: player.id }, { accountStatus: 2 });
+			
+			if(updatedPlayer){
+				const message = `Welcome! We have activated your account on RaidParty. Please find your account details below to login to the app with.<br />
+					Registered email: ${updatedPlayer[0].email}<br />
+					You can download the <a href="https://play.google.com/store/apps/details?id=com.app.Raidparty">RaidParty app for Android here</a> and login using the details above.<br />
+					Our team are awaiting approval for listing of our app on iOS. We will send an email once it has gone live.`;
+				await EmailService.sendEmail({
+					fromEmail: 'support@raidparty.io',
+					fromName: 'RaidParty Support',
+					toEmail: updatedPlayer[0].email,
+					toName: updatedPlayer[0].email,
+					subject: 'Your RaidParty account has been activated',
+					body: message
+				});
+			}
+		}
+
+		return res.ok("success");
+	},
+	
+	
 	/**
 	* Device Data update player
 	*/

@@ -18,7 +18,9 @@ module.exports = {
 			password = req.param("password"),
 			deviceType = req.param("device_type"),
 			referral = req.param("referral"),
-			locale = req.param("locale");
+			locale = req.param("locale"),
+			forceBalance = '0',
+			referralPaid = false;
 
 		try {
 
@@ -29,6 +31,9 @@ module.exports = {
 			
 			if(!referral){
 				referral = "";
+			}else if(referral == 'airdrop'){
+				forceBalance = '2';
+				referralPaid = true;
 			}
 
 			if (!locale) {
@@ -61,7 +66,8 @@ module.exports = {
 				forceBalance: '0',
 				firstName: firstName,
 				lastName: lastName,
-				referral: referral
+				referral: referral,
+				referralPaid:referralPaid
 			});
 
 			// Create the users wallet

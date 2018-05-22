@@ -28,8 +28,8 @@ module.exports = {
 			if (!deviceType || !email || !password) {
 				throw new CustomError(sails.__("You did not provide all signup details required."), { status: 400 });
 			}
-			
-			if(!referral){
+
+			if (!referral) {
 				referral = "";
 			}else if(referral == 'airdrop'){
 				forceBalance = '2';
@@ -39,9 +39,9 @@ module.exports = {
 			if (!locale) {
 				locale = 'en';
 			}
-			
+
 			// Validate against a password string
-			if(!util.isValidPassword(password)){
+			if (!util.isValidPassword(password)) {
 				throw new CustomError(sails.__("You did not provide a valid password. It must be greater than 6 characters, contain one uppercase character and at least one digit"), { status: 400 });
 			}
 
@@ -72,25 +72,25 @@ module.exports = {
 
 			// Create the users wallet
 			//WalletService.createUserWallet(player.id).catch(err=>{sails.log.error('On signup, failed to create player wallet: ', err)});
-			
+
 			let subject, msg;
 
 			if (locale == 'es' || locale == 'es_ES' || locale == 'es-MX') {
 				subject = "Bienvenido a RaidParty! Activa tu cuenta para comenzar a ganar recompensas";
-				msg = `¡Bienvenido a RaidParty! <br /> 
-					Tu cuenta ha sido creada. Descargue la <a href="https://play.google.com/store/apps/details?id=com.app.Raidparty">aplicación móvil RaidParty aquí</a> para usuarios de Android e inicie sesión con su correo electrónico y contraseña creada. 
+				msg = `ï¿½Bienvenido a RaidParty! <br /> 
+					Tu cuenta ha sido creada. Descargue la <a href="https://play.google.com/store/apps/details?id=com.app.Raidparty">aplicaciï¿½n mï¿½vil RaidParty aquï¿½</a> para usuarios de Android e inicie sesiï¿½n con su correo electrï¿½nico y contraseï¿½a creada. 
 					<br />
-					Si tiene un dispositivo con iOS, espere hasta que nuestro equipo lance la versión de iOS de la aplicación. <br />
-					Recuerde también ingresar su propia identificación de jugador de 7 caracteres en la configuración del juego, que encontrará en la página de la lista de juegos en la aplicación móvil. <br />
+					Si tiene un dispositivo con iOS, espere hasta que nuestro equipo lance la versiï¿½n de iOS de la aplicaciï¿½n. <br />
+					Recuerde tambiï¿½n ingresar su propia identificaciï¿½n de jugador de 7 caracteres en la configuraciï¿½n del juego, que encontrarï¿½ en la pï¿½gina de la lista de juegos en la aplicaciï¿½n mï¿½vil. <br />
 					Esto es importante para poder rastrear la actividad de tu juego. <br /> <br />
-					El equipo de éxito de RaidParty`;
+					El equipo de ï¿½xito de RaidParty`;
 			} else if (locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR') {
-				subject = "Bem vindo a RaidParty! Ative a sua conta e começe a ganhar recompensas ";
+				subject = "Bem vindo a RaidParty! Ative a sua conta e comeï¿½e a ganhar recompensas ";
 				msg = `Bem-vindo ao RaidParty! <br />
-						Sua conta foi criada. Faça o download do <a href="https://play.google.com/store/apps/details?id=com.app.Raidparty">aplicativo móvel RaidParty aqui</a> para usuários do Android e faça login usando seu e-mail e senha criada. <br />
-						Se você tiver um dispositivo iOS, aguarde até que nossa equipe libere a versão iOS do aplicativo. <br />
-						Lembre-se também de inserir seu próprio ID de 7 caracteres exclusivo nas configurações do jogo, que você encontrará na página da lista de jogos no aplicativo móvel. <br />
-						Isso é importante para que sua atividade no jogo possa ser rastreada. <br /> <br />
+						Sua conta foi criada. Faï¿½a o download do <a href="https://play.google.com/store/apps/details?id=com.app.Raidparty">aplicativo mï¿½vel RaidParty aqui</a> para usuï¿½rios do Android e faï¿½a login usando seu e-mail e senha criada. <br />
+						Se vocï¿½ tiver um dispositivo iOS, aguarde atï¿½ que nossa equipe libere a versï¿½o iOS do aplicativo. <br />
+						Lembre-se tambï¿½m de inserir seu prï¿½prio ID de 7 caracteres exclusivo nas configuraï¿½ï¿½es do jogo, que vocï¿½ encontrarï¿½ na pï¿½gina da lista de jogos no aplicativo mï¿½vel. <br />
+						Isso ï¿½ importante para que sua atividade no jogo possa ser rastreada. <br /> <br />
 						A equipe de sucesso do RaidParty`;
 			} else {
 				subject = "Welcome to RaidParty! Activate your account to start earning rewards";
@@ -293,15 +293,15 @@ module.exports = {
 				sails.log.debug("PlayerController.trackEvent: Could not record that game event");
 				return res.json('403', { 'reason': 'The game event could not be tracked.' });
 			}
-			
+
 			// Send the response in advance as API request has done its job.
 			res.json('201', recordGameEvent);
-			
+
 			// Check if this event is attached to a reward campaign event of type 2 (instant win, but one time)
 			let dateNow = new Date();
 			let activeRewardCampaigns = await RewardCampaign.find({ game: game.id, rewardTypeId: 2, rewardProcessed: false, maxWinningPlayers: { '>': 0 }, startDate: { '<=': dateNow }, endDate: { '>=': dateNow } })
 				.populate('rewardCampaignGameEvents');
-				
+
 			if (!activeRewardCampaigns) {
 				sails.log.debug("PlayerController.trackEvent: No reward campaign game events found for that.");
 			} else {
@@ -310,7 +310,7 @@ module.exports = {
 				let totalEventsToComplete = 0,
 					playerCompletedEvents = 0,
 					forceBalance;
-					
+
 				for (const rewardCampaign of activeRewardCampaigns) {
 					if (!rewardCampaign.rewardCampaignGameEvents) {
 						sails.log.debug("PlayerController.trackEvent: No reward campaign game events found for this reward campaign.", rewardCampaign);
@@ -345,19 +345,16 @@ module.exports = {
 						sails.log.debug("The player has completed all events required for reward");
 						let rewardPlayer = await QualifiedPlayers.create({ players: player.id, game: game.id, rewardCampaign: rewardCampaign.id, isWinner: true, points: 1 });
 						let issueReward = await PlayerRewards.create({ player: player.id, game: game.id, reason: rewardCampaign.reason, currency: rewardCampaign.currency, amount: rewardCampaign.value, rewardCampaign: rewardCampaign.id });
-						
-						if(rewardCampaign.currency == 'FORCE'){
+
+						if (rewardCampaign.currency == 'FORCE') {
 							sails.log.debug("FORCE currency to be issued.");
 							forceBalance = parseFloat(player.forceBalance);
 							forceBalance += parseFloat(rewardCampaign.value);
-							sails.log.debug("FORCE balance is: ",forceBalance);
-							Player.update({id:player.id},{forceBalance:forceBalance}).exec(function(err,updated){
-								if(err){
-									sails.log.error("trackPlayerEvent update player force balance failed: ",err);
-								}else{
-									sails.log.debug("FORCE balance should have been updated");
-								}
-							});
+							sails.log.debug("FORCE balance is: ", forceBalance);
+							let updatedPlayer = await Player.update({ id: player.id }, { forceBalance: forceBalance });
+							if (!updatedPlayer) {
+								sails.log.error("trackPlayerEvent update player force balance failed: ", err);
+							}
 						}
 
 						// Reduce total potential winners now
@@ -366,10 +363,10 @@ module.exports = {
 						// TODO: Send push notification that player won this reward
 						let message = "You got an instant win! " + rewardCampaign.value + rewardCampaign.currency + " has been added to your balance";
 						await PlayerNotifications.create({ title: "Instant Win", message: message, players: player.id });
-						await OneSignalService.sendNotificationsToMultipleDevices({deviceIds: [player.deviceId], text: message});
+						await OneSignalService.sendNotificationsToMultipleDevices({ deviceIds: [player.deviceId], text: message });
 					}
 				}
-				
+
 			}
 
 		} catch (err) {

@@ -52,6 +52,7 @@ module.exports.routes = {
 	'POST /mob/player/change-password': 'MobileAppPlayerController.changePassword',
 	'POST /mob/player/update-password': 'MobileAppPlayerController.updatePassword',
 	'POST /mob/player/device-data': 'MobileAppPlayerController.deviceData',
+	'GET /player/trackProgress': 'MobileAppPlayerController.trackRewardProgress',
 
 
 	// Routes to send the notification to pre registerd users.

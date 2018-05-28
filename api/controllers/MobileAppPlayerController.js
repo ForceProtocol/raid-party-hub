@@ -76,7 +76,7 @@ module.exports = {
 			let okMsg, subject, msg;
 
 			if (locale == 'es' || locale == 'es_ES' || locale == 'es-MX') {
-				await OneSignalService.sendNotificationsToMultipleDevices({ deviceIds: [deviceId], text: pin + " es tu pin de activación"  });
+				await OneSignalService.sendNotificationsToMultipleDevices({ deviceIds: [deviceId], text: pin + " es tu pin de activación" });
 				okMsg = "Por favor revise su bandeja de entrada de correo electrónico para un pin de 6 dígitos e ingrese a continuación para activar su cuenta";
 				subject = "Bienvenido a RaidParty! Activa tu cuenta para comenzar a ganar recompensas";
 				msg = `¡Bienvenido a RaidParty! <br /> 
@@ -91,7 +91,7 @@ module.exports = {
 					Mantén la calma, sigue jugando <br />
 					El equipo de éxito de RaidParty`;
 			} else if (locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR') {
-				await OneSignalService.sendNotificationsToMultipleDevices({ deviceIds: [deviceId], text: pin + " é o seu pino de ativação"  });
+				await OneSignalService.sendNotificationsToMultipleDevices({ deviceIds: [deviceId], text: pin + " é o seu pino de ativação" });
 				okMsg = "Por favor verifique o seu email por um PIN de 6 Digitos e digite a seguir para ativar a sua conta";
 				subject = "Bem vindo a RaidParty! Ative a sua conta e começe a ganhar recompensas ";
 				msg = `Bem vindo a  RaidParty!<br />
@@ -102,7 +102,7 @@ module.exports = {
 					Sem Stress, Continue Jogando<br />
 					A equipe RaidParty`;
 			} else {
-				await OneSignalService.sendNotificationsToMultipleDevices({ deviceIds: [deviceId], text: pin + " is your activation pin"  });
+				await OneSignalService.sendNotificationsToMultipleDevices({ deviceIds: [deviceId], text: pin + " is your activation pin" });
 				okMsg = "Please check your email inbox for a 6 digit pin and enter below to activate your account";
 				subject = "Welcome to RaidParty! Activate your account to start earning rewards";
 				msg = `Welcome to RaidParty!<br />
@@ -152,11 +152,11 @@ module.exports = {
 			let email = req.param("email"),
 				password = req.param("password"),
 				locale = req.param("locale");
-				
+
 			if (!locale) {
 				locale = 'en';
 			}
-				
+
 			// Validate sent params
 			if (!email || !password) {
 				if (locale == 'es' || locale == 'es_ES' || locale == 'es-MX') {
@@ -247,11 +247,11 @@ module.exports = {
 			let pin = req.param("pin"),
 				email = req.param("email"),
 				locale = req.param("locale");
-				
+
 			if (!locale) {
 				locale = 'en';
 			}
-			
+
 			// Validate sent params
 			if (!pin || !email) {
 				if (locale == 'es' || locale == 'es_ES' || locale == 'es-MX') {
@@ -397,7 +397,7 @@ module.exports = {
 		try {
 			let email = req.param("email"),
 				locale = req.param("locale");
-				
+
 			if (!locale) {
 				locale = 'en';
 			}
@@ -498,7 +498,7 @@ module.exports = {
 			let pin = req.param("pin"),
 				email = req.param("email"),
 				locale = req.param("locale");
-				
+
 			if (!locale) {
 				locale = 'en';
 			}
@@ -641,7 +641,7 @@ module.exports = {
 				email = req.param("email"),
 				newPassword = req.param("password"),
 				locale = req.param("locale");
-				
+
 			if (!locale) {
 				locale = 'en';
 			}
@@ -779,7 +779,7 @@ module.exports = {
 		try {
 			let player = await Player.findOne({ id: req.token.user.id }),
 				locale = req.param("locale");
-				
+
 			if (!locale) {
 				locale = 'en';
 			}
@@ -845,7 +845,7 @@ module.exports = {
 			let currentPassword = req.param("current_password"),
 				newPassword = req.param("new_password"),
 				locale = req.param("locale");
-				
+
 			if (!locale) {
 				locale = 'en';
 			}
@@ -1107,8 +1107,8 @@ module.exports = {
 
 				player.code = playerCode;
 			}
-			
-			if(!player.deviceId){
+
+			if (!player.deviceId) {
 				player.deviceId = '';
 			}
 
@@ -1178,11 +1178,11 @@ module.exports = {
 		// External Connection to Mysql database server.
 		// Replace the Creds with actual ones.
 		const connection = await mysql.createConnection({
-		  adapter: 'sails-mysql',
-		  host: '178.62.109.184',
-		  user: 'triforcer236',
-		  password: 'ji4Zr56Bu72FY',
-		  database: 'triforcetokens_live'
+			adapter: 'sails-mysql',
+			host: '178.62.109.184',
+			user: 'triforcer236',
+			password: 'ji4Zr56Bu72FY',
+			database: 'triforcetokens_live'
 		});
 
 		const players = await Player.find({ accountStatus: 2 });
@@ -1264,18 +1264,18 @@ module.exports = {
 
 		return res.ok("success");
 	},
-	
-	
-	
+
+
+
 	activatePlayers: async function (req, res) {
 
 		const nonActivatedPlayers = await Player.find({ accountStatus: 1 });
-		
-		for(const player of nonActivatedPlayers){
+
+		for (const player of nonActivatedPlayers) {
 
 			let updatedPlayer = await Player.update({ id: player.id }, { accountStatus: 2 });
-			
-			if(updatedPlayer){
+
+			if (updatedPlayer) {
 				const message = `Welcome! We have activated your account on RaidParty. Please find your account details below to login to the app with.<br />
 					Registered email: ${updatedPlayer[0].email}<br />
 					You can download the <a href="https://play.google.com/store/apps/details?id=com.app.Raidparty">RaidParty app for Android here</a> and login using the details above.<br />
@@ -1293,8 +1293,8 @@ module.exports = {
 
 		return res.ok("success");
 	},
-	
-	
+
+
 	/**
 	* Device Data update player
 	*/
@@ -1302,22 +1302,64 @@ module.exports = {
 		try {
 			let deviceType = req.param("device_type").toLowerCase(),
 				deviceId = req.param("device_id");
-				
+
 			// Get games we need for this device
-			let player = await Player.findOne({id: req.token.user.id});
+			let player = await Player.findOne({ id: req.token.user.id });
 
 			if (!player) {
 				throw new CustomError('Could not find that player.', { status: 401, err_code: "not_found" });
 			}
-			
-			await Player.update({id:player.id},{deviceId:deviceId,deviceType:deviceType});
 
-			return res.ok({success:true});
+			await Player.update({ id: player.id }, { deviceId: deviceId, deviceType: deviceType });
+
+			return res.ok({ success: true });
 		} catch (err) {
 			return util.errorResponse(err, res);
 		}
 	},
 
-	
-	
+	async trackRewardProgress(req, res) {
+		try {
+			const rewardCampaignId = req.param('rewardCampaign');
+			// const playerId = req.token.user.id;
+			const playerId = req.param('player');
+			console.log(rewardCampaignId, playerId)
+			const rewardCampaign = await RewardCampaign.findOne({ id: rewardCampaignId }).populate('rewardCampaignGameEvents');
+			if (!rewardCampaign) {
+				throw new CustomError('Could not find Reward Campaign.', { status: 401, err_code: "not_found" });
+			}
+			const relevantGameEvents = _.map(rewardCampaign.rewardCampaignGameEvents, 'gameEvent');
+			console.log('relevantGameEvents', relevantGameEvents);
+			if (!relevantGameEvents) {
+			}
+			const playerRecordedEvents = await PlayerToGameEvent.find({ player: playerId });
+			console.log('playerRecordedEvents', playerRecordedEvents);
+			if (!playerRecordedEvents) {
+				throw new CustomError('No Player Recorded Events', { status: 404, err_code: "not_found" });
+			}
+			let playerCompletedEvents = 0, totalEventstoBeCompleted = 0;
+			_.each(rewardCampaign.rewardCampaignGameEvents, (rcgEvent) => {
+				totalEventstoBeCompleted++;
+				const playerEvents = _.find(playerRecordedEvents, (e) => e.gameEvent === rcgEvent.gameEvent);
+				if (!playerEvents) {
+					throw new CustomError('No Player Recorded Events', { status: 404, err_code: "not_found" });
+				}
+				rcgEvent.repeat = (rcgEvent.repeat) ? rcgEvent.repeat : 0;
+				totalEventstoBeCompleted = (rcgEvent.repeat > 0) ? totalEventstoBeCompleted + rcgEvent.repeat : totalEventstoBeCompleted;
+				if (rcgEvent.repeat <= playerEvents.length) {
+					_.each(playerEvents, (event) => {
+						if (event.eventValue >= rcgEvent.valueMin && event.eventValue >= rcgEvent.valueMax) {
+							playerCompletedEvents++;
+						}
+					})
+				}
+			})
+			return res.ok({ rewardCampaign: rewardCampaignId, totalEventstoBeCompleted, playerCompletedEvents })
+		} catch (err) {
+			return util.errorResponse(err, res);
+		}
+	}
+
+
+
 };

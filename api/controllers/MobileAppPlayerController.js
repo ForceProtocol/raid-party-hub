@@ -17,11 +17,13 @@ module.exports = {
 
 		let email = req.param("email"),
 			password = req.param("password"),
-			deviceType = req.param("device_type"),
-			deviceId = req.param("device_id"),
-			longitude = req.param("lon"),
-			latitude = req.param("lat"),
-			locale = req.param("locale");
+			firstname = req.param("firstName"),
+			lastname = req.param("lastName")
+		// deviceType = req.param("device_type"),
+		// deviceId = req.param("device_id"),
+		// longitude = req.param("lon"),
+		// latitude = req.param("lat"),
+		locale = req.param("locale");
 
 		try {
 
@@ -29,8 +31,8 @@ module.exports = {
 				locale = 'en';
 			}
 
-			// Validate sent params
-			if (!deviceType || !email || !password || !deviceId) {
+			// Validate firstname params
+			if (!firstname || !email || !password || !lastname) {
 				if (locale == 'es' || locale == 'es_ES' || locale == "es-MX") {
 					throw new CustomError("No proporcionó todos los detalles de registro necesarios.", { status: 400 });
 				} else if (locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR') {
@@ -55,20 +57,19 @@ module.exports = {
 
 			// Create activation PIN
 			let pin = util.randomFixedInteger(6);
-
 			// Create new player account
 			// AccountStatus: 0 = blocked, 1 = pending activation, 2 = activated
 			let player = await Player.create({
 				email: email,
 				password: password,
-				deviceType: deviceType,
-				deviceId: deviceId,
+				firstname: firstname,
+				lastname: lastname,
 				pin: pin,
 				accountStatus: 1,
 				forceBalance: '0',
-				latitude: latitude,
-				longitude: longitude
 			});
+
+			let playerCode = await PlayerService.generatePlayerSdkCode(player.id, 0);
 
 			// Create the users wallet
 			//WalletService.createUserWallet(player.id).catch(err=>{sails.log.error('On signup, failed to create player wallet: ', err)});
@@ -76,7 +77,7 @@ module.exports = {
 			let okMsg, subject, msg;
 
 			if (locale == 'es' || locale == 'es_ES' || locale == 'es-MX') {
-				await OneSignalService.sendNotificationsToMultipleDevices({ deviceIds: [deviceId], text: pin + " es tu pin de activación" });
+				// await OneSignalService.sendNotificationsToMultipleDevices({ deviceIds: [deviceId], text: pin + " es tu pin de activación" });
 				okMsg = "Por favor revise su bandeja de entrada de correo electrónico para un pin de 6 dígitos e ingrese a continuación para activar su cuenta";
 				subject = "Bienvenido a RaidParty! Activa tu cuenta para comenzar a ganar recompensas";
 				msg = `¡Bienvenido a RaidParty! <br /> 
@@ -91,7 +92,7 @@ module.exports = {
 					Mantén la calma, sigue jugando <br />
 					El equipo de éxito de RaidParty`;
 			} else if (locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR') {
-				await OneSignalService.sendNotificationsToMultipleDevices({ deviceIds: [deviceId], text: pin + " é o seu pino de ativação" });
+				// await OneSignalService.sendNotificationsToMultipleDevices({ deviceIds: [deviceId], text: pin + " é o seu pino de ativação" });
 				okMsg = "Por favor verifique o seu email por um PIN de 6 Digitos e digite a seguir para ativar a sua conta";
 				subject = "Bem vindo a RaidParty! Ative a sua conta e começe a ganhar recompensas ";
 				msg = `Bem vindo a  RaidParty!<br />
@@ -102,12 +103,14 @@ module.exports = {
 					Sem Stress, Continue Jogando<br />
 					A equipe RaidParty`;
 			} else {
-				await OneSignalService.sendNotificationsToMultipleDevices({ deviceIds: [deviceId], text: pin + " is your activation pin" });
+				// await OneSignalService.sendNotificationsToMultipleDevices({ deviceIds: [deviceId], text: pin + " is your activation pin" });
 				okMsg = "Please check your email inbox for a 6 digit pin and enter below to activate your account";
 				subject = "Welcome to RaidParty! Activate your account to start earning rewards";
+				activationLink = `${sails.config.PLAYER_APP_HOST}activate-player?playerId=${player.id}`;
 				msg = `Welcome to RaidParty!<br />
-					Your account has been created and is now awaiting your activation. Please enter the 6 digit PIN below into the PIN activation screen in the RaidParty mobile app.<br /><br />
+					Your account has been created and is now awaiting your activation. Please enter the 6 digit PIN below into the PIN activation screen by clicking on the following link.<br /><br />
 					<strong>${pin}</strong><br /><br />
+					<strong><a href=\"${activationLink}\">Activate My Account</a></strong><br /><br />
 					Also remember to enter your own unique 7 character player ID into the game settings, which you will find in the games list page on the mobile app.<br />
 					This is important so that your game activity can be tracked.<br /><br />
 					Keep calm, keep playing<br />
@@ -245,7 +248,7 @@ module.exports = {
 		try {
 
 			let pin = req.param("pin"),
-				email = req.param("email"),
+				playerId = req.param("playerId"),
 				locale = req.param("locale");
 
 			if (!locale) {
@@ -253,7 +256,7 @@ module.exports = {
 			}
 
 			// Validate sent params
-			if (!pin || !email) {
+			if (!pin || !playerId) {
 				if (locale == 'es' || locale == 'es_ES' || locale == 'es-MX') {
 					throw new CustomError('No proporcionó todos los detalles de inicio de sesión requeridos.', { status: 400 });
 				} else if (locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR') {
@@ -274,7 +277,7 @@ module.exports = {
 				}
 			}
 
-			let player = await Player.findOne({ email: email });
+			let player = await Player.findOne({ id: playerId });
 
 			// Could not find that account
 			if (!player) {
@@ -442,13 +445,14 @@ module.exports = {
 			let okMsg, subject, msg;
 
 			await Player.update({ id: player.id }, { pin: pin });
-
+			const activationLink = `${sails.config.PLAYER_APP_HOST}forgot-password?playerId=${player.id}`;
 			if (locale == 'es' || locale == 'es_ES' || locale == 'es-MX') {
 				okMsg = 'Por favor, revise su bandeja de entrada para encontrar un PIN de restablecimiento de contraseña de 6 dígitos';
 				subject = 'Bienvenido a RaidParty! Restablecer contraseña solicitada';
 				msg = `Hola, 
 					<br /> Usted solicitó un restablecimiento de contraseña. Ingrese el PIN de 6 dígitos a continuación en la pantalla de activación del PIN en la aplicación móvil RaidParty para restablecer su contraseña.<br /><br />
 					<strong>${pin}</strong><br /><br />
+					<strong><a href=\"${activationLink}\">Reset My password</a></strong><br /><br />
 					Mantén la calma, sigue jugando <br />
 					El equipo exitoso de RaidParty`;
 			} else if (locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR') {
@@ -457,14 +461,16 @@ module.exports = {
 				msg = `Olá,<br />
 					 Pediu que a sua palavra passe fosse alterada. Por favor digite o PIN de 6 digitos na tela de ativação da aplicação RaidParty para efetuar o reset da sua palvra passe.<br /><br />
 					 <strong>${pin}</strong><br /><br />
+					 <strong><a href=\"${activationLink}\">Reset My password</a></strong><br /><br />
 					Sem Stress, Continue Jogando<br />
 					A equipe RaidParty`;
 			} else {
 				okMsg = 'Please check your inbox to find a 6 digit password reset PIN';
 				subject = 'Welcome to RaidParty! Reset password requested';
 				msg = `Hi,<br />
-					You requested a password reset. Please enter the 6 digit PIN below into the PIN activation screen in the RaidParty mobile app to reset your password.<br /><br />
+					You requested a password reset. Please click on the link below and reset your passoword.<br /><br />
 					<strong>${pin}</strong><br /><br />
+					<strong><a href=\"${activationLink}\">Reset My password</a></strong><br /><br />
 					Keep calm, keep playing<br />
 					The RaidParty success team`;
 			}
@@ -637,9 +643,9 @@ module.exports = {
 	*/
 	async changePassword(req, res) {
 		try {
-			let pin = req.param("pin"),
-				email = req.param("email"),
-				newPassword = req.param("password"),
+			playerId = req.param("playerId"),
+				pin = req.param("pin")
+			newPassword = req.param("password"),
 				locale = req.param("locale");
 
 			if (!locale) {
@@ -647,7 +653,7 @@ module.exports = {
 			}
 
 			// Validate sent params
-			if (!email || !pin || !newPassword) {
+			if (!playerId || !newPassword) {
 				if (locale == 'es' || locale == 'es_ES' || locale == 'es-MX') {
 					throw new CustomError('No proporcionó todos los detalles requeridos.', { status: 400 });
 				} else if (locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR') {
@@ -657,7 +663,7 @@ module.exports = {
 				}
 			}
 
-			let player = await Player.findOne({ email: email });
+			let player = await Player.findOne({ id: playerId });
 
 			// Could not find that account
 			if (!player) {
@@ -1333,32 +1339,109 @@ module.exports = {
 			if (!relevantGameEvents) {
 			}
 			const playerRecordedEvents = await PlayerToGameEvent.find({ player: playerId });
-			console.log('playerRecordedEvents', playerRecordedEvents);
-			if (!playerRecordedEvents) {
-				throw new CustomError('No Player Recorded Events', { status: 404, err_code: "not_found" });
-			}
 			let playerCompletedEvents = 0, totalEventstoBeCompleted = 0;
-			_.each(rewardCampaign.rewardCampaignGameEvents, (rcgEvent) => {
-				totalEventstoBeCompleted++;
-				const playerEvents = _.find(playerRecordedEvents, (e) => e.gameEvent === rcgEvent.gameEvent);
-				if (!playerEvents) {
-					throw new CustomError('No Player Recorded Events', { status: 404, err_code: "not_found" });
-				}
-				rcgEvent.repeat = (rcgEvent.repeat) ? rcgEvent.repeat : 0;
-				totalEventstoBeCompleted = (rcgEvent.repeat > 0) ? totalEventstoBeCompleted + rcgEvent.repeat : totalEventstoBeCompleted;
-				if (rcgEvent.repeat <= playerEvents.length) {
-					_.each(playerEvents, (event) => {
-						if (event.eventValue >= rcgEvent.valueMin && event.eventValue >= rcgEvent.valueMax) {
-							playerCompletedEvents++;
-						}
-					})
-				}
+			if (!_.isEmpty(playerRecordedEvents)) {
+				_.each(rewardCampaign.rewardCampaignGameEvents, (rcgEvent) => {
+					totalEventstoBeCompleted++;
+					const playerEvents = _.find(playerRecordedEvents, (e) => e.gameEvent === rcgEvent.gameEvent);
+					if (!playerEvents) {
+						throw new CustomError('No Player Recorded Events', { status: 404, err_code: "not_found" });
+					}
+					rcgEvent.repeat = (rcgEvent.repeat) ? rcgEvent.repeat : 0;
+					totalEventstoBeCompleted = (rcgEvent.repeat > 0) ? totalEventstoBeCompleted + rcgEvent.repeat : totalEventstoBeCompleted;
+					if (rcgEvent.repeat <= playerEvents.length) {
+						_.each(playerEvents, (event) => {
+							if (event.eventValue >= rcgEvent.valueMin && event.eventValue >= rcgEvent.valueMax) {
+								playerCompletedEvents++;
+							}
+						})
+					}
+				})
+				return res.ok({ rewardCampaign: rewardCampaignId, totalEventstoBeCompleted, playerCompletedEvents })
+			}
+			return res.ok({
+				rewardCampaign: rewardCampaignId, totalEventstoBeCompleted: rewardCampaign.rewardCampaignGameEvents.length,
+				playerCompletedEvents: 0
 			})
-			return res.ok({ rewardCampaign: rewardCampaignId, totalEventstoBeCompleted, playerCompletedEvents })
 		} catch (err) {
 			return util.errorResponse(err, res);
 		}
+	},
+
+	async getPlayerGames(req, res) {
+		// const playerId = req.token.user.id;
+		let locale = req.param('locale');
+		const playerId = req.param('playerId');
+		if (!locale) {
+			locale = 'en';
+		}
+		const playerGames = await PlayerToGame.find({ player: playerId });
+		if (!playerGames) {
+			throw new CustomError('You haven not played any game yet!', { status: 401, err_code: "not_found" });
+		}
+		const finalResponse = {
+			gamesList: []
+		}
+		const playerGameIds = _.map(playerGames, 'game');
+		let games = await Game.find({ id: playerGameIds }).populate('rewardCampaign').populate('gamePlatforms');
+		for (game of games) {
+			// Prepare the prizes list
+			prizeList = [];
+			for (reward of game.rewardCampaign) {
+				rules = util.stringToJson(reward.rules);
+				if (rules) {
+					ruleLocale = rules.find(function (obj) { return obj.hasOwnProperty(locale); });
+
+					if (!ruleLocale) {
+						reward.rules = rules.find(function (obj) { return obj.hasOwnProperty('en'); });
+						reward.rules = reward.rules['en'];
+					} else {
+						reward.rules = ruleLocale[locale];
+					}
+				}
+				if (!reward.rules) {
+					reward.rules = rules;
+				}
+				// Ensure we set the correct language for the rules
+				description = util.stringToJson(reward.description);
+				if (description) {
+					descriptionLocale = description.find(function (obj) { return obj.hasOwnProperty(locale); });
+					if (!descriptionLocale) {
+						reward.description = reward.find(function (obj) { return obj.hasOwnProperty('en'); });
+						reward.description = reward.description['en'];
+					} else {
+						reward.description = descriptionLocale[locale];
+					}
+				}
+				if (!reward.description) {
+					reward.description = description;
+				}
+				prize = { id: reward.id, value: reward.value, currency: reward.currency, rules: reward.rules, maxQualifyingPlayers: reward.maxQualifyingPlayers, maxWinningPlayers: reward.maxWinningPlayers, startDate: reward.startDate, endDate: reward.endDate };
+				prizeList.push(prize);
+			}
+			// Ensure we set the correct language for the rules
+			description = util.stringToJson(game.description);
+			if (description) {
+				descriptionLocale = description.find(function (obj) { return obj.hasOwnProperty(locale); });
+				if (!descriptionLocale) {
+					game.description = description.find(function (obj) { return obj.hasOwnProperty('en'); });
+					game.description = game.description['en'];
+				} else {
+					game.description = descriptionLocale[locale];
+				}
+			}
+			if (!game.description) {
+				game.description = description;
+			}
+			// Convert game avatar to base64 encoded string
+			game.avatar = '/assets/images/' + game.avatar;
+			gameItem = { game_id: game.gameId, title: game.title, reward: game.rewardAvailable, description: game.description, jackpot: game.jackpot, bannerContent: game.bannerContent, link: game.link, platform: game.platform, avatar: game.avatar, prizes: prizeList };
+			finalResponse.gamesList.push(gameItem);
+		}
+		finalResponse['success'] = true;
+		return res.ok(finalResponse);
 	}
+
 
 
 

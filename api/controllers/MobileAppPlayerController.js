@@ -1056,7 +1056,7 @@ module.exports = {
 				}
 
 				// Convert game avatar to base64 encoded string
-				game.avatar = base64Img.base64Sync(sails.config.appPath + '/assets/images/games/banners/' + game.avatar);
+				game.avatar = '/assets/images/' + game.avatar;
 
 				gameItem = { game_id: game.gameId, title: game.title, reward: game.rewardAvailable, description: game.description, jackpot: game.jackpot, bannerContent: game.bannerContent, link: game.link, platform: game.platform, avatar: game.avatar, prizes: prizeList };
 
@@ -1329,13 +1329,12 @@ module.exports = {
 			const rewardCampaignId = req.param('rewardCampaign');
 			// const playerId = req.token.user.id;
 			const playerId = req.param('player');
-			console.log(rewardCampaignId, playerId)
+			console.log(playerId)
 			const rewardCampaign = await RewardCampaign.findOne({ id: rewardCampaignId }).populate('rewardCampaignGameEvents');
 			if (!rewardCampaign) {
 				throw new CustomError('Could not find Reward Campaign.', { status: 401, err_code: "not_found" });
 			}
 			const relevantGameEvents = _.map(rewardCampaign.rewardCampaignGameEvents, 'gameEvent');
-			console.log('relevantGameEvents', relevantGameEvents);
 			if (!relevantGameEvents) {
 			}
 			const playerRecordedEvents = await PlayerToGameEvent.find({ player: playerId });
@@ -1343,15 +1342,17 @@ module.exports = {
 			if (!_.isEmpty(playerRecordedEvents)) {
 				_.each(rewardCampaign.rewardCampaignGameEvents, (rcgEvent) => {
 					totalEventstoBeCompleted++;
-					const playerEvents = _.find(playerRecordedEvents, (e) => e.gameEvent === rcgEvent.gameEvent);
+					const playerEvents = _.remove(playerRecordedEvents, (e) => {
+						return e.gameEvent === rcgEvent.gameEvent;
+ 					});
 					if (!playerEvents) {
 						throw new CustomError('No Player Recorded Events', { status: 404, err_code: "not_found" });
 					}
-					rcgEvent.repeat = (rcgEvent.repeat) ? rcgEvent.repeat : 0;
-					totalEventstoBeCompleted = (rcgEvent.repeat > 0) ? totalEventstoBeCompleted + rcgEvent.repeat : totalEventstoBeCompleted;
-					if (rcgEvent.repeat <= playerEvents.length) {
+					rcgEvent.repeated = (rcgEvent.repeated) ? rcgEvent.repeated : 0;
+					totalEventstoBeCompleted = (rcgEvent.repeated > 0) ? totalEventstoBeCompleted + rcgEvent.repeated : totalEventstoBeCompleted;
+					if (rcgEvent.repeated <= playerEvents.length) {
 						_.each(playerEvents, (event) => {
-							if (event.eventValue >= rcgEvent.valueMin && event.eventValue >= rcgEvent.valueMax) {
+							if (event.eventValue >= rcgEvent.valueMin && event.eventValue <= rcgEvent.valueMax) {
 								playerCompletedEvents++;
 							}
 						})
@@ -1359,8 +1360,12 @@ module.exports = {
 				})
 				return res.ok({ rewardCampaign: rewardCampaignId, totalEventstoBeCompleted, playerCompletedEvents })
 			}
+			_.each(rewardCampaign.rewardCampaignGameEvents, (rcgEvent) => {
+				rcgEvent.repeated = (rcgEvent.repeated) ? rcgEvent.repeated : 0;
+				totalEventstoBeCompleted = (rcgEvent.repeated > 0) ? totalEventstoBeCompleted + rcgEvent.repeated : totalEventstoBeCompleted + 1;
+			})
 			return res.ok({
-				rewardCampaign: rewardCampaignId, totalEventstoBeCompleted: rewardCampaign.rewardCampaignGameEvents.length,
+				rewardCampaign: rewardCampaignId, totalEventstoBeCompleted: totalEventstoBeCompleted,
 				playerCompletedEvents: 0
 			})
 		} catch (err) {
@@ -1372,6 +1377,7 @@ module.exports = {
 		// const playerId = req.token.user.id;
 		let locale = req.param('locale');
 		const playerId = req.param('playerId');
+		let deviceType = req.param("device_type").toLowerCase();
 		if (!locale) {
 			locale = 'en';
 		}
@@ -1385,6 +1391,19 @@ module.exports = {
 		const playerGameIds = _.map(playerGames, 'game');
 		let games = await Game.find({ id: playerGameIds }).populate('rewardCampaign').populate('gamePlatforms');
 		for (game of games) {
+
+			platformAvailable = false;
+			for (const platform of game.gamePlatforms) {
+				if (platform.type == deviceType) {
+					platformAvailable = true;
+					game.link = platform.link;
+					game.platform = platform.type;
+				}
+			}
+
+			if (!platformAvailable) {
+				continue;
+			}
 			// Prepare the prizes list
 			prizeList = [];
 			for (reward of game.rewardCampaign) {

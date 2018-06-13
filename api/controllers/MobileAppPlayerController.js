@@ -62,8 +62,8 @@ module.exports = {
 			let player = await Player.create({
 				email: email,
 				password: password,
-				firstname: firstname,
-				lastname: lastname,
+				firstName: firstname,
+				lastName: lastname,
 				pin: pin,
 				accountStatus: 1,
 				forceBalance: '0',

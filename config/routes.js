@@ -6,7 +6,7 @@ module.exports.routes = {
 	'GET /players/count': 'PlayerController.getPlayerCount',
 	'GET /games/active': 'GameController.getActiveGames',
 	'GET /game/:gameId': 'GameController.getGame',
-	
+
 	/** Developer Login and Signups */
 	'POST /app/developer': 'DeveloperController.signupDeveloper',
 	'GET /app/developer/activate': 'DeveloperController.activateDeveloper',
@@ -26,17 +26,17 @@ module.exports.routes = {
 	'POST /app/developer/reset-password': 'DeveloperController.resetPassword',
 	'POST /app/developer/change-password': 'DeveloperController.changePassword',
 	'POST /app/developer/update-password': 'DeveloperController.updatePassword',
-	
-	
+
+
 	/** Player Routes */
 	'POST /app/player': 'PlayerController.signupPlayer',
-	
-	
+
+
 	/** SDK PLAYER ROUTES */
 	'POST /sdk/player/track': 'PlayerController.trackPlayer',
 	'POST /sdk/game/event': 'PlayerController.trackEvent',
-	
-	
+
+
 	/** OUR OWN MOBILE APPLICATION API ROUTES **/
 	'GET /mob/player/dashboard': 'MobileAppPlayerController.getPlayerDashboard',
 	'GET /mob/player/code': 'MobileAppPlayerController.getPlayerCode',
@@ -52,7 +52,24 @@ module.exports.routes = {
 	'POST /mob/player/change-password': 'MobileAppPlayerController.changePassword',
 	'POST /mob/player/update-password': 'MobileAppPlayerController.updatePassword',
 	'POST /mob/player/device-data': 'MobileAppPlayerController.deviceData',
-	'GET /player/trackProgress': 'MobileAppPlayerController.trackRewardProgress',
+
+	/** OUR OWN WEB APPLICATION API ROUTES **/
+	'GET /web/player/dashboard': 'WebPlayerController.getPlayerDashboard',
+	'GET /web/player/code': 'WebPlayerController.getPlayerCode',
+	'GET /web/player/games': 'WebPlayerController.getGames',
+	'GET /web/player/rewards': 'WebPlayerController.getRewards',
+	'GET /web/player/notifications': 'WebPlayerController.getNotifications',
+	'POST /web/player/notification/delete': 'WebPlayerController.deleteNotification',
+	'POST /web/player/signup': 'WebPlayerController.signupPlayer',
+	'POST /web/player/login': 'WebPlayerController.loginPlayer',
+	'POST /web/player/activate': 'WebPlayerController.activatePlayer',
+	'POST /web/player/reset-password': 'WebPlayerController.resetPassword',
+	'POST /web/player/validate-pin': 'WebPlayerController.validatePin',
+	'POST /web/player/change-password': 'WebPlayerController.changePassword',
+	'POST /web/player/update-password': 'WebPlayerController.updatePassword',
+	'POST /web/player/device-data': 'WebPlayerController.deviceData',
+	'GET /player/trackProgress': 'WebPlayerController.trackRewardProgress',
+	'GET /player/playerGames': 'WebPlayerController.getPlayerGames',
 
 
 	// Routes to send the notification to pre registerd users.

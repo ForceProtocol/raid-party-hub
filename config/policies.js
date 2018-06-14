@@ -35,7 +35,30 @@ module.exports.policies = {
         getNotifications: 'tokenAuth',
         deleteNotification: 'tokenAuth',
         deviceData: 'tokenAuth',
+        
     },
+
+    WebPlayerController: {
+        signupPlayer: true,
+		loginPlayer: true,
+        activatePlayer: true,
+        resetPassword: true,
+        validatePin: true,
+        changePassword: true,
+        sendEmailsToAirdropUsers: true,
+        getPlayerDashboard: 'tokenAuth',
+        getGames: 'tokenAuth',
+        getPlayerCode: 'tokenAuth',
+        getRewards: 'tokenAuth',
+        updatePassword: 'tokenAuth',
+        getNotifications: 'tokenAuth',
+        deleteNotification: 'tokenAuth',
+        deviceData: 'tokenAuth',
+        trackRewardProgress: 'tokenAuth',
+        getPlayerGames: 'tokenAuth',
+        
+    },
+
 
     DeveloperController: {
         '*': 'isDeveloper',

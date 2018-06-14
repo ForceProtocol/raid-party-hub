@@ -43,6 +43,7 @@ module.exports = {
     hookTimeout: 120000,
     API_HOST: 'https://staging.hub.raidparty.io',
     APP_HOST: 'https://appstaging.raidparty.io',
+    PLAYER_APP_HOST: 'https://player.raidparty.io/', // Change while Deploying
 
     oneSignal: {
         userAuthKey: 'YzBhY2IwNGYtNGVhZS00YjZjLWFiNTctYzViODZkZDQ0OGRh',

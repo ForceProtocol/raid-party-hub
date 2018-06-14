@@ -49,7 +49,6 @@ module.exports = {
 
 		deviceType: {
 			type: 'string',
-			required: true
 		},
 
 		deviceId: {

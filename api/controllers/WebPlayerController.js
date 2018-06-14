@@ -1330,7 +1330,6 @@ module.exports = {
 			const rewardCampaignId = req.param('rewardCampaign');
 			// const playerId = req.token.user.id;
 			const playerId = req.param('player');
-			console.log(playerId)
 			const rewardCampaign = await RewardCampaign.findOne({ id: rewardCampaignId }).populate('rewardCampaignGameEvents');
 			if (!rewardCampaign) {
 				throw new CustomError('Could not find Reward Campaign.', { status: 401, err_code: "not_found" });

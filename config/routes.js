@@ -54,6 +54,7 @@ module.exports.routes = {
 	'POST /mob/player/device-data': 'MobileAppPlayerController.deviceData',
 
 	/** OUR OWN WEB APPLICATION API ROUTES **/
+	'GET /web/player': 'WebPlayerController.getPlayer',
 	'GET /web/player/dashboard': 'WebPlayerController.getPlayerDashboard',
 	'GET /web/player/code': 'WebPlayerController.getPlayerCode',
 	'GET /web/player/games': 'WebPlayerController.getGames',

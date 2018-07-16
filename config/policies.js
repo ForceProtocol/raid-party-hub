@@ -56,7 +56,7 @@ module.exports.policies = {
         deviceData: 'tokenAuth',
         trackRewardProgress: 'tokenAuth',
         getPlayerGames: 'tokenAuth',
-        
+        getPlayer: 'tokenAuth',
     },
 
 

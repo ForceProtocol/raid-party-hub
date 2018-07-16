@@ -1124,8 +1124,27 @@ module.exports = {
 			return util.errorResponse(err, res);
 		}
 	},
+	
+	
+	/**
+	* Get player
+	*/
+	async getPlayer(req, res) {
+		try {
 
+			// Get games we need for this device
+			let player = await Player.findOne({ id: req.token.user.id });
 
+			if (!player) {
+				throw new CustomError('Could not find that player.', { status: 401, err_code: "not_found" });
+			}
+
+			return res.ok({ player: player});
+		} catch (err) {
+			return util.errorResponse(err, res);
+		}
+	},
+	
 
 	/**
 	* Get notifications against a player

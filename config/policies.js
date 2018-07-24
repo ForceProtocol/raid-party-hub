@@ -57,6 +57,9 @@ module.exports.policies = {
         trackRewardProgress: 'tokenAuth',
         getPlayerGames: 'tokenAuth',
         getPlayer: 'tokenAuth',
+        getProducts: 'tokenAuth',
+        getProduct: 'tokenAuth',
+        confirmPlayerOrder: 'tokenAuth',
     },
 
 

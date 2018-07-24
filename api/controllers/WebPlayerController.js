@@ -1139,6 +1139,12 @@ module.exports = {
 				throw new CustomError('Could not find that player.', { status: 401, err_code: "not_found" });
 			}
 
+			if(typeof player.forceBalance == 'undefined' || player.forceBalance == ''){
+				player.forceBalance = '0';
+			}
+
+			player.forceBalance = parseFloat(player.forceBalance);
+
 			return res.ok({ player: player});
 		} catch (err) {
 			return util.errorResponse(err, res);
@@ -1478,9 +1484,141 @@ module.exports = {
 		}
 		finalResponse['success'] = true;
 		return res.ok(finalResponse);
-	}
+	},
+	
+	
+	
+	/**
+	* Get live products for sale
+	*/
+	async getProducts(req, res) {
+		try {
+			let category = req.param("category").toLowerCase(),
+			platform = req.param("platform").toLowerCase(),
+			products,
+			searchQuery = {active:true};
+
+			if(typeof category != 'undefined' && category.length > 0){
+				searchQuery.category = category;
+			}
+
+			if(typeof platform != 'undefined' && platform.length > 0){
+				searchQuery.platform = platform;
+			}
+
+			products = await Products.find(searchQuery);
+			
+			if (!products) {
+				throw new CustomError('Could not find any products.', { status: 401, err_code: "not_found" });
+			}
+
+			return res.ok({ success: true, products: products });
+		} catch (err) {
+			return util.errorResponse(err, res);
+		}
+	},
+
+
+	/**
+	* Get live product for sale
+	*/
+	async getProduct(req, res) {
+		try {
+			let productId = req.param("productId");
+
+			// Get games we need for this device
+			let product = await Products.findOne({ id: productId });
+
+			if (!product) {
+				throw new CustomError('Could not find that product.', { status: 401, err_code: "not_found" });
+			}
+
+			if(typeof product.forcePrice == 'undefined' || product.forcePrice == ''){
+				product.forcePrice = '0';
+			}
+
+			product.forcePrice = parseFloat(product.forcePrice);
+
+			return res.ok({ success: true, product: product });
+		} catch (err) {
+			return util.errorResponse(err, res);
+		}
+	},
 
 
 
+	/**
+	* Get live product for sale
+	*/
+	async confirmPlayerOrder(req, res) {
+		try {
+			let productId = req.param("productId");
+			let product = await Products.findOne({id:productId});
+			let player = await Player.findOne({id: req.token.user.id});
+
+			if (!product) {
+				throw new CustomError('Could not find that product.', { status: 401, err_code: "not_found" });
+			}
+
+			if (!player) {
+				throw new CustomError('Could not find that user account.', { status: 401, err_code: "not_found" });
+			}
+
+			if(typeof product.forcePrice == 'undefined' || product.forcePrice == ''){
+				product.forcePrice = '0';
+			}
+			product.forcePrice = parseFloat(product.forcePrice);
+
+			if(typeof player.forceBalance == 'undefined' || product.forceBalance == ''){
+				player.forceBalance = '0';
+			}
+			player.forceBalance = parseFloat(player.forceBalance);
+
+			// Confirm product is in stock
+			if(product.qty < 1){
+				throw new CustomError('That product is no longer in stock.', { status: 401, err_code: "not_found" });
+			}
+
+			// Confirm player has enough FORCE balance
+			if(player.forceBalance < product.forcePrice){
+				throw new CustomError('You do not have enough FORCE in your wallet to purchase that product.', { status: 401, err_code: "not_found" });
+			}
+
+			// Everything OK, initiate the order
+
+			// Find an available digital key for this product that has not been used
+			let productDigitalKey = await ProductDigitalKeys.findOne({product:product.id,used:false});
+
+			if(typeof productDigitalKey == 'undefined' || !productDigitalKey ||  productDigitalKey.length == 0){
+				throw new CustomError('That product is no longer in stock', { status: 401, err_code: "not_found" });
+			}
+
+			// Create a new order
+			let orderCreated = await Orders.create({product: product.id, note: product.orderNote, qty: 1, totalForce: product.forcePrice, player: player.id});
+
+			if(!orderCreated){
+				throw new CustomError('There was a problem with our server creating that order. Please try again soon.', { status: 401, err_code: "not_found" });
+			}
+
+			// Assign digital key to order
+			let orderDigitalKey = await OrderDigitalKey.create({order:orderCreated.id,productDigitalKey:productDigitalKey.id});
+
+			// Remove force balance from player
+			let playerForceBalance = player.forceBalance - product.forcePrice;
+			await Player.update({id:player.id},{forceBalance:playerForceBalance});
+
+			// Update product digital key as being used
+			await ProductDigitalKeys.update({id:productDigitalKey.id},{used:true});
+
+			// Reduce stock level of product
+			await Products.update({id:product.id},{qty:product.qty - 1});
+
+			// Email the player the digital key
+			
+			return res.ok({result: {success: true, message: ""}});
+		} catch (err) {
+			return util.errorResponse(err, res);
+		}
+	},
 
 };

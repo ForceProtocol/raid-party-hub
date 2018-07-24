@@ -60,6 +60,8 @@ module.exports.routes = {
 	'GET /web/player/games': 'WebPlayerController.getGames',
 	'GET /web/player/rewards': 'WebPlayerController.getRewards',
 	'GET /web/player/notifications': 'WebPlayerController.getNotifications',
+	'GET /web/player/products': 'WebPlayerController.getProducts',
+	'GET /web/player/product/:productId': 'WebPlayerController.getProduct',
 	'POST /web/player/notification/delete': 'WebPlayerController.deleteNotification',
 	'POST /web/player/signup': 'WebPlayerController.signupPlayer',
 	'POST /web/player/login': 'WebPlayerController.loginPlayer',
@@ -69,6 +71,7 @@ module.exports.routes = {
 	'POST /web/player/change-password': 'WebPlayerController.changePassword',
 	'POST /web/player/update-password': 'WebPlayerController.updatePassword',
 	'POST /web/player/device-data': 'WebPlayerController.deviceData',
+	'POST /web/player/confirm-order': 'WebPlayerController.confirmPlayerOrder',
 	'GET /player/trackProgress': 'WebPlayerController.trackRewardProgress',
 	'GET /player/playerGames': 'WebPlayerController.getPlayerGames',
 

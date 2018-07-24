@@ -60,7 +60,7 @@
   },
   "scripts": {
     "debug": "node debug app.js",
-    "start": "nodemon app.js"
+    "start": "nodemon app.js --port 1338"
   },
   "main": "app.js",
   "repository": {

@@ -6,7 +6,7 @@
  */
 module.exports = function (req, res, next) {
     let token,
-        ip = 'na';
+        ip = 'na'; 
 
     try {
         ip = req.headers['x-forwarded-for'] ||
@@ -55,7 +55,7 @@ module.exports = function (req, res, next) {
 			}
 			
 
-			Player.findOne({playerId:token.user.playerId,accountStatus:2})
+			Advertiser.findOne({id:token.user.id,accountStatus:2})
 			.then(_user=>{
 
 				if(!_user){

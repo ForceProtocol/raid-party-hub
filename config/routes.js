@@ -6,6 +6,7 @@ module.exports.routes = {
 	'GET /players/count': 'PlayerController.getPlayerCount',
 	'GET /games/active': 'GameController.getActiveGames',
 	'GET /game/:gameId': 'GameController.getGame',
+	'GET /game/game-assets/:gameId': 'GameController.getGameAssets',
 
 	/** Developer Login and Signups */
 	'POST /app/developer': 'DeveloperController.signupDeveloper',
@@ -35,6 +36,11 @@ module.exports.routes = {
 	/** SDK PLAYER ROUTES */
 	'POST /sdk/player/track': 'PlayerController.trackPlayer',
 	'POST /sdk/game/event': 'PlayerController.trackEvent',
+
+
+	/** SDK DYNAMIC ADVERTISEMENT SOCKET ROUTES */
+	'GET /sdk/advert/connect/:gameId/:gameAssetId': 'DynamicAdvertController.connectGame',
+	'GET /sdk/advert/connect/test': 'DynamicAdvertController.testConnectGame',
 
 
 	/** OUR OWN MOBILE APPLICATION API ROUTES **/
@@ -75,6 +81,24 @@ module.exports.routes = {
 	'GET /player/trackProgress': 'WebPlayerController.trackRewardProgress',
 	'GET /player/playerGames': 'WebPlayerController.getPlayerGames',
 
+
+	/** OUR OWN WEB APPLICATION API ROUTES FOR ADVERTISERS **/
+	'GET /web/advertiser': 'WebAdvertiserController.getUser',
+	'GET /web/advertiser/games': 'WebAdvertiserController.getUserGames',
+	'GET /web/advertiser-games': 'WebAdvertiserController.getGames',
+	'GET /web/advertiser/campaigns': 'WebAdvertiserController.getCampaigns',
+	'GET /web/advertiser/download': 'WebAdvertiserController.downloadItem',
+	'POST /web/advertiser/signup': 'WebAdvertiserController.signupUser',
+	'POST /web/advertiser/login': 'WebAdvertiserController.loginUser',
+	'POST /web/advertiser/activate': 'WebAdvertiserController.activateUser',
+	'POST /web/advertiser/reset-password': 'WebAdvertiserController.resetPassword',
+	'POST /web/advertiser/validate-pin': 'WebAdvertiserController.validatePin',
+	'POST /web/advertiser/change-password': 'WebAdvertiserController.changePassword',
+	'POST /web/advertiser/update-password': 'WebAdvertiserController.updatePassword',
+	'POST /web/advertiser/upload/asset/:type': 'WebAdvertiserController.uploadAsset',
+	'POST /web/advertiser/create-campaign': 'WebAdvertiserController.createCampaign',
+	'POST /web/advertiser/campaign/delete': 'WebAdvertiserController.deleteCampaign',
+	
 
 	// Routes to send the notification to pre registerd users.
 	'GET /airdrop-users-send-email': 'MobileAppPlayerController.sendEmailsToAirdropUsers',

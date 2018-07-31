@@ -10,18 +10,6 @@ const moment = require('moment');
 module.exports = {
 
 
-	/**
-	* Return the home page
-	*/
-	getHomePage: function (req, res) {
-		return res.view('public/home', {
-			layout: 'public/layout',
-			title: 'RaidParty',
-			metaDescription: '',
-		});
-    },
-	
-	
 	
 	async getActiveGames(req,res){
 		
@@ -125,8 +113,6 @@ module.exports = {
 			gameIndex = 0,
 			locale = req.param("locale");
 			
-			sails.log.debug("is not a number:",gameId);
-			
 			if(!locale){
 				locale = 'en';
 			}
@@ -187,8 +173,36 @@ module.exports = {
 				game.isLive = false;
 				game.timeRemaining = sails.__("Starts ") + moment(game.startDate).fromNow() + "!";
 			}
+
+			game.avatar = '/assets/images/' + game.avatar;
 			
 			return res.ok(game);
+		}catch(err){
+			return res.serverError(err);
+		}
+	},
+
+
+
+	async getGameAssets(req,res){
+		try{
+			let gameId = req.param("gameId"),
+			gameAssetList = [];
+			
+			let gameAssets = await GameAsset.find({game:gameId});
+
+			if(!gameAssets){
+				throw new CustomError("There are no game assets available for this game yet.", { status: 400 });
+			}
+
+			for(const gameAsset of gameAssets){
+				gameAsset.screenshot = "/assets/images/game-assets/screenshots/" + gameAsset.screenshot;
+
+				// Insert refactored object to array
+				gameAssetList.push(gameAsset);
+			}
+
+			return res.ok(gameAssetList);
 		}catch(err){
 			return res.serverError(err);
 		}

@@ -63,6 +63,27 @@ module.exports.policies = {
     },
 
 
+    WebAdvertiserController: {
+        signupPlayer: true,
+        loginPlayer: true,
+        activatePlayer: true,
+        resetPassword: true,
+        validatePin: true,
+        changePassword: true,
+        getGames: true,
+        updatePassword: 'tokenAuth',
+        getUser: 'tokenAuth',
+        getNotifications: 'tokenAuth',
+        deleteNotification: 'tokenAuth',
+        getUserGames: 'tokenAuth',
+        uploadAsset: 'tokenAuth',
+        createCampaign: 'tokenAuth',
+        getCampaigns: 'tokenAuth',
+        deleteCampaign: 'tokenAuth',
+        downloadItem: true
+    },
+
+
     DeveloperController: {
         '*': 'isDeveloper',
         signupDeveloper: true,
@@ -70,6 +91,10 @@ module.exports.policies = {
         loginDeveloper: true,
         resetPassword: true,
         changePassword: true,
+    },
+
+    GameController: {
+        '*': true
     },
 
     PlayerController: {

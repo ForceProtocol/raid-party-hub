@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title></title>
+
+        <!-- Viewport mobile tag for sensible mobile support -->
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+
+        <!--STYLES-->
+        <link rel="stylesheet" href="/styles/importer.css">
+        <!--STYLES END-->
+    </head>
+
+    <body>
+	
+    <%- body %>
+
+		<!--SCRIPTS-->
+		<script src="/js/dependencies/sails.io.js"></script>
+		<script src="/js/dependencies/jquery-3.2.1.min.js"></script>
+		<!--SCRIPTS END-->
+		
+		<script type="text/javascript">
+			// Socket Connections
+			io.sails.url = "<%- sails.config.API_HOST %>";
+			
+			$(document).ready(function(){
+			
+				// URL route is /sdk/advert/connect/:gameId/:gameAssetId
+				io.socket.get('/sdk/advert/connect/57a776af-2dfd-4f1f-85bd-c065c8d14f34/1', function (resData) {
+					$("#connect-data").html(JSON.stringify(resData));
+				});
+
+				io.socket.on('advert', function onServerSentEvent (msg) {
+					$("#socket-response").html(JSON.stringify(msg));
+				});
+				
+			});
+		</script>
+		
+
+    </body>
+</html>

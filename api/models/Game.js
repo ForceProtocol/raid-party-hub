@@ -24,6 +24,11 @@ module.exports = {
             type: 'boolean',
 			defaultsTo: false
         },
+
+        dynamicAdsEnabled: {
+            type: 'boolean',
+			defaultsTo: false
+        },
 		
 		title: {
             type: 'string',
@@ -134,6 +139,16 @@ module.exports = {
 		
 		playerGameEventAirdrops: {
 			collection: 'playergameeventairdrops',
+			via: 'game'
+		},
+
+		gameAdAsset: {
+			collection: 'gameadasset',
+			via: 'game'
+		},
+
+		gameAsset: {
+			collection: 'gameasset',
 			via: 'game'
 		},
 		

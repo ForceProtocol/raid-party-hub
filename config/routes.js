@@ -40,6 +40,7 @@ module.exports.routes = {
 
 	/** SDK DYNAMIC ADVERTISEMENT SOCKET ROUTES */
 	'GET /sdk/advert/connect/:gameId/:gameAssetId': 'DynamicAdvertController.connectGame',
+	'GET /sdk/advert/load/:gameId/:gameAssetId': 'DynamicAdvertController.getLiveAdverts',
 	'GET /sdk/advert/connect/test': 'DynamicAdvertController.testConnectGame',
 
 

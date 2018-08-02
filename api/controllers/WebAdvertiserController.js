@@ -5,7 +5,7 @@
  * @help        :: See http://links.sailsjs.org/docs/controllers
  */
 
-const moment = require('moment'), base64Img = require('base64-img');
+const moment = require('moment');
 
 module.exports = {
 
@@ -1079,7 +1079,6 @@ module.exports = {
 
 	async createCampaign(req,res){
 		try{
-			sails.log.debug("Create Campaign DatA: ", req.allParams());
 			let gameId = req.param("gameId"),
 			width = req.param("width"),
 			height = req.param("height"),
@@ -1130,7 +1129,7 @@ module.exports = {
 			}
 
 			if(resourceUrlImg){
-				resourceUrlIm = '/adverts/images/' + resourceUrlIm;
+				resourceUrlImg = '/adverts/images/' + resourceUrlImg;
 			}
 
 			let gameAdAsset = await GameAdAsset.create({game:gameId,gameAsset:gameAsset,active:active,advertiser:advertiserId,width:width,height:height,resourceUrlSd:resourceUrlSd,
@@ -1143,7 +1142,7 @@ module.exports = {
 			return res.ok({success:true,gameAdAsset:gameAdAsset});
 
 		}catch(err){
-			sails.log.error("error is: ",err);
+			sails.log.error("WebAdertiserController.createCampaign error: ",err);
 			return util.errorResponse(err, res);
 		}
 	},
@@ -1151,7 +1150,7 @@ module.exports = {
 
 	async getCampaigns(req,res){
 		try{
-			let campaigns = await GameAdAsset.find({advertiser:req.token.user.id}).populate('gameAsset').populate('game'),
+			let campaigns = await GameAdAsset.find({advertiser:req.token.user.id}).populate('gameAsset').populate('game').sort('createdAt DESC'),
 			campaignsList = [];
 
 			for (campaign of campaigns) {
@@ -1161,6 +1160,7 @@ module.exports = {
 
 			return res.ok({campaigns:campaignsList});
 		}catch(err){
+			sails.log.error("WebAdertiserController.getCampaign error: ",err);
 			return util.errorResponse(err, res);
 		}
 	},
@@ -1171,6 +1171,7 @@ module.exports = {
 			let item = decodeURI(req.param("item"));
 			return res.download(sails.config.appPath + "/assets" + item);
 		}catch(err){
+			sails.log.error("WebAdertiserController.downloadItem error: ",err);
 			return util.errorResponse(err, res);
 		}
 	},
@@ -1188,6 +1189,7 @@ module.exports = {
 
 			return res.ok();
 		}catch(err){
+			sails.log.error("WebAdertiserController.deleteCampaign error: ",err);
 			return util.errorResponse(err, res);
 		}
 	}

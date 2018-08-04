@@ -197,6 +197,8 @@ module.exports = {
 
 			for(const gameAsset of gameAssets){
 				gameAsset.screenshot = "/assets/images/game-assets/screenshots/" + gameAsset.screenshot;
+				gameAsset.avgExposure = 231;
+				gameAsset.avgSession = 600;
 
 				// Insert refactored object to array
 				gameAssetList.push(gameAsset);

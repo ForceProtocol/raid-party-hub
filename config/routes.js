@@ -42,6 +42,7 @@ module.exports.routes = {
 	'GET /sdk/advert/connect/:gameId/:gameAssetId': 'DynamicAdvertController.connectGame',
 	'GET /sdk/advert/load/:gameId/:gameAssetId': 'DynamicAdvertController.getLiveAdverts',
 	'GET /sdk/advert/connect/test': 'DynamicAdvertController.testConnectGame',
+	'POST /sdk/advert/session-end/:gameId/:gameAdAssetId': 'DynamicAdvertController.sessionEnd',
 
 
 	/** OUR OWN MOBILE APPLICATION API ROUTES **/
@@ -98,7 +99,9 @@ module.exports.routes = {
 	'POST /web/advertiser/update-password': 'WebAdvertiserController.updatePassword',
 	'POST /web/advertiser/upload/asset/:type': 'WebAdvertiserController.uploadAsset',
 	'POST /web/advertiser/create-campaign': 'WebAdvertiserController.createCampaign',
+	'POST /web/advertiser/campaign/archive': 'WebAdvertiserController.archiveCampaign',
 	'POST /web/advertiser/campaign/delete': 'WebAdvertiserController.deleteCampaign',
+	'POST /web/advertiser/campaign/activate': 'WebAdvertiserController.activateCampaign',
 	
 
 	// Routes to send the notification to pre registerd users.

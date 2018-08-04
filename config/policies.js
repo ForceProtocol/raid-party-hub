@@ -64,9 +64,9 @@ module.exports.policies = {
 
 
     WebAdvertiserController: {
-        signupPlayer: true,
-        loginPlayer: true,
-        activatePlayer: true,
+        signupUser: true,
+        loginUser: true,
+        activateUser: true,
         resetPassword: true,
         validatePin: true,
         changePassword: true,
@@ -80,6 +80,8 @@ module.exports.policies = {
         createCampaign: 'tokenAuth',
         getCampaigns: 'tokenAuth',
         deleteCampaign: 'tokenAuth',
+        archiveCampaign: 'tokenAuth',
+        activateCampaign: 'tokenAuth',
         downloadItem: true
     },
 

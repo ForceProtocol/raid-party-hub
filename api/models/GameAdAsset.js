@@ -12,6 +12,16 @@ module.exports = {
             type: 'boolean',
 			defaultsTo: false
         },
+
+        approved: {
+            type: 'boolean',
+            defaultsTo: false
+        },
+
+        archived: {
+            type: 'boolean',
+            defaultsTo: false
+        },
 		
 		width: {
             type: 'float', 

@@ -5,7 +5,8 @@
  * @help        :: See http://links.sailsjs.org/docs/controllers
  */
 
-const moment = require('moment');
+const moment = require('moment'),
+fs = require("fs");
 
 module.exports = {
 
@@ -49,13 +50,12 @@ module.exports = {
 			// await OneSignalService.sendNotificationsToMultipleDevices({ deviceIds: [deviceId], text: pin + " is your activation pin" });
 			okMsg = "Please check your email inbox for a 6 digit pin and enter below to activate your account";
 			subject = "Welcome to RaidParty! Activate your account to start earning rewards";
-			activationLink = `${sails.config.ADVERTISER_APP_HOST}activate-advertiser?advertiserId=${advertiser.id}`;
+			activationLink = `${sails.config.APP_HOST}/activate-account?advertiserId=${advertiser.id}&pin=${pin}&email=${email}`;
 			msg = `Welcome to RaidParty!<br />
-				Your account has been created and is now awaiting your activation. Please enter the 6 digit PIN below into the PIN activation screen by clicking on the following link.<br /><br />
-				<strong>${pin}</strong><br /><br />
-				<strong><a href=\"${activationLink}\">Activate My Account</a></strong><br /><br />
+				Your account has been created and is now awaiting your activation. Please click on the link below to activate your account.<br /><br />
+				<strong><a href=\"${activationLink}\">Activate Account</a></strong><br /><br />
 				<br />
-				The RaidParty success team`;
+				The RaidParty Team`;
 
 
 			// Send activation email/SMS to player to activate their account
@@ -145,7 +145,8 @@ module.exports = {
 		try {
 
 			let pin = req.param("pin"),
-				advertiserId = req.param("advertiserId");
+				email = req.param("email"),
+				advertiserId = req.param("userId");
 
 			// Validate sent params
 			if (!pin || !advertiserId) {
@@ -157,7 +158,7 @@ module.exports = {
 				throw new CustomError('Invalid PIN was provided', { status: 401, err_code: "invalid_pin" });
 			}
 
-			let advertiser = await Advertiser.findOne({ id: advertiserId });
+			let advertiser = await Advertiser.findOne({ id: advertiserId, email:email });
 
 			// Could not find that account
 			if (!advertiser) {
@@ -174,7 +175,7 @@ module.exports = {
 
 				// If too many PIN attempts made, block their account, send email notifying user
 				if (advertiser.pinAttempts > 6) {
-					let updatedPinAttempt = await Player.update({ id: advertiser.id }, { accountStatus: 0 });
+					let updatedPinAttempt = await Advertiser.update({ id: advertiser.id }, { accountStatus: 0 });
 					let okMsg, subject, msg;
 
 					subject = "Your RaidParty account has been locked";
@@ -182,7 +183,7 @@ module.exports = {
 						We are sorry to inform you that your account has been locked due to too many incorrect PIN attempts to change your password.<br /><br />
 						You should reply to this email to confirm your identity and allow us to ensure your account is safe. We will then reactivate your account based on an assessment.<br />
 						Keep calm, keep playing<br />
-						The RaidParty success team`;
+						The RaidParty team`;
 
 					// Send activation email/SMS to advertiser to activate their account
 					await EmailService.sendEmail({
@@ -248,10 +249,10 @@ module.exports = {
 				}
 			}
 
-			let player = await Player.findOne({ email: email });
+			let user = await Advertiser.findOne({ email: email });
 
 			// Could not find that account
-			if (!player) {
+			if (!user) {
 				if (locale == 'es' || locale == 'es_ES' || locale == 'es-MX') {
 					throw new CustomError('No se pudo encontrar una cuenta con esos detalles. Por favor verifique sus detalles y vuelva a intentarlo.', { status: 401, err_code: "not_found" });
 				} else if (locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR') {
@@ -261,8 +262,8 @@ module.exports = {
 				}
 			}
 
-			// Player is locked
-			if (player.accountStatus == 0) {
+			// user is locked
+			if (user.accountStatus == 0) {
 				if (locale == 'es' || locale == 'es_ES' || locale == 'es-MX') {
 					throw new CustomError('Tu cuenta ha sido bloqueada.', { status: 403, err_code: "blocked" });
 				} else if (locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR') {
@@ -276,8 +277,9 @@ module.exports = {
 			let pin = util.randomFixedInteger(6);
 			let okMsg, subject, msg;
 
-			await Player.update({ id: player.id }, { pin: pin });
-			const activationLink = `${sails.config.PLAYER_APP_HOST}forgot-password?playerId=${player.id}`;
+			await Advertiser.update({ id: user.id }, { pin: pin });
+			const activationLink = `${sails.config.APP_HOST}/forgot-password?email=${email}&user=${user.id}&pin=${pin}`;
+
 			if (locale == 'es' || locale == 'es_ES' || locale == 'es-MX') {
 				okMsg = 'Por favor, revise su bandeja de entrada para encontrar un PIN de restablecimiento de contraseña de 6 dígitos';
 				subject = 'Bienvenido a RaidParty! Restablecer contraseña solicitada';
@@ -297,22 +299,21 @@ module.exports = {
 					Sem Stress, Continue Jogando<br />
 					A equipe RaidParty`;
 			} else {
-				okMsg = 'Please check your inbox to find a 6 digit password reset PIN';
+				okMsg = 'Please check your email inbox for a password reset link.';
 				subject = 'Welcome to RaidParty! Reset password requested';
 				msg = `Hi,<br />
 					You requested a password reset. Please click on the link below and reset your passoword.<br /><br />
 					<strong>${pin}</strong><br /><br />
 					<strong><a href=\"${activationLink}\">Reset My password</a></strong><br /><br />
-					Keep calm, keep playing<br />
-					The RaidParty success team`;
+					The RaidParty team`;
 			}
 
 			// Send activation email/SMS to player to activate their account
 			await EmailService.sendEmail({
 				fromEmail: 'support@raidparty.io',
 				fromName: 'Success Team',
-				toEmail: player.email,
-				toName: player.email,
+				toEmail: user.email,
+				toName: user.email,
 				subject: subject,
 				body: msg
 			});
@@ -352,10 +353,10 @@ module.exports = {
 				}
 			}
 
-			let player = await Player.findOne({ email: email });
+			let user = await Advertiser.findOne({ email: email });
 
 			// Could not find that account
-			if (!player) {
+			if (!user) {
 				if (locale == 'es' || locale == 'es_ES' || locale == 'es-MX') {
 					throw new CustomError('No se pudo encontrar una cuenta con esos detalles. Por favor verifique sus detalles y vuelva a intentarlo.', { status: 401, err_code: "not_found" });
 				} else if (locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR') {
@@ -365,8 +366,8 @@ module.exports = {
 				}
 			}
 
-			// Player is locked
-			if (player.accountStatus == 0) {
+			// user is locked
+			if (user.accountStatus == 0) {
 				if (locale == 'es' || locale == 'es_ES' || locale == 'es-MX') {
 					throw new CustomError('Tu cuenta ha sido bloqueada.', { status: 403, err_code: "blocked" });
 				} else if (locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR') {
@@ -377,15 +378,15 @@ module.exports = {
 			}
 
 			// Pin does not match
-			if (player.pin != pin) {
+			if (user.pin != pin) {
 
 				// If too many PIN attempts made, block their account, send email notifying user
-				if (player.pinAttempts > 5) {
-					let updatedPinAttempt = await Player.update({ id: player.id }, { accountStatus: 0 });
+				if (user.pinAttempts > 5) {
+					let updatedPinAttempt = await Advertiser.update({ id: user.id }, { accountStatus: 0 });
 					let okMsg, subject, msg;
 
 					if (locale == 'es' || locale == 'es_ES' || locale == 'es-MX') {
-						// Send player an email that their account has been blocked
+						// Send user an email that their account has been blocked
 						subject = "Su cuenta RaidParty ha sido bloqueada";
 						msg = `Hola<br />
 						   Lamentamos informarle que su cuenta se ha bloqueado debido a demasiados intentos incorrectos de PIN para cambiar su contraseña.<br /><br />
@@ -393,19 +394,19 @@ module.exports = {
 						   Mantén la calma, sigue jugando<br />
 						   El equipo exitoso de RaidParty`;
 
-						// Send activation email/SMS to player to activate their account
+						// Send activation email/SMS to user to activate their account
 						await EmailService.sendEmail({
 							fromEmail: 'support@raidparty.io',
 							fromName: 'Account Team',
-							toEmail: player.email,
-							toName: player.email,
+							toEmail: user.email,
+							toName: user.email,
 							subject: subject,
 							body: msg
 						});
 
 						throw new CustomError('Ha realizado demasiados intentos incorrectos de PIN. Su cuenta ha sido bloqueada.', { status: 403, err_code: "blocked" });
 					} else if (locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR') {
-						// Send player an email that their account has been blocked
+						// Send user an email that their account has been blocked
 						subject = "A sua conta RaidParty foi bloqueada.";
 						msg = `Olá<br />
 						   Lamentamos informar que a sua conta foi bloqueada devido a várias tentativas incorretas de alterar a sua palavra passe.<br /><br />
@@ -413,19 +414,19 @@ module.exports = {
 						   Sem Stress, Continue Jogando<br />
 						A equipe RaidParty`;
 
-						// Send activation email/SMS to player to activate their account
+						// Send activation email/SMS to user to activate their account
 						await EmailService.sendEmail({
 							fromEmail: 'support@raidparty.io',
 							fromName: 'Account Team',
-							toEmail: player.email,
-							toName: player.email,
+							toEmail: user.email,
+							toName: user.email,
 							subject: subject,
 							body: msg
 						});
 
 						throw new CustomError('PIN Introduzido erradamente por multiplas vezes. A sua conta foi bloqueada.', { status: 403, err_code: "blocked" });
 					} else {
-						// Send player an email that their account has been blocked
+						// Send user an email that their account has been blocked
 						subject = "Your RaidParty account has been locked";
 						msg = `Hi<br />
 							We are sorry to inform you that your account has been locked due to too many incorrect PIN attempts to change your password.<br /><br />
@@ -437,8 +438,8 @@ module.exports = {
 						await EmailService.sendEmail({
 							fromEmail: 'support@raidparty.io',
 							fromName: 'Account Team',
-							toEmail: player.email,
-							toName: player.email,
+							toEmail: user.email,
+							toName: user.email,
 							subject: subject,
 							body: msg
 						});
@@ -447,7 +448,7 @@ module.exports = {
 					}
 				}
 
-				let updatedPinAttempt = await Player.update({ id: player.id }, { pinAttempts: player.pinAttempts + 1 });
+				let updatedPinAttempt = await Advertiser.update({ id: user.id }, { pinAttempts: user.pinAttempts + 1 });
 
 				if (locale == 'es' || locale == 'es_ES' || locale == 'es-MX') {
 					throw new CustomError('PIN no válido fue proporcionado', { status: 401, err_code: "invalid_pin" });
@@ -459,7 +460,7 @@ module.exports = {
 
 			}
 
-			// PIN is correct and player is allowed to enter
+			// PIN is correct and user is allowed to enter
 			return res.ok({ "success": true, "isValid": true });
 
 		} catch (err) {
@@ -475,17 +476,18 @@ module.exports = {
 	*/
 	async changePassword(req, res) {
 		try {
-			playerId = req.param("playerId"),
-				pin = req.param("pin")
+			userId = req.param("userId"),
+			pin = req.param("pin"),
+			email = req.param("email"),
 			newPassword = req.param("password"),
-				locale = req.param("locale");
+			locale = req.param("locale");
 
 			if (!locale) {
 				locale = 'en';
 			}
 
 			// Validate sent params
-			if (!playerId || !newPassword) {
+			if (!userId || !newPassword) {
 				if (locale == 'es' || locale == 'es_ES' || locale == 'es-MX') {
 					throw new CustomError('No proporcionó todos los detalles requeridos.', { status: 400 });
 				} else if (locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR') {
@@ -495,10 +497,10 @@ module.exports = {
 				}
 			}
 
-			let player = await Player.findOne({ id: playerId });
+			let user = await Advertiser.findOne({ id: userId, email: email });
 
 			// Could not find that account
-			if (!player) {
+			if (!user) {
 				if (locale == 'es' || locale == 'es_ES' || locale == 'es-MX') {
 					throw new CustomError('No se pudo encontrar una cuenta con esos detalles. Por favor verifique sus detalles y vuelva a intentarlo.', { status: 401, err_code: "not_found" });
 				} else if (locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR') {
@@ -508,8 +510,8 @@ module.exports = {
 				}
 			}
 
-			// Player is locked
-			if (player.accountStatus == 0) {
+			// user is locked
+			if (user.accountStatus == 0) {
 				if (locale == 'es' || locale == 'es_ES' || locale == 'es-MX') {
 					throw new CustomError('Tu cuenta ha sido bloqueada.', { status: 403, err_code: "blocked" });
 				} else if (locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR') {
@@ -520,11 +522,11 @@ module.exports = {
 			}
 
 			// Pin does not match
-			if (player.pin != pin) {
+			if (user.pin != pin) {
 
 				// If too many PIN attempts made, block their account, send email notifying user
-				if (player.pinAttempts > 6) {
-					let updatedPinAttempt = await Player.update({ id: player.id }, { accountStatus: 0 });
+				if (user.pinAttempts > 6) {
+					let updatedPinAttempt = await Advertiser.update({ id: user.id }, { accountStatus: 0 });
 
 					if (locale == 'es' || locale == 'es_ES' || locale == 'es-MX') {
 						let msg = `Hola<br />
@@ -532,12 +534,12 @@ module.exports = {
 						   Debe responder a este correo electrónico para confirmar su identidad y permitirnos garantizar que su cuenta esté segura. A continiación, reactivaremos su cuenta en función de una evaluación.<br />
 						   Mantén la calma, sigue jugando<br />
 						   El equipo exitoso de RaidParty`;
-						// Send activation email/SMS to player to activate their account
+						// Send activation email/SMS to user to activate their account
 						await EmailService.sendEmail({
 							fromEmail: 'support@raidparty.io',
 							fromName: 'Account Team',
-							toEmail: player.email,
-							toName: player.email,
+							toEmail: user.email,
+							toName: user.email,
 							subject: 'Su cuenta RaidParty ha sido bloqueada',
 							body: msg
 						});
@@ -553,8 +555,8 @@ module.exports = {
 						await EmailService.sendEmail({
 							fromEmail: 'support@raidparty.io',
 							fromName: 'Account Team',
-							toEmail: player.email,
-							toName: player.email,
+							toEmail: user.email,
+							toName: user.email,
 							subject: 'A sua conta foi bloqueada.',
 							body: msg
 						});
@@ -566,12 +568,12 @@ module.exports = {
 							You should reply to this email to confirm your identity and allow us to ensure your account is safe. We will then reactivate your account based on an assessment.<br />
 							Keep calm, keep playing<br />
 							The RaidParty success team`;
-						// Send activation email/SMS to player to activate their account
+						// Send activation email/SMS to user to activate their account
 						await EmailService.sendEmail({
 							fromEmail: 'support@raidparty.io',
 							fromName: 'Account Team',
-							toEmail: player.email,
-							toName: player.email,
+							toEmail: user.email,
+							toName: user.email,
 							subject: 'Your RaidParty account has been locked',
 							body: msg
 						});
@@ -580,7 +582,7 @@ module.exports = {
 					}
 				}
 
-				let updatedPinAttempt = await Player.update({ id: player.id }, { pinAttempts: player.pinAttempts + 1 });
+				let updatedPinAttempt = await Advertiser.update({ id: user.id }, { pinAttempts: user.pinAttempts + 1 });
 
 				if (locale == 'es' || locale == 'es_ES' || locale == 'es-MX') {
 					throw new CustomError('PIN no válido fue proporcionado', { status: 401, err_code: "invalid_pin" });
@@ -593,8 +595,8 @@ module.exports = {
 
 			// TODO: Make sure password is valid
 
-			// PIN is correct and player can change their password
-			let updatedPassword = await Player.update({ id: player.id }, { password: newPassword, pinAttempts: 0, pin: 0 });
+			// PIN is correct and user can change their password
+			let updatedPassword = await Advertiser.update({ id: user.id }, { password: newPassword, pinAttempts: 0, pin: 0 });
 
 			if (locale == 'es' || locale == 'es_ES' || locale == 'es-MX') {
 				return res.ok({ "success": true, "msg": "Su nueva contraseña ha sido configurada, ingrese a su cuenta" });
@@ -613,7 +615,7 @@ module.exports = {
 
 
 	/**
-	* Update players password when logged in
+	* Update users password when logged in
 	* Uses Authentication Bearer auth
 	*/
 	async updatePassword(req, res) {
@@ -647,10 +649,10 @@ module.exports = {
 				}
 			}
 
-			let player = await Player.findOne({ id: req.token.user.id });
+			let user = await Advertiser.findOne({ id: req.token.user.id });
 
 			// Could not find that account
-			if (!player) {
+			if (!user) {
 				if (locale == 'es' || locale == 'es_ES' || locale == 'es-MX') {
 					throw new CustomError('No se pudo encontrar una cuenta con esos detalles. Por favor verifique sus detalles y vuelva a intentarlo.', { status: 401, err_code: "not_found" });
 				} else if (locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR') {
@@ -660,8 +662,8 @@ module.exports = {
 				}
 			}
 
-			// Player is locked
-			if (player.accountStatus == 0) {
+			// user is locked
+			if (user.accountStatus == 0) {
 				if (locale == 'es' || locale == 'es_ES' || locale == 'es-MX') {
 					throw new CustomError('Tu cuenta ha sido bloqueada.', { status: 403, err_code: "blocked" });
 				} else if (locale == 'pt' || locale == 'pt_PT' || locale == 'pt-BR') {
@@ -672,7 +674,7 @@ module.exports = {
 			}
 
 			// Check current password entered is valid
-			let validPassword = await Player.validatePassword(currentPassword, player.password);
+			let validPassword = await Advertiser.validatePassword(currentPassword, user.password);
 
 			// Invalid current password given
 			if (!validPassword) {
@@ -686,7 +688,7 @@ module.exports = {
 			}
 
 			// Current password was correct, enter new password
-			let updatedPassword = await Player.update({ id: player.id }, { password: newPassword });
+			let updatedPassword = await Advertiser.update({ id: user.id }, { password: newPassword });
 
 			if (locale == 'es' || locale == 'es_ES' || locale == 'es-MX') {
 				return res.ok({ "success": true, "msg": "Su contraseña se ha actualizado correctamente" });
@@ -696,146 +698,6 @@ module.exports = {
 				return res.ok({ "success": true, "msg": "Your password has been updated successfully" });
 			}
 		} catch (err) {
-			return util.errorResponse(err, res);
-		}
-	},
-
-
-
-
-	/**
-	* Get list of active games
-	*/
-	async getGames(req, res) {
-		try {
-			let deviceType = req.param("device_type").toLowerCase(),
-				locale = req.param('locale'),
-				excludePlatform = 'android',
-				game, prizeList, prize, reward, gameItem, platformAvailable,
-				rules,
-				ruleLocale,
-				description,
-				descriptionLocale;
-
-			if (deviceType == 'android') {
-				excludePlatform = 'ios';
-			}
-
-			if (!locale) {
-				locale = 'en';
-			}
-
-			moment.locale(locale);
-
-			// Get games we need for this device
-			let games = await Game.find({ active: true, startDate: { '<=': new Date() }, endDate: { '>=': new Date() } }).populate('rewardCampaign').populate('gamePlatforms');
-
-			finalGamesList = [];
-			for (game of games) {
-
-				// Go through each platform to check this is available on their platform
-				platformAvailable = false;
-				for (const platform of game.gamePlatforms) {
-					if (platform.type == deviceType) {
-						platformAvailable = true;
-						game.link = platform.link;
-						game.platform = platform.type;
-					}
-				}
-
-				if (!platformAvailable) {
-					continue;
-				}
-
-				// Prepare the prizes list
-				prizeList = [];
-				for (reward of game.rewardCampaign) {
-					// TODO: Whether the player has qualified for this reward
-					// TODO: ?? Ionic might be fine displaying html ?? Strip HTML out of rules, for display purposes in mobile app
-
-					// Reward is not currently live - skip listing it
-					if (moment().isSameOrBefore(reward.startDate) || moment().isSameOrAfter(reward.endDate)) {
-						continue;
-					}
-
-					// Reward has no more entries available
-					if (reward.maxQualifyingPlayers < 1) {
-						continue;
-					}
-
-					if (reward.value <= 0) {
-						continue;
-					}
-
-					// Ensure we set the correct language for the rules
-					rules = util.stringToJson(reward.rules);
-
-					if (rules) {
-						ruleLocale = rules.find(function (obj) { return obj.hasOwnProperty(locale); });
-
-						if (!ruleLocale) {
-							reward.rules = rules.find(function (obj) { return obj.hasOwnProperty('en'); });
-							reward.rules = reward.rules['en'];
-						} else {
-							reward.rules = ruleLocale[locale];
-						}
-					}
-
-					if (!reward.rules) {
-						reward.rules = rules;
-					}
-
-					// Ensure we set the correct language for the rules
-					description = util.stringToJson(reward.description);
-
-					if (description) {
-						descriptionLocale = description.find(function (obj) { return obj.hasOwnProperty(locale); });
-
-						if (!descriptionLocale) {
-							reward.description = reward.find(function (obj) { return obj.hasOwnProperty('en'); });
-							reward.description = reward.description['en'];
-						} else {
-							reward.description = descriptionLocale[locale];
-						}
-					}
-
-					if (!reward.description) {
-						reward.description = description;
-					}
-
-					prize = { id: reward.id, value: reward.value, currency: reward.currency, rules: reward.rules, maxQualifyingPlayers: reward.maxQualifyingPlayers, maxWinningPlayers: reward.maxWinningPlayers, startDate: reward.startDate, endDate: reward.endDate };
-					prizeList.push(prize);
-				}
-
-				// Ensure we set the correct language for the rules
-				description = util.stringToJson(game.description);
-
-				if (description) {
-					descriptionLocale = description.find(function (obj) { return obj.hasOwnProperty(locale); });
-
-					if (!descriptionLocale) {
-						game.description = description.find(function (obj) { return obj.hasOwnProperty('en'); });
-						game.description = game.description['en'];
-					} else {
-						game.description = descriptionLocale[locale];
-					}
-				}
-
-				if (!game.description) {
-					game.description = description;
-				}
-
-				// Convert game avatar to base64 encoded string
-				game.avatar = '/assets/images/' + game.avatar;
-
-				gameItem = { game_id: game.gameId, title: game.title, reward: game.rewardAvailable, description: game.description, jackpot: game.jackpot, bannerContent: game.bannerContent, link: game.link, platform: game.platform, avatar: game.avatar, prizes: prizeList };
-
-				finalGamesList.push(gameItem);
-			}
-
-			return res.ok({ games: finalGamesList });
-		} catch (err) {
-			sails.log.debug("this is an err", err);
 			return util.errorResponse(err, res);
 		}
 	},
@@ -879,7 +741,9 @@ module.exports = {
 				game.avatar = '/assets/images/' + game.avatar;
 
 				gameItem = { game_id: game.gameId, title: game.title, description: game.description, 
-					bannerContent: game.bannerContent, link: game.link, platform: game.platform, avatar: game.avatar
+					bannerContent: game.bannerContent, link: game.link, platform: game.platform, avatar: game.avatar,
+					dailyActiveUsers:game.dailyActiveUsers, monthlyActiveUsers:game.monthlyActiveUsers, regions:game.regions, age:game.age,
+					gender:game.gender
 				};
 
 				finalGamesList.push(gameItem);
@@ -914,7 +778,7 @@ module.exports = {
 
 
 	/**
-	* Delete a player notification
+	* Delete a user notification
 	*/
 	async deleteNotification(req, res) {
 		try {
@@ -946,7 +810,9 @@ module.exports = {
 
 
 
-
+	/**
+	* Get games the advertiser is using
+	*/
 	async getUserGames(req, res) {
 		// const playerId = req.token.user.id;
 		let locale = req.param('locale');
@@ -1150,11 +1016,28 @@ module.exports = {
 
 	async getCampaigns(req,res){
 		try{
-			let campaigns = await GameAdAsset.find({advertiser:req.token.user.id}).populate('gameAsset').populate('game').sort('createdAt DESC'),
+			let archived = req.param("archived"),
+			active = req.param("active"),
+			findQuery = {advertiser:req.token.user.id};
+
+			if(!archived || archived == 'false'){
+				findQuery.archived = false;
+			}else{
+				findQuery.archived = true;
+			}
+
+			let campaigns = await GameAdAsset.find(findQuery).populate('gameAsset').populate('game').populate('gameAdSessions').sort('createdAt DESC'),
 			campaignsList = [];
 
 			for (campaign of campaigns) {
-				campaign.gameAsset.screenshot = "/assets/images/game-assets/screenshots/" + campaign.gameAsset.screenshot;
+				campaign.gameAsset.screenshot = sails.config.API_HOST + "/adverts/game-assets/screenshots/" + campaign.gameAsset.screenshot;
+
+				// Calculate how long this advert has been viewed in seconds
+				// This sums all the exposure time of every player session recorded for this game ad asset
+				campaign.totalExposure = _.reduce(campaign.gameAdSessions, function(memo, value) { return memo + value.exposedTime}, 0);
+
+				campaign.status = await GameAdvertService.getAdvertStatus(campaign.active,campaign.approved,campaign.startDate,campaign.endDate);
+
 				campaignsList.push(campaign);
 			}
 
@@ -1177,6 +1060,35 @@ module.exports = {
 	},
 
 
+	async archiveCampaign(req,res){
+		try{
+			let gameAdAssetId = decodeURI(req.param("campaignId")),
+			archived = req.param("archived"),
+			updateQuery = {};
+
+			if(!archived){
+				updateQuery.archived = false;
+				updateQuery.active = true;
+			}else{
+				updateQuery.archived = true;
+				updateQuery.active = false;
+			}
+
+			let archiveGameAdAsset = await GameAdAsset.update({advertiser:req.token.user.id,id:gameAdAssetId},updateQuery);
+
+			if (archiveGameAdAsset.length === 0) {
+				throw new CustomError('Could not archive that campaign. Please check your permissions.', { status: 401, err_code: "not_found" });
+			}
+
+			return res.ok();
+		}catch(err){
+			sails.log.error("WebAdertiserController.archiveCampaign error: ",err);
+			return util.errorResponse(err, res);
+		}
+	},
+
+
+
 	async deleteCampaign(req,res){
 		try{
 			let gameAdAssetId = decodeURI(req.param("campaignId"));
@@ -1187,11 +1099,64 @@ module.exports = {
 				throw new CustomError('Could not delete that campaign. Please check your permissions.', { status: 401, err_code: "not_found" });
 			}
 
+			// Remove files associated with this campaign
+			if(deleteGameAdAsset[0].resourceUrlHd){
+				fs.unlink(sails.config.appPath + '/assets' + deleteGameAdAsset[0].resourceUrlHd, function(err) {
+			  		if (err){
+						sails.log.error("WebAdvertiserController.deleteCampaign delete file error: ", err);
+					}
+				});
+			}
+
+			if(deleteGameAdAsset[0].resourceUrlSd){
+				fs.unlink(sails.config.appPath + '/assets' + deleteGameAdAsset[0].resourceUrlSd, function(err) {
+			  		if (err){
+						sails.log.error("WebAdvertiserController.deleteCampaign delete file error: ", err);
+					}
+				});
+			}
+
+			if(deleteGameAdAsset[0].resourceUrlImg){
+				fs.unlink(sails.config.appPath + '/assets' + deleteGameAdAsset[0].resourceUrlImg, function(err) {
+			  		if (err){
+						sails.log.error("WebAdvertiserController.deleteCampaign delete file error: ", err);
+					}
+				});
+			}
+
 			return res.ok();
 		}catch(err){
 			sails.log.error("WebAdertiserController.deleteCampaign error: ",err);
 			return util.errorResponse(err, res);
 		}
-	}
+	},
+
+
+
+	async activateCampaign(req,res){
+		try{
+
+			let gameAdAssetId = req.param("gameAdAssetId"),
+			active = req.param("active"),
+			userId = req.token.user.id;
+
+			if(!active){
+				active = false;
+			}else{
+				active = true;
+			}
+
+			let gameAdAssetUpdate = await GameAdAsset.update({id:gameAdAssetId,advertiser:userId},{active:active});
+
+			if(!gameAdAssetUpdate){
+				throw new CustomError('Could not change status of campaign.', { status: 401, err_code: "not_found" });
+			}
+
+			return res.ok({success:true});
+		}catch(err){
+			sails.log.error("WebAdertiserController.activateCampaign error: ",err);
+			return util.errorResponse(err, res);
+		}
+	},
 
 };

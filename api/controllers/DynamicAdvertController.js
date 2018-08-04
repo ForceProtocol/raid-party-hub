@@ -9,8 +9,6 @@ module.exports = {
 
 	async connectGame(req,res){
 
-		sails.log.debug("connecting to dynamic advert controller");
-
 		if (!req.isSocket) {
 			return res.badRequest();
 		}
@@ -60,7 +58,7 @@ module.exports = {
 			}
 
             // Find any live campaigns
-            let gameAdAssets = await GameAdAsset.find({gameAsset: gameAssetId, game: game.id, active:true,startDate: {'<=': new Date()}, endDate: {'>=': new Date()}}).populate('gameAsset').populate("game"),
+            let gameAdAssets = await GameAdAsset.find({gameAsset: gameAssetId, game: game.id, active:true, approved: true, startDate: {'<=': new Date()}, endDate: {'>=': new Date()}}).populate('gameAsset').populate("game"),
             gameAdvertData = {},
             selectedGameAdAsset = {};
 
@@ -132,7 +130,40 @@ module.exports = {
             sails.log.error("GameAdvertService.pushLiveAdCampaigns Error: ",err);
             return res.serverError({err: err});
         }
-	}
+	},
+
+
+
+    async sessionEnd(req,res){
+
+        try{
+            sails.log.debug("DynamicAdvertController.sessionEnd called: ", req);
+
+            let gameId = req.param("gameId"),
+            gameAdAssetId = req.param("gameAdAssetId"),
+            exposedTime = req.param("exposedTime"),
+            sessionTime = req.param("sessionTime");
+
+            if(!gameId || !gameAdAssetId){
+                throw new CustomError('Invalid Params Sent', { status: 401, err_code: "not_found" });
+            }
+
+            // Make sure this game ad asset exists
+            let gameAdAsset = await GameAdAsset.findOne({id:gameAdAssetId,game:gameId});
+
+            if(!gameAdAsset ){
+                throw new CustomError('Could not find that game ad asset', { status: 401, err_code: "not_found" });
+            }
+
+            // Find any live campaigns
+            let gameAdAssets = await GameAdAssetSession.create({gameAdAsset:gameAdAssetId,exposedTime:exposedTime,sessionTime:sessionTime});
+
+            return res.ok({success:true});
+        }catch(err){
+            sails.log.error("GameAdvertService.sessionEnd Error: ",err);
+            return res.serverError({err: err});
+        }
+    }
 
 
 	

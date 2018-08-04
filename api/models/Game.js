@@ -83,6 +83,31 @@ module.exports = {
 			type: 'text',
 			required: true
 		},
+
+		dailyActiveUsers: {
+			type: 'integer',
+			defaultsTo: 0
+		},
+
+		monthlyActiveUsers: {
+			type: 'integer',
+			defaultsTo: 0
+		},
+
+		regions: {
+			type: 'string',
+			defaultsTo: ""
+		},
+
+		gender: {
+			type: 'string',
+			defaultsTo: ""
+		},
+
+		age: {
+			type: 'string',
+			defaultsTo: ""
+		},
 		
 		publicKey: {
             type: 'string',

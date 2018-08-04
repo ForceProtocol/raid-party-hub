@@ -18,6 +18,11 @@ module.exports = {
                     gameAdAsset.link = '';
                 }
 
+                // Ensure we have all information from populated tables for this game advert
+                if(!gameAdAsset.gameAsset || !gameAdAsset.game){
+                    continue;
+                }
+
 
                 // Set the game asset URL
                 if(gameAdAsset.gameAsset.type == 'screen'){
@@ -40,7 +45,7 @@ module.exports = {
                 // Must be type 'screen' or 'texture'
                 else{
                     sails.log.error("GameAdvertService.pushLiveAdCampaigns cron err: game asset type set is not recognised: ", gameAdAsset);
-                    return;
+                    continue;
                 }
 
 
@@ -88,5 +93,48 @@ module.exports = {
         }
         
     },
+
+
+
+    /** Define the status of this game ad campaign:
+    *   active: 0 = advertiser paused
+    *   active: 1 = advertiser approved
+    *   approved: 0 = pending developer approval
+    *   approved: 1 = developer approved
+    */
+    getAdvertStatus: async (active,approved,startDate,endDate)=>{
+        let status = '';
+
+        // The advert is withing the start and end date so can go live
+        if(moment().isBetween(startDate,endDate)){
+
+            // The advert is approved and active, it's live
+            if(active && approved){
+                return 'live';
+            }
+
+            else if(!active && approved){
+                return 'paused';
+            }
+
+            else if(!approved){
+                return 'pending';
+            }
+
+        }
+        else{
+
+            // The advert is approved and active, it's live
+            if(active && approved || !approved){
+                return 'pending';
+            }
+
+            else if(!active && approved){
+                return 'paused';
+            }
+        }
+    },
+
+
 
 };

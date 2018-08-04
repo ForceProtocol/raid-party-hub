@@ -7,20 +7,15 @@
 
 module.exports = {
     attributes: {
-	
-		sessionId: {
-            type: 'string',
-            required: true
+
+        exposedTime: {
+            type: 'integer',
+            defaultsTo: 0
         },
 
-        visitedLink: {
-        	type: 'boolean',
-        	defaultsTo: false
-        },
-
-        videoQuality: {
-            type: 'string',
-            defaultsTo: 'sd'
+        sessionTime: {
+            type: 'integer',
+            defaultsTo: 0
         },
 
         startDate: {
@@ -29,11 +24,6 @@ module.exports = {
 
         endDate: {
         	type: 'datetime'
-        },
-
-        userAgent: {
-            type: 'string',
-            defaultsTo: ''
         },
 
 		gameAdAsset: {

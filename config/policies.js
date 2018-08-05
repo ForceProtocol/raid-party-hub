@@ -78,10 +78,13 @@ module.exports.policies = {
         getUserGames: 'tokenAuth',
         uploadAsset: 'tokenAuth',
         createCampaign: 'tokenAuth',
+        updateCampaign: 'tokenAuth',
         getCampaigns: 'tokenAuth',
+        getCampaign: 'tokenAuth',
         deleteCampaign: 'tokenAuth',
         archiveCampaign: 'tokenAuth',
         activateCampaign: 'tokenAuth',
+        deleteFile: 'tokenAuth',
         downloadItem: true
     },
 

@@ -89,6 +89,7 @@ module.exports.routes = {
 	'GET /web/advertiser/games': 'WebAdvertiserController.getUserGames',
 	'GET /web/advertiser-games': 'WebAdvertiserController.getGames',
 	'GET /web/advertiser/campaigns': 'WebAdvertiserController.getCampaigns',
+	'GET /web/advertiser/campaign/:gameAdAssetId': 'WebAdvertiserController.getCampaign',
 	'GET /web/advertiser/download': 'WebAdvertiserController.downloadItem',
 	'POST /web/advertiser/signup': 'WebAdvertiserController.signupUser',
 	'POST /web/advertiser/login': 'WebAdvertiserController.loginUser',
@@ -99,9 +100,11 @@ module.exports.routes = {
 	'POST /web/advertiser/update-password': 'WebAdvertiserController.updatePassword',
 	'POST /web/advertiser/upload/asset/:type': 'WebAdvertiserController.uploadAsset',
 	'POST /web/advertiser/create-campaign': 'WebAdvertiserController.createCampaign',
+	'POST /web/advertiser/update-campaign/:gameAdAssetId': 'WebAdvertiserController.updateCampaign',
 	'POST /web/advertiser/campaign/archive': 'WebAdvertiserController.archiveCampaign',
 	'POST /web/advertiser/campaign/delete': 'WebAdvertiserController.deleteCampaign',
 	'POST /web/advertiser/campaign/activate': 'WebAdvertiserController.activateCampaign',
+	'POST /web/advertiser/campaign/file/delete': 'WebAdvertiserController.deleteFile',
 	
 
 	// Routes to send the notification to pre registerd users.

@@ -1014,6 +1014,72 @@ module.exports = {
 	},
 
 
+
+	async updateCampaign(req,res){
+		try{
+			let gameAdAssetId = req.param("gameAdAssetId"),
+			gameId = req.param("gameId"),
+			width = req.param("width"),
+			height = req.param("height"),
+			resourceUrlHd = req.param("resourceUrlHd"),
+			resourceUrlSd = req.param("resourceUrlSd"),
+			resourceUrlImg = req.param("resourceImg"),
+			startDate = req.param("startDate"),
+			endDate = req.param("endDate"),
+			gameAsset = req.param("gameAsset"),
+			maxBid = req.param("maxBid"),
+			dailyBudget = req.param("dailyBudget"),
+			advertiserId = req.token.user.id;
+
+
+			// Validate width and height values as float
+			if(!width){
+				width = 0.0;
+			}
+
+			if(!height){
+				height = 0.0;
+			}
+
+			width = parseFloat(width);
+			height = parseFloat(height);
+
+
+			// Ensure at least one asset was uploaded
+			if(!resourceUrlHd && !resourceUrlSd && !resourceUrlImg){
+				throw new CustomError('You must provide at least one asset (video or image)', { status: 401, err_code: "not_found" });
+			}
+
+			// Ensure that uploaded files exist
+			if(resourceUrlHd){
+				resourceUrlHd = '/adverts/videos/' + resourceUrlHd;
+			}
+
+			if(resourceUrlSd){
+				resourceUrlSd = '/adverts/videos/' + resourceUrlSd;
+			}
+
+			if(resourceUrlImg){
+				resourceUrlImg = '/adverts/images/' + resourceUrlImg;
+			}
+
+			let gameAdAsset = await GameAdAsset.update({id:gameAdAssetId,advertiser:advertiserId},{active:true,approved:false,game:gameId,
+				gameAsset:gameAsset,advertiser:advertiserId,width:width,height:height,resourceUrlSd:resourceUrlSd,
+				resourceUrlHd:resourceUrlHd,resourceUrlImg:resourceUrlImg,maxBid:maxBid,dailyBudget:dailyBudget,startDate:startDate,endDate:endDate});
+
+			if (!gameAdAsset) {
+				throw new CustomError('Could not update that campaign', { status: 401, err_code: "not_found" });
+			}
+
+			return res.ok({success:true,gameAdAsset:gameAdAsset});
+
+		}catch(err){
+			sails.log.error("WebAdertiserController.updateCampaign error: ",err);
+			return util.errorResponse(err, res);
+		}
+	},
+
+
 	async getCampaigns(req,res){
 		try{
 			let archived = req.param("archived"),
@@ -1043,10 +1109,30 @@ module.exports = {
 
 			return res.ok({campaigns:campaignsList});
 		}catch(err){
+			sails.log.error("WebAdertiserController.getCampaigns error: ",err);
+			return util.errorResponse(err, res);
+		}
+	},
+
+
+
+	async getCampaign(req,res){
+		try{
+			let gameAdAssetId = req.param("gameAdAssetId");
+
+			let campaign = await GameAdAsset.findOne({advertiser:req.token.user.id,id:gameAdAssetId}).populate('gameAsset').populate('game').populate('gameAdSessions');
+
+			if (!campaign) {
+				throw new CustomError('Could not find that campaign.', { status: 401, err_code: "not_found" });
+			}
+
+			return res.ok(campaign);
+		}catch(err){
 			sails.log.error("WebAdertiserController.getCampaign error: ",err);
 			return util.errorResponse(err, res);
 		}
 	},
+
 
 
 	async downloadItem(req,res){
@@ -1158,5 +1244,42 @@ module.exports = {
 			return util.errorResponse(err, res);
 		}
 	},
+
+
+
+	async deleteFile(req,res){
+		try{
+			let gameAdAssetId = decodeURI(req.param("campaignId")),
+			fileKey = req.param("fileKey");
+
+			let gameAdAsset = await GameAdAsset.findOne({advertiser:req.token.user.id,id:gameAdAssetId});
+
+			if (gameAdAsset.length === 0) {
+				throw new CustomError('Could not find that campaign.', { status: 401, err_code: "not_found" });
+			}
+
+			// Remove file
+			if(gameAdAsset[fileKey]){
+				fs.unlink(sails.config.appPath + '/assets' + gameAdAsset[fileKey], function(err) {
+			  		if (err){
+						sails.log.error("WebAdvertiserController.deleteFile delete file error: ", err);
+					}
+				});
+
+				// If no files exist against this campaign, it must be paused
+				if(!gameAdAsset.resourceUrlHd && !gameAdAsset.resourceUrlSd && !gameAdAsset.resourceUrlImg){
+					await GameAdAsset.update({id:gameAdAsset.id},{active:false,approved:false,[fileKey]:""});
+				}else{
+					await GameAdAsset.update({id:gameAdAsset.id},{[fileKey]:""});
+				}
+			}
+
+			return res.ok();
+		}catch(err){
+			sails.log.error("WebAdertiserController.deleteFile error: ",err);
+			return util.errorResponse(err, res);
+		}
+	},
+
 
 };

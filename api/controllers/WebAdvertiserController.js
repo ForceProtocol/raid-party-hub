@@ -740,9 +740,9 @@ module.exports = {
 				// Convert game avatar to base64 encoded string
 				game.avatar = '/assets/images/' + game.avatar;
 
-				gameItem = { game_id: game.gameId, title: game.title, description: game.description, 
+				gameItem = { game_id: game.gameId, title: game.title, dynamicAdsDescription: game.dynamicAdsDescription, 
 					bannerContent: game.bannerContent, link: game.link, platform: game.platform, avatar: game.avatar,
-					dailyActiveUsers:game.dailyActiveUsers, monthlyActiveUsers:game.monthlyActiveUsers, regions:game.regions, age:game.age,
+					monthlyImpressions:game.monthlyImpressions, monthlyActiveUsers:game.monthlyActiveUsers, regions:game.regions, age:game.age,
 					gender:game.gender
 				};
 

@@ -29,6 +29,10 @@ module.exports = {
             type: 'boolean',
 			defaultsTo: false
         },
+
+        dynamicAdsDescription: {
+            type: 'text',
+        },
 		
 		title: {
             type: 'string',
@@ -84,7 +88,7 @@ module.exports = {
 			required: true
 		},
 
-		dailyActiveUsers: {
+		monthlyImpressions: {
 			type: 'integer',
 			defaultsTo: 0
 		},

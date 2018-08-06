@@ -30,7 +30,7 @@ module.exports = {
 
 			// Player already exists
 			if (existingUser) {
-				throw new CustomError("This email is already registered with another account. Please login to your account using the following email: " + existingPlayerDevice.email, { status: 400 });
+				throw new CustomError("This email is already registered with another account. Please login to your account using the following email: " + existingUser.email, { status: 400 });
 			}
 
 			// Create activation PIN

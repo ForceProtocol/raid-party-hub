@@ -729,7 +729,7 @@ module.exports = {
 	async getGames(req, res) {
 		try {
 			// Get games we need for this device
-			let games = await Game.find({ dynamicAdsEnabled: true });
+			let games = await Game.find({ dynamicAdsEnabled: true }).populate('gamePlatforms').populate('gameAsset');
 
 			if (!games) {
 				throw new CustomError('Could not find any active games.', { status: 401, err_code: "not_found" });

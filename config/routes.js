@@ -7,6 +7,7 @@ module.exports.routes = {
 	'GET /games/active': 'GameController.getActiveGames',
 	'GET /game/:gameId': 'GameController.getGame',
 	'GET /game/game-assets/:gameId': 'GameController.getGameAssets',
+	'POST /web/contact' : 'PagesController.contact',
 
 
 	/** Studio Auth */

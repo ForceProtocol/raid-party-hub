@@ -63,6 +63,70 @@ module.exports = {
 			success: true,
 		});
     },
+
+
+
+    /**
+	* Submit the contact form
+	*/
+	async contact(req, res) {
+
+		try{
+			let name = req.param('name'),
+			email = req.param('email'),
+			telephone = req.param('telephone'),
+			message = req.param('message'),
+			captcha = req.param('captcha');
+			
+			if(!name){
+				name = '';
+			}
+
+			if(!captcha){
+				throw new CustomError('You must complete the captcha box.', {status: 400});
+			}
+			
+			if(!email){
+				throw new CustomError('An invalid email was provided.', {status: 400});
+			}
+
+			await EmailService.sendEmail({
+				fromEmail: 'support@raidparty.io',
+				fromName: 'Support Team',
+				toEmail: email,
+				toName: name,
+				subject: "Thank you for your enquiry",
+				body: `You submitted a message to us at https://brands.raidparty.io regarding dynamic advertisement.<br />
+					This is a notification that we have received your message and will be in touch soon.<br /><br />
+					Kindest Regards<br />
+					The RaidParty Team`
+			});
+
+			let emailMsg = `Their email: ${email}<br />
+			Name: ${name}<br />
+			Telephone: ${telephone}<br />
+			Message: ${message}`;
+
+			await EmailService.sendEmail({
+				fromEmail: 'support@raidparty.io',
+				fromName: 'Support Team',
+				toEmail: 'pete@triforcetokens.io',
+				toName: 'Pete',
+				subject: "New brands.raidparty.io enquiry",
+				body: emailMsg
+			});
+
+			return res.ok({
+				success: true,
+			});
+		
+		}
+		catch(err){
+			sails.log.debug("error for this is:",err);
+			return res.error();
+		}
+    },
+	
 	
 	
 	

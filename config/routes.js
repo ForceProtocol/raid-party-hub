@@ -8,25 +8,22 @@ module.exports.routes = {
 	'GET /game/:gameId': 'GameController.getGame',
 	'GET /game/game-assets/:gameId': 'GameController.getGameAssets',
 
-	/** Developer Login and Signups */
-	'POST /app/developer': 'DeveloperController.signupDeveloper',
-	'GET /app/developer/activate': 'DeveloperController.activateDeveloper',
-	'POST /app/developer/login': 'DeveloperController.loginDeveloper',
-	/** API Player Routes 
-	'GET /player/:playerId': 'PlayerController.getPlayer',
-	'POST /player/track': 'PlayerController.trackPlayer',
-	'POST /player/reward': 'PlayerController.rewardPlayer',
+
+	/** Studio Auth */
+	'POST /app/studio': 'studioController.signupStudio',
+	'GET /app/studio/activate': 'StudioController.activateStudio',
+	'POST /app/studio/login': 'StudioController.loginStudio',
+	'POST /app/studio/reset-password': 'StudioController.resetPassword',
+	'POST /app/studio/change-password': 'StudioController.changePassword',
+	'POST /app/studio/update-password': 'StudioController.updatePassword',
 	
-	/** Developer Games Management */
-	'GET /app/developer/games': 'DeveloperController.getGames',
-	'GET /app/developer/game/:gameId': 'DeveloperController.getGame',
-	'GET /app/developer/balance': 'DeveloperController.getBalance',
-	'POST /app/developer/game': 'DeveloperController.addGame',
-	'POST /app/developer/game/:gameId': 'DeveloperController.updateGame',
-	'DELETE /app/developer/game/:gameId': 'DeveloperController.deleteGame',
-	'POST /app/developer/reset-password': 'DeveloperController.resetPassword',
-	'POST /app/developer/change-password': 'DeveloperController.changePassword',
-	'POST /app/developer/update-password': 'DeveloperController.updatePassword',
+	/** Studio Objects */
+	'GET /app/studio/games': 'StudioController.getGames',
+	'GET /app/studio/game/:gameId': 'StudioController.getGame',
+	'GET /app/studio/balance': 'StudioController.getBalance',
+	'POST /app/studio/game': 'StudioController.addGame',
+	'POST /app/studio/game/:gameId': 'StudioController.updateGame',
+	'DELETE /app/studio/game/:gameId': 'StudioController.deleteGame',
 
 
 	/** Player Routes */

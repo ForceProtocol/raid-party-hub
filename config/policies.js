@@ -89,11 +89,11 @@ module.exports.policies = {
     },
 
 
-    DeveloperController: {
-        '*': 'isDeveloper',
-        signupDeveloper: true,
-        activateDeveloper: true,
-        loginDeveloper: true,
+    StudioController: {
+        '*': 'isStudio',
+        signupStudio: true,
+        activateStudio: true,
+        loginStudio: true,
         resetPassword: true,
         changePassword: true,
     },

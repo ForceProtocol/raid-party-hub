@@ -1,5 +1,5 @@
 /**
- * DeveloperController
+ * StudioController
  *
  * @description :: Server-side logic for managing Pages
  * @help        :: See http://links.sailsjs.org/docs/controllers
@@ -13,14 +13,15 @@ module.exports = {
 
 
 	/**
-	* Sign Up New Developer
+	* Sign Up New Studio
 	*/
-	async signupDeveloper(req, res) {
+	async signupStudio(req, res) {
 
 		const email = req.param("email"),
-			password = req.param("password");
-		firstName = req.param("firstName");
-		lastName = req.param("lastName");
+			password = req.param("password"),
+			firstName = req.param("firstName"),
+			lastName = req.param("lastName"),
+			studioName = req.param("studioName");
 
 		try {
 
@@ -29,44 +30,48 @@ module.exports = {
 				throw new CustomError('You did not provide all signup details required.', { status: 400 });
 			}
 
-			let existingDeveloper = await Developer.findOne({ email: email });
+			// Studio name is not required
+			if(!studioName){
+				studioName = '';
+			}
 
-			// developer already exists
-			if (existingDeveloper) {
+			let existingStudio = await Studio.findOne({ email: email });
+
+			// studio already exists
+			if (existingStudio) {
 				throw new CustomError('This email is already registered with another account. Please login to your account.', { status: 400 });
 			}
 
 			// Create activation PIN
 			let pin = util.randomFixedInteger(6);
 
-			// Create new developer account
+			// Create new studio account
 			// AccountStatus: 0 = blocked, 1 = pending activation, 2 = activated
-			let developer = await Developer.create({
+			let studio = await Studio.create({
 				email: email,
 				password: password,
 				firstName: firstName,
 				lastName: lastName,
+				studioName: studioName,
 				pin: pin,
 				accountStatus: 1,
 				forceBalance: '0'
 			});
 
-			// Create the users wallet
-			//WalletService.createUserWallet(developer.id).catch(err=>{sails.log.error('On signup, failed to create developer wallet: ', err)});
-			let activationLink = sails.config.APP_HOST + "activate-developer?developer=" + developer.developerId + "&pin=" + pin;
+			let activationLink = sails.config.APP_HOST + "activate?studio=" + studio.studioId + "&pin=" + pin;
 
 			let msg = `Welcome to RaidParty!<br />
-				Your account has been created and is now awaiting your activation. Please click on the activation link below to activate your RaidParty Indie Developer account.<br /><br />
+				Your account has been created and is now awaiting your activation. Please click on the activation link below to activate your RaidParty Studio account.<br /><br />
 				<strong><a href=\"${activationLink}\">${activationLink}</a></strong><br /><br />
-				Keep calm, keep playing<br />
-				The RaidParty success team`;
+				Keep calm, keep building<br />
+				The RaidParty team`;
 
-			// Send activation email/SMS to developer to activate their account
+			// Send activation email/SMS to studio to activate their account
 			await EmailService.sendEmail({
 				fromEmail: 'support@raidparty.io',
 				fromName: 'Success Team',
-				toEmail: developer.email,
-				toName: developer.email,
+				toEmail: studio.email,
+				toName: studio.firstName + ' ' + studio.lastName,
 				subject: 'Welcome to RaidParty! Activate your account to start launching your games successfully',
 				body: msg
 			})
@@ -84,9 +89,9 @@ module.exports = {
 
 
 	/**
-	* Login Developer
+	* Login Studio
 	*/
-	async loginDeveloper(req, res) {
+	async loginStudio(req, res) {
 		try {
 			let email = req.param("email"),
 				password = req.param("password");
@@ -96,42 +101,42 @@ module.exports = {
 				throw new CustomError('You did not provide all login details required.', { status: 400 });
 			}
 
-			let developer = await Developer.findOne({ email: email });
+			let studio = await Studio.findOne({ email: email });
 
-			// developer does not exist
-			if (!developer) {
+			// studio does not exist
+			if (!studio) {
 				throw new CustomError('That account does not exist, please check the details you entered', { status: 401, err_code: "not_found" });
 			}
 
-			// Developer is activated - try to login
-			if (developer.accountStatus == 2) {
+			// Studio is activated - try to login
+			if (studio.accountStatus == 2) {
 				// Check password matches
-				let isValidPassword = await Developer.validatePassword(password, developer.password);
+				let isValidPassword = await Studio.validatePassword(password, studio.password);
 
 				// Invalid password entered
 				if (!isValidPassword) {
-					sails.log.debug("DeveloperController.logindeveloper: invalid password given by developer.");
+					sails.log.debug("StudioController.loginstudio: invalid password given by studio.");
 					throw new CustomError('Could not find an account with those details. Please check your details and try again.', { status: 401, err_code: "not_found" });
 				}
 
 				const rsp = {
-					developer: developer,
+					studio: studio,
 					success: true,
 					token: jwToken.issue({
-						user: developer.toJSON()
+						user: studio.toJSON()
 					}, "30 days")
 				};
 
 				return res.ok(rsp);
 			}
 
-			// developer is blocked
-			if (developer.accountStatus == 0) {
+			// studio is blocked
+			if (studio.accountStatus == 0) {
 				throw new CustomError('Your account has been blocked. Please contact us if you feel this is in error.', { status: 403, err_code: "blocked" });
 			}
 
-			// developer has not activated their account
-			if (developer.accountStatus == 1) {
+			// studio has not activated their account
+			if (studio.accountStatus == 1) {
 				throw new CustomError('Your account has not yet been activated. Please check your email for an activation link.', { status: 401, err_code: "activate" });
 			}
 
@@ -142,17 +147,17 @@ module.exports = {
 
 
 	/**
-	* Activate Developer Account - using PIN
+	* Activate Studio Account - using PIN
 	*/
-	async activateDeveloper(req, res) {
+	async activateStudio(req, res) {
 
 		try {
 
 			let pin = req.param("pin"),
-				developerId = req.param("developer");
+				studioId = req.param("studio");
 
 			// Validate sent params
-			if (!pin || !developerId) {
+			if (!pin || !studioId) {
 				throw new CustomError('You did not provide all login details required.', { status: 400 });
 			}
 
@@ -161,43 +166,43 @@ module.exports = {
 				throw new CustomError('Invalid PIN was provided', { status: 401, err_code: "invalid_pin" });
 			}
 
-			let developer = await Developer.findOne({ developerId: developerId });
+			let studio = await Studio.findOne({ studioId: studioId });
 
 			// Could not find that account
-			if (!developer) {
+			if (!studio) {
 				throw new CustomError('Could not find an account with those details. Please check your details and try again.', { status: 401, err_code: "not_found" });
 			}
 
-			// Developer is already active
-			if (developer.accountStatus == 2) {
+			// Studio is already active
+			if (studio.accountStatus == 2) {
 				throw new CustomError('Your account is already active. Please login.', { status: 403, err_code: "blocked" });
 			}
 
-			// developer is locked
-			if (developer.accountStatus == 0) {
+			// studio is locked
+			if (studio.accountStatus == 0) {
 				throw new CustomError('Your account has been blocked.', { status: 403, err_code: "blocked" });
 			}
 
 			// Pin does not match
-			if (developer.pin != pin) {
+			if (studio.pin != pin) {
 
 				// If too many PIN attempts made, block their account, send email notifying user
-				if (developer.pinAttempts > 6) {
-					let updatedPinAttempt = await Developer.update({ developerId: developer.developerId }, { accountStatus: 0 });
+				if (studio.pinAttempts > 6) {
+					let updatedPinAttempt = await Studio.update({ studioId: studio.studioId }, { accountStatus: 0 });
 
-					// Send developer an email that their account has been blocked
+					// Send studio an email that their account has been blocked
 					let msg = `Hi<br />
 						We are sorry to inform you that your account has been locked due to too many incorrect activation attempts.<br /><br />
 						You should reply to this email to confirm your identity and allow us to ensure your account is safe. We will then reactivate your account based on an assessment.<br />
 						Keep calm, keep playing<br />
 						The RaidParty success team`;
 
-					// Send activation email/SMS to developer to activate their account
+					// Send activation email/SMS to studio to activate their account
 					await EmailService.sendEmail({
 						fromEmail: 'support@raidparty.io',
 						fromName: 'Success Team',
-						toEmail: developer.email,
-						toName: developer.email,
+						toEmail: studio.email,
+						toName: studio.email,
 						subject: 'Your RaidParty account has been locked',
 						body: msg
 					});
@@ -205,20 +210,20 @@ module.exports = {
 					throw new CustomError('You have made too many incorrect PIN attempts. Your account has been locked.', { status: 403, err_code: "blocked" });
 				}
 
-				let updatedPinAttempt = await Developer.update({ developerId: developer.developerId }, { pinAttempts: developer.pinAttempts + 1 });
+				let updatedPinAttempt = await Studio.update({ studioId: studio.studioId }, { pinAttempts: studio.pinAttempts + 1 });
 				throw new CustomError('The PIN provided was invalid', { status: 401, err_code: "invalid_pin" });
 			}
 
-			// PIN is correct and developer is allowed to enter
-			let updatedPinAttempt = await Developer.update({ developerId: developer.developerId }, { accountStatus: 2, pinAttempts: 0, pin: 0 });
+			// PIN is correct and studio is allowed to enter
+			let updatedPinAttempt = await Studio.update({ studioId: studio.studioId }, { accountStatus: 2, pinAttempts: 0, pin: 0 });
 
 			const rsp = {
-				developer: developer,
+				studio: studio,
 				success: true,
 				isValid: true,
 				msg: "Success! Your account is now active",
 				token: jwToken.issue({
-					user: developer.toJSON()
+					user: studio.toJSON()
 				}, "30 days")
 			};
 
@@ -243,24 +248,24 @@ module.exports = {
 				throw new CustomError('You did not provide all details required.', { status: 400 });
 			}
 
-			let developer = await Developer.findOne({ email: email });
+			let studio = await Studio.findOne({ email: email });
 
 			// Could not find that account
-			if (!developer) {
+			if (!studio) {
 				throw new CustomError('Could not find an account with those details. Please check your details and try again.', { status: 401, err_code: "not_found" });
 			}
 
-			// Developer is locked
-			if (developer.accountStatus == 0) {
+			// Studio is locked
+			if (studio.accountStatus == 0) {
 				throw new CustomError('Your account has been blocked.', { status: 403, err_code: "blocked" });
 			}
 
 			// Create activation PIN
 			let pin = util.randomFixedInteger(6);
 
-			await Developer.update({ developerId: developer.developerId }, { pin: pin });
+			await Studio.update({ studioId: studio.studioId }, { pin: pin });
 
-			let activationLink = sails.config.APP_HOST + "change-password?developer=" + developer.developerId + "&pin=" + pin;
+			let activationLink = sails.config.APP_HOST + "change-password?studio=" + studio.studioId + "&pin=" + pin;
 
 			let msg = `Welcome to RaidParty!<br />
 				A password reset request was made. Please visit the link below to update your password.<br /><br />
@@ -268,12 +273,12 @@ module.exports = {
 				Keep calm, keep playing<br />
 				The RaidParty success team`;
 
-			// Send activation email/SMS to developer to activate their account
+			// Send activation email/SMS to studio to activate their account
 			await EmailService.sendEmail({
 				fromEmail: 'support@raidparty.io',
 				fromName: 'Success Team',
-				toEmail: developer.email,
-				toName: developer.email,
+				toEmail: studio.email,
+				toName: studio.email,
 				subject: 'Reset password requested for your RaidParty account',
 				body: msg
 			})
@@ -298,46 +303,46 @@ module.exports = {
 	async changePassword(req, res) {
 		try {
 			let pin = req.param("pin"),
-				developerId = req.param("developer"),
+				studioId = req.param("studio"),
 				newPassword = req.param("password");
 
 			// Validate sent params
-			if (!developerId || !pin || !newPassword) {
+			if (!studioId || !pin || !newPassword) {
 				throw new CustomError('You did not provide all details required.', { status: 400 });
 			}
 
-			let developer = await Developer.findOne({ developerId: developerId });
+			let studio = await Studio.findOne({ studioId: studioId });
 
 			// Could not find that account
-			if (!developer) {
+			if (!studio) {
 				throw new CustomError('Could not find an account with those details. Please check your details and try again.', { status: 401, err_code: "not_found" });
 			}
 
-			// developer is locked
-			if (developer.accountStatus == 0) {
+			// studio is locked
+			if (studio.accountStatus == 0) {
 				throw new CustomError('Your account has been blocked.', { status: 403, err_code: "blocked" });
 			}
 
 			// Pin does not match
-			if (developer.pin != pin) {
+			if (studio.pin != pin) {
 
 				// If too many PIN attempts made, block their account, send email notifying user
-				if (developer.pinAttempts > 6) {
-					let updatedPinAttempt = await Developer.update({ developerId: developer.developerId }, { accountStatus: 0 });
+				if (studio.pinAttempts > 6) {
+					let updatedPinAttempt = await Studio.update({ studioId: studio.studioId }, { accountStatus: 0 });
 
-					// Send developer an email that their account has been blocked
+					// Send studio an email that their account has been blocked
 					let msg = `Hi<br />
 						We are sorry to inform you that your account has been locked due to too many incorrect PIN attempts to change your password.<br /><br />
 						You should reply to this email to confirm your identity and allow us to ensure your account is safe. We will then reactivate your account based on an assessment.<br />
 						Keep calm, keep playing<br />
 						The RaidParty success team`;
 
-					// Send activation email/SMS to developer to activate their account
+					// Send activation email/SMS to studio to activate their account
 					await EmailService.sendEmail({
 						fromEmail: 'support@raidparty.io',
 						fromName: 'Account Team',
-						toEmail: developer.email,
-						toName: developer.email,
+						toEmail: studio.email,
+						toName: studio.email,
 						subject: 'Your RaidParty account has been locked',
 						body: msg
 					});
@@ -345,14 +350,14 @@ module.exports = {
 					throw new CustomError('You have made too many incorrect PIN attempts. Your account has been locked.', { status: 403, err_code: "blocked" });
 				}
 
-				let updatedPinAttempt = await Developer.update({ developerId: developer.developerId }, { pinAttempts: developer.pinAttempts + 1 });
+				let updatedPinAttempt = await Studio.update({ studioId: studio.studioId }, { pinAttempts: studio.pinAttempts + 1 });
 				throw new CustomError('The PIN provided was invalid', { status: 401, err_code: "invalid_pin" });
 			}
 
 			// TODO: Make sure password is valid
 
-			// PIN is correct and developer can change their password
-			let updatedPassword = await Developer.update({ developerId: developer.developerId }, { password: newPassword, pinAttempts: 0, pin: 0 });
+			// PIN is correct and studio can change their password
+			let updatedPassword = await Studio.update({ studioId: studio.studioId }, { password: newPassword, pinAttempts: 0, pin: 0 });
 
 			return res.ok({ "success": true, "msg": "Your new password has been set, please login to your account" });
 		} catch (err) {
@@ -362,12 +367,12 @@ module.exports = {
 
 
 	/**
-	* Get developer games
+	* Get studio games
 	*/
 	async getGames(req, res) {
 		try {
-			let developer = req.developer;
-			let games = await Game.find({ developer: developer.developerId });
+			let studio = req.studio;
+			let games = await Game.find({ studio: studio.studioId });
 			return res.ok({ games: games });
 		} catch (err) {
 			return util.errorResponse(err, res);
@@ -376,24 +381,24 @@ module.exports = {
 
 
 	/**
-	* Get developer balance
+	* Get studio balance
 	*/
 	async getBalance(req, res) {
 		try {
-			let developer = req.developer;
+			let studio = req.studio;
 
-			if (!developer.forceBalance) {
-				developer.forceBalance = '0';
+			if (!studio.forceBalance) {
+				studio.forceBalance = '0';
 			}
 
 			// Work out FORCE balance in dollar
-			let forceTotal = new BigNumber(developer.forceBalance);
+			let forceTotal = new BigNumber(studio.forceBalance);
 
-			developer.totalForce = forceTotal.toFormat(6);
+			studio.totalForce = forceTotal.toFormat(6);
 
-			developer.totalForceUSD = parseInt(forceTotal) * 0.11;
+			studio.totalForceUSD = parseInt(forceTotal) * 0.11;
 
-			return res.ok({ totalForce: developer.totalForce, totalForceUsd: developer.totalForceUSD });
+			return res.ok({ totalForce: studio.totalForce, totalForceUsd: studio.totalForceUSD });
 		} catch (err) {
 			return util.errorResponse(err, res);
 		}
@@ -405,7 +410,7 @@ module.exports = {
 	*/
 	async addGame(req, res) {
 		try {
-			let developer = req.developer;
+			let studio = req.studio;
 
 			let gameTitle = req.param("title"),
 				description = req.param("description"),
@@ -413,7 +418,7 @@ module.exports = {
 				active = req.param('activeStatus')
 
 			if (!req.file('avatar')) {
-				throw new CustomError('You must provide a valid game image to be listed on the RaidParty developer app.', { status: 401 });
+				throw new CustomError('You must provide a valid game image to be listed on the RaidParty studio app.', { status: 401 });
 			}
 
 			req.file('avatar').upload({ maxBytes: 10000000 }, async function (err, file) {
@@ -427,7 +432,7 @@ module.exports = {
 				});
 				let avatarBase64Data = await new Buffer(fs.readFileSync(file[0].fd)).toString("base64");
 
-				let addGame = await Game.create({ title: gameTitle, description: description, active: active, avatar: avatarBase64Data, isAndroid: isAndroid, isIos: isIos, platform: platform, developer: developer.developerId });
+				let addGame = await Game.create({ title: gameTitle, description: description, active: active, avatar: avatarBase64Data, isAndroid: isAndroid, isIos: isIos, platform: platform, studio: studio.studioId });
 
 				if (!addGame) {
 					throw new CustomError('Could not add that game due to a technical issue. Please try again later.', { status: 400 });
@@ -447,7 +452,7 @@ module.exports = {
 	*/
 	async updateGame(req, res) {
 		try {
-			let developer = req.developer;
+			let studio = req.studio;
 
 			let gameId = req.param("gameId"),
 				gameTitle = req.param("title"),
@@ -468,14 +473,14 @@ module.exports = {
 						isIos = pfObject.name === 'ios' ? true : false;
 					});
 					let avatarBase64Data = await new Buffer(fs.readFileSync(file[0].fd)).toString("base64");
-					updatedGame = await Game.update({ gameId: gameId, developer: developer.developerId }, { title: gameTitle, description: description, platform: platform, isAndroid: isAndroid, isIos: isIos, active: active, avatar: avatarBase64Data });
+					updatedGame = await Game.update({ gameId: gameId, studio: studio.studioId }, { title: gameTitle, description: description, platform: platform, isAndroid: isAndroid, isIos: isIos, active: active, avatar: avatarBase64Data });
 					if (!updatedGame) {
 						throw new CustomError('Could not update that game due to a technical issue. Please try again later.', { status: 400 });
 					}
 					return res.ok({ game: updatedGame });
 				})
 			} else {
-				updatedGame = await Game.update({ gameId: gameId, developer: developer.developerId }, { title: gameTitle, description: description, platform: platform, isAndroid: isAndroid, isIos: isIos, active: active });
+				updatedGame = await Game.update({ gameId: gameId, studio: studio.studioId }, { title: gameTitle, description: description, platform: platform, isAndroid: isAndroid, isIos: isIos, active: active });
 				if (!updatedGame) {
 					throw new CustomError('Could not update that game due to a technical issue. Please try again later.', { status: 400 });
 				}
@@ -493,12 +498,12 @@ module.exports = {
 	*/
 	async deleteGame(req, res) {
 		try {
-			let developer = req.developer;
+			let studio = req.studio;
 
 			let gameId = req.param("gameId"),
 				gameTitle = req.param("title");
 
-			let game = await Game.findOne({ gameId: gameId, developer: developer.developerId });
+			let game = await Game.findOne({ gameId: gameId, studio: studio.studioId });
 
 			if (!game) {
 				throw new CustomError('You do not have relevant permissions to delete that game.', { status: 501 });
@@ -527,10 +532,10 @@ module.exports = {
 	*/
 	async getGame(req, res) {
 		try {
-			let developer = req.developer,
+			let studio = req.studio,
 				gameId = req.param("gameId");
 
-			let game = await Game.findOne({ gameId: gameId, developer: developer.developerId });
+			let game = await Game.findOne({ gameId: gameId, studio: studio.studioId });
 
 			if (!game) {
 				throw new CustomError('That game could not be found.', { status: 400 });
@@ -544,7 +549,7 @@ module.exports = {
 
 
 	/**
-	* Update developers password when logged in
+	* Update studios password when logged in
 	* Uses Authentication Bearer auth
 	*/
 	async updatePassword(req, res) {
@@ -561,20 +566,20 @@ module.exports = {
 				throw new CustomError('You entered the same password as your current password', { status: 400 });
 			}
 
-			let developer = await Developer.findOne({ developerId: req.developer.developerId });
+			let studio = await Studio.findOne({ studioId: req.studio.studioId });
 
 			// Could not find that account
-			if (!developer) {
+			if (!studio) {
 				throw new CustomError('Could not find an account with those details. Please check your details and try again.', { status: 401, err_code: "not_found" });
 			}
 
-			// developer is locked
-			if (developer.accountStatus == 0) {
+			// studio is locked
+			if (studio.accountStatus == 0) {
 				throw new CustomError('Your account has been blocked.', { status: 403, err_code: "blocked" });
 			}
 
 			// Check current password entered is valid
-			let validPassword = await Developer.validatePassword(currentPassword, developer.password);
+			let validPassword = await Studio.validatePassword(currentPassword, studio.password);
 
 			// Invalid current password given
 			if (!validPassword) {
@@ -582,7 +587,7 @@ module.exports = {
 			}
 
 			// Current password was correct, enter new password
-			let updatedPassword = await Developer.update({ developerId: developer.developerId }, { password: newPassword });
+			let updatedPassword = await Studio.update({ studioId: studio.studioId }, { password: newPassword });
 
 			return res.ok({ "success": true, "msg": "Your password has been updated successfully" });
 		} catch (err) {

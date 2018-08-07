@@ -21,6 +21,26 @@ module.exports = {
 			}
 		},
 
+		companyName: {
+			type: 'string',
+			defaultsTo: ''
+		},
+
+		firstName: {
+			type: 'string',
+			defaultsTo: ''
+		},
+
+		lastName: {
+			type: 'string',
+			defaultsTo: ''
+		},
+
+		telephone: {
+			type: 'string',
+			defaultsTo: ''
+		},
+
 		password: {
 			type: 'string',
 			required: true

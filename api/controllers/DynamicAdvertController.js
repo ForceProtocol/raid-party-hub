@@ -148,8 +148,15 @@ module.exports = {
                 throw new CustomError('Invalid Params Sent', { status: 401, err_code: "not_found" });
             }
 
+            // Get the game ensure it exists
+            let game = await Game.findOne({gameId:gameId});
+
+            if(!game){
+                throw new CustomError('Could not find that game', { status: 401, err_code: "not_found" });
+            }
+
             // Make sure this game ad asset exists
-            let gameAdAsset = await GameAdAsset.findOne({id:gameAdAssetId,game:gameId});
+            let gameAdAsset = await GameAdAsset.findOne({id:game.id,game:gameId});
 
             if(!gameAdAsset ){
                 throw new CustomError('Could not find that game ad asset', { status: 401, err_code: "not_found" });

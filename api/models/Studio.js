@@ -1,5 +1,5 @@
 /**
- * Developer.js
+ * Studio.js
  *
  * @description :: A model definition.  Represents a database table/collection/etc.
  * @docs        :: https://sailsjs.com/docs/concepts/models-and-orm/models
@@ -9,10 +9,9 @@ const uuidv4 = require('uuid/v4');
 const bcrypt = require('bcrypt-nodejs');
 
 module.exports = {
-	tableName: 'developers',
 	attributes: {
 
-		developerId: {
+		studioId: {
 			type: 'string',
 			primaryKey: true,
 			unique: true,
@@ -23,11 +22,18 @@ module.exports = {
 		},
 
 		firstName: {
-			type: 'string'
+			type: 'string',
+			defaultsTo: ''
 		},
 
 		lastName: {
-			type: 'string'
+			type: 'string',
+			defaultsTo: ''
+		},
+
+		studioName: {
+			type: 'string',
+			defaultsTo: ''
 		},
 
 		password: {
@@ -64,17 +70,19 @@ module.exports = {
 		},
 
 		forceBalance: {
-			type: 'string'
+			type: 'string',
+			defaultsTo: ''
+
 		},
 
 		transactions: {
-			collection: 'developertransactions',
-			via: 'developer'
+			collection: 'studiotransactions',
+			via: 'studio'
 		},
 
 		games: {
 			collection: 'game',
-			via: 'developer'
+			via: 'studio'
 		},
 
 		toJSON: function () {

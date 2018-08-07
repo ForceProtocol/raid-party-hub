@@ -131,8 +131,8 @@ module.exports = {
 			}
         },
 		
-		developer: {
-			model: 'developer'
+		studio: {
+			model: 'studio'
 		},
 		
 		players: {

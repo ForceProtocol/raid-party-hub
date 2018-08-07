@@ -33,24 +33,24 @@ module.exports = function (req, res, next) {
 		
 		// Make sure is a valid and active developer
 
-		Developer.findOne({developerId:token.user.developerId}).exec(function(err,developer){
+		Studio.findOne({studioId:token.user.id}).exec(function(err,studio){
 			
 			// Could not find that account
-			if(!developer){
+			if(!studio){
 				return res.send(401, {err: 'Could not find an account with those details. Please check your details and try again.'});
 			}
 			
 			// Developer is locked
-			if(developer.accountStatus == 0){
+			if(studio.accountStatus == 0){
 				return res.send(401, {err: 'Your account has been blocked.'});
 			}
 			
 			// Player is not active
-			if(developer.accountStatus == 1){
+			if(studio.accountStatus == 1){
 				return res.send(401, {err: 'Your account has not been activated yet. Please check your email'});
 			}
 			
-			req.developer = developer;
+			req.user = studio;
 			req.payload = token.data;
 
 			next();

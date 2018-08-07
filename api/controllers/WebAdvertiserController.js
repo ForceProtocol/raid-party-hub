@@ -16,10 +16,19 @@ module.exports = {
 	*/
 	async signupUser(req, res) {
 
-		let email = req.param("email"),
-			password = req.param("password");
-
 		try {
+			let email = req.param("email"),
+				password = req.param("password"),
+				firstName = req.param("firstName"),
+				lastName = req.param("lastName"),
+				companyName = req.param("companyName"),
+				telephone = req.param("telephone"),
+				captcha = req.param("captcha");
+
+
+			if(!captcha){
+				throw new CustomError("You must click the captcha checkbox.", { status: 400 });
+			}
 
 			// Validate firstname params
 			if (!email || !password) {
@@ -38,6 +47,10 @@ module.exports = {
 			// Create new player account
 			// AccountStatus: 0 = blocked, 1 = pending activation, 2 = activated
 			let advertiser = await Advertiser.create({
+				companyName:companyName,
+				firstName:firstName,
+				lastName:lastName,
+				telephone:telephone,
 				email: email,
 				password: password,
 				pin: pin,
@@ -48,11 +61,11 @@ module.exports = {
 			let okMsg, subject, msg;
 
 			// await OneSignalService.sendNotificationsToMultipleDevices({ deviceIds: [deviceId], text: pin + " is your activation pin" });
-			okMsg = "Please check your email inbox for a 6 digit pin and enter below to activate your account";
-			subject = "Welcome to RaidParty! Activate your account to start earning rewards";
+			okMsg = "Please check your email inbox for an activation link to access your account.";
+			subject = "Welcome to RaidParty! Activate your account to start advertising";
 			activationLink = `${sails.config.APP_HOST}/activate-account?advertiserId=${advertiser.id}&pin=${pin}&email=${email}`;
-			msg = `Welcome to RaidParty!<br />
-				Your account has been created and is now awaiting your activation. Please click on the link below to activate your account.<br /><br />
+			msg = `Welcome to RaidParty!<br /><br />
+				Your advertiser account has been created and is now awaiting your activation. Please click on the link below to activate your account.<br /><br />
 				<strong><a href=\"${activationLink}\">Activate Account</a></strong><br /><br />
 				<br />
 				The RaidParty Team`;
@@ -65,6 +78,23 @@ module.exports = {
 				toEmail: advertiser.email,
 				toName: advertiser.email,
 				subject: subject,
+				body: msg
+			});
+			
+
+			// Send email to office about new advertiser signup
+			msg = `New user signedup:<br />
+				email: ${email}<br />
+				Company Name: ${companyName}<br />
+				Telephone: ${telephone}<br />
+				Name: ${firstName} ${lastName}`;
+
+			await EmailService.sendEmail({
+				fromEmail: 'support@raidparty.io',
+				fromName: 'Success Team',
+				toEmail: "pete@triforcetokens.io",
+				toName: "Pete",
+				subject: "New Brand Signed Up: brands.raidparty.io",
 				body: msg
 			});
 

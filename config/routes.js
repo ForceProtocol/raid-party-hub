@@ -11,20 +11,22 @@ module.exports.routes = {
 
 
 	/** Studio Auth */
-	'POST /app/studio': 'studioController.signupStudio',
-	'GET /app/studio/activate': 'StudioController.activateStudio',
-	'POST /app/studio/login': 'StudioController.loginStudio',
-	'POST /app/studio/reset-password': 'StudioController.resetPassword',
-	'POST /app/studio/change-password': 'StudioController.changePassword',
-	'POST /app/studio/update-password': 'StudioController.updatePassword',
+	'POST /studio/signup': 'studioController.signupStudio',
+	'POST /studio/activate': 'StudioController.activateStudio',
+	'POST /studio/login': 'StudioController.loginStudio',
+	'POST /studio/reset-password': 'StudioController.resetPassword',
+	'POST /studio/change-password': 'StudioController.changePassword',
+	'POST /studio/update-password': 'StudioController.updatePassword',
+	'POST /studio/update-password': 'StudioController.updatePassword',
+	'POST /studio/contact': 'StudioController.contact',
 	
 	/** Studio Objects */
-	'GET /app/studio/games': 'StudioController.getGames',
-	'GET /app/studio/game/:gameId': 'StudioController.getGame',
-	'GET /app/studio/balance': 'StudioController.getBalance',
-	'POST /app/studio/game': 'StudioController.addGame',
-	'POST /app/studio/game/:gameId': 'StudioController.updateGame',
-	'DELETE /app/studio/game/:gameId': 'StudioController.deleteGame',
+	'GET /studio/games': 'StudioController.getGames',
+	'GET /studio/game/:gameId': 'StudioController.getGame',
+	'GET /studio/balance': 'StudioController.getBalance',
+	'POST /studio/game': 'StudioController.addGame',
+	'POST /studio/game/:gameId': 'StudioController.updateGame',
+	'DELETE /studio/game/:gameId': 'StudioController.deleteGame',
 
 
 	/** Player Routes */

@@ -33,7 +33,7 @@ module.exports = function (req, res, next) {
 		
 		// Make sure is a valid and active developer
 
-		Studio.findOne({studioId:token.user.id}).exec(function(err,studio){
+		Studio.findOne({id:token.user.id}).exec(function(err,studio){
 			
 			// Could not find that account
 			if(!studio){

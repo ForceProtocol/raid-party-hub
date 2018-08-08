@@ -11,7 +11,7 @@ const bcrypt = require('bcrypt-nodejs');
 module.exports = {
 	attributes: {
 
-		studioId: {
+		id: {
 			type: 'string',
 			primaryKey: true,
 			unique: true,

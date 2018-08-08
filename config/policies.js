@@ -57,12 +57,13 @@ module.exports.policies = {
 
 
     StudioController: {
-        '*': 'isStudio',
         signupStudio: true,
         activateStudio: true,
         loginStudio: true,
         resetPassword: true,
         changePassword: true,
+        contact: true,
+        '*': 'studioAuth',
     },
 
     GameController: {

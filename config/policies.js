@@ -27,14 +27,7 @@ module.exports.policies = {
         validatePin: true,
         changePassword: true,
         sendEmailsToAirdropUsers: true,
-        getPlayerDashboard: 'tokenAuth',
-        getGames: 'tokenAuth',
-        getPlayerCode: 'tokenAuth',
-        getRewards: 'tokenAuth',
-        updatePassword: 'tokenAuth',
-        getNotifications: 'tokenAuth',
-        deleteNotification: 'tokenAuth',
-        deviceData: 'tokenAuth',
+        '*': 'playerAuth'
         
     },
 
@@ -46,20 +39,7 @@ module.exports.policies = {
         validatePin: true,
         changePassword: true,
         sendEmailsToAirdropUsers: true,
-        getPlayerDashboard: 'tokenAuth',
-        getGames: 'tokenAuth',
-        getPlayerCode: 'tokenAuth',
-        getRewards: 'tokenAuth',
-        updatePassword: 'tokenAuth',
-        getNotifications: 'tokenAuth',
-        deleteNotification: 'tokenAuth',
-        deviceData: 'tokenAuth',
-        trackRewardProgress: 'tokenAuth',
-        getPlayerGames: 'tokenAuth',
-        getPlayer: 'tokenAuth',
-        getProducts: 'tokenAuth',
-        getProduct: 'tokenAuth',
-        confirmPlayerOrder: 'tokenAuth',
+        '*': 'playerAuth'
     },
 
 
@@ -71,21 +51,8 @@ module.exports.policies = {
         validatePin: true,
         changePassword: true,
         getGames: true,
-        updatePassword: 'tokenAuth',
-        getUser: 'tokenAuth',
-        getNotifications: 'tokenAuth',
-        deleteNotification: 'tokenAuth',
-        getUserGames: 'tokenAuth',
-        uploadAsset: 'tokenAuth',
-        createCampaign: 'tokenAuth',
-        updateCampaign: 'tokenAuth',
-        getCampaigns: 'tokenAuth',
-        getCampaign: 'tokenAuth',
-        deleteCampaign: 'tokenAuth',
-        archiveCampaign: 'tokenAuth',
-        activateCampaign: 'tokenAuth',
-        deleteFile: 'tokenAuth',
-        downloadItem: true
+        downloadItem: true,
+        '*': 'advertiserAuth'
     },
 
 

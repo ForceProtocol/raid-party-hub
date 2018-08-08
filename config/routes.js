@@ -17,7 +17,6 @@ module.exports.routes = {
 	'POST /studio/reset-password': 'StudioController.resetPassword',
 	'POST /studio/change-password': 'StudioController.changePassword',
 	'POST /studio/update-password': 'StudioController.updatePassword',
-	'POST /studio/update-password': 'StudioController.updatePassword',
 	'POST /studio/contact': 'StudioController.contact',
 	
 	/** Studio Objects */
@@ -27,6 +26,7 @@ module.exports.routes = {
 	'POST /studio/game': 'StudioController.addGame',
 	'POST /studio/game/:gameId': 'StudioController.updateGame',
 	'DELETE /studio/game/:gameId': 'StudioController.deleteGame',
+	'POST /studio/game/upload/image': 'StudioController.uploadGameImage',
 
 
 	/** Player Routes */

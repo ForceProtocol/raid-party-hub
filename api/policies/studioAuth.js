@@ -1,63 +1,75 @@
 /**
- * isAuthenticated
+ * tokenAuth
  *
- * @description :: Policy to check if this url has a valid token and if this token was issued for this url
+ * @description :: Policy to check if user is authorized with JSON web token
  * @help        :: See http://sailsjs.org/#!/documentation/concepts/Policies
  */
-
 module.exports = function (req, res, next) {
-    let token = req.param('token') || req.param('state');   // state required for google auth
+    let token,
+        ip = 'na'; 
 
-    if (!token) {
-        return res.json(401, {err: 'Access restricted'});
-    }
+    try {
+        ip = req.headers['x-forwarded-for'] ||
+            req.connection.remoteAddress ||
+            req.socket.remoteAddress ||
+            req.connection.socket.remoteAddress;
+    } catch (e) {}
 
-    jwToken.verify(token, function (err, token) {
-        if(!token){
-			return res.json(401, {err: 'Invalid Token'});
+	
+	try {
+		let duid = _.isString(req.headers.cduid) ? req.headers.cduid : null;
+
+		sails.log.verbose(`${new Date()} - auth request from ${ip} for route: ${req.route.path}. socket status: ${req.isSocket ? 'socket request' : 'http request'}`);
+
+		if (req.param('token')) {
+			token = req.param('token');
+
+			// We delete the token from param to not mess with blueprints
+			//delete req.query.token; Enabled for demo purposes
 		}
-		
-        if(_.isString(token.route)){
-            token.route = [token.route];
-		}
-		
-        if(err || !token.route || token.route.indexOf(req.baseUrl + req.route.path) === -1){
-            // return res.json(401, {err: 'Invalid Token 1' + req.baseUrl + req.route.path, });
-        }
+		else if (req.headers && req.headers.authorization) {
+			let parts = req.headers.authorization.split(' ');
+			if (parts.length === 2) {
+				let scheme = parts[0],
+					credentials = parts[1];
 
-        var moment = require('moment');
-		
-        if(!token.ignoreExpiration && moment.unix(token.exp).isBefore(new Date())){
-            return res.send(401, {err: 'Token Expired'});
+				if (/^Bearer$/i.test(scheme)) {
+					token = credentials;
+				}
+			} else {
+				return res.json(401, {err: 'Format is Authorization: Bearer [token]'});
+			}
+		} else {
+			return res.json(401, {err: 'No Authorization header was found'});
 		}
-		
-		// Make sure is a valid and active developer
 
-		Studio.findOne({id:token.user.id}).exec(function(err,studio){
-			
-			// Could not find that account
-			if(!studio){
-				return res.send(401, {err: 'Could not find an account with those details. Please check your details and try again.'});
+		jwToken.verify(token, function (err, token) {
+			if (err) {
+				return res.json(401, {err: 'Invalid Token'});
+			}
+
+			let dcrp = EncryptionService.decrypt(token.requester);
+			if(duid && duid !== EncryptionService.decrypt(token.requester)){
+				sails.log.debug('This token is not valid for current cduid');
+				return res.json(401, {err: 'Not a valid token. Please login again to get another'});
 			}
 			
-			// Developer is locked
-			if(studio.accountStatus == 0){
-				return res.send(401, {err: 'Your account has been blocked.'});
-			}
-			
-			// Player is not active
-			if(studio.accountStatus == 1){
-				return res.send(401, {err: 'Your account has not been activated yet. Please check your email'});
-			}
-			
-			req.user = studio;
-			req.payload = token.data;
 
-			next();
-			
+			Studio.findOne({id:token.user.id,accountStatus:2})
+			.then(_user=>{
+
+				if(!_user){
+					throw new CustomError('Invalid token. User doesn\'t exist');
+				}
+				
+				req.token = {user: _user};
+				
+				next();
+			}).catch(err=> util.errorResponse(err, res));
+
 		});
 		
-    }, {
-        ignoreExpiration: false
-    });
+	}catch(e){
+		return res.json(500, {err: 'Server Error'});
+	}
 };

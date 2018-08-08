@@ -87,7 +87,6 @@ module.exports = {
 
 		toJSON: function () {
 			let obj = this.toObject();
-			delete obj.id;
 			delete obj.password;
 			delete obj.pin;
 			delete obj.pinAttempts;

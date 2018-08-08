@@ -5,8 +5,8 @@
  * @help        :: See http://links.sailsjs.org/docs/controllers
  */
 
-const fs = require("fs");
-const BigNumber = require('bignumber.js');
+const fs = require("fs"),
+BigNumber = require('bignumber.js');
 
 
 module.exports = {
@@ -350,7 +350,7 @@ module.exports = {
 			// Create activation PIN
 			let pin = util.randomFixedInteger(6);
 
-			await Studio.update({ studioId: studio.id }, { pin: pin });
+			await Studio.update({ id: studio.id }, { pin: pin });
 
 			let activationLink = sails.config.STUDIOS_APP_HOST + "change-password?studio=" + studio.id + "&pin=" + pin;
 
@@ -398,7 +398,7 @@ module.exports = {
 				throw new CustomError('You did not provide all details required.', { status: 400 });
 			}
 
-			let studio = await Studio.findOne({ studioId: studioId });
+			let studio = await Studio.findOne({ id: studioId });
 
 			// Could not find that account
 			if (!studio) {
@@ -415,7 +415,7 @@ module.exports = {
 
 				// If too many PIN attempts made, block their account, send email notifying user
 				if (studio.pinAttempts > 6) {
-					let updatedPinAttempt = await Studio.update({ studioId: studio.id }, { accountStatus: 0 });
+					let updatedPinAttempt = await Studio.update({ id: studio.id }, { accountStatus: 0 });
 
 					// Send studio an email that their account has been blocked
 					let msg = `Hi<br />
@@ -437,14 +437,14 @@ module.exports = {
 					throw new CustomError('You have made too many incorrect PIN attempts. Your account has been locked.', { status: 403, err_code: "blocked" });
 				}
 
-				let updatedPinAttempt = await Studio.update({ studioId: studio.id }, { pinAttempts: studio.pinAttempts + 1 });
+				let updatedPinAttempt = await Studio.update({ id: studio.id }, { pinAttempts: studio.pinAttempts + 1 });
 				throw new CustomError('The PIN provided was invalid', { status: 401, err_code: "invalid_pin" });
 			}
 
 			// TODO: Make sure password is valid
 
 			// PIN is correct and studio can change their password
-			let updatedPassword = await Studio.update({ studioId: studio.id }, { password: newPassword, pinAttempts: 0, pin: 0 });
+			let updatedPassword = await Studio.update({ id: studio.id }, { password: newPassword, pinAttempts: 0, pin: 0 });
 
 			return res.ok({ "success": true, "msg": "Your new password has been set, please login to your account" });
 		} catch (err) {
@@ -458,8 +458,9 @@ module.exports = {
 	*/
 	async getGames(req, res) {
 		try {
-			let studio = req.studio;
-			let games = await Game.find({ studio: studio.id });
+			let studio = req.token.user;
+			let games = await Game.find({ studio: studio.id }).populate("gamePlatforms").populate("gameAdAsset").populate("gameAsset");
+
 			return res.ok({ games: games });
 		} catch (err) {
 			return util.errorResponse(err, res);
@@ -472,7 +473,7 @@ module.exports = {
 	*/
 	async getBalance(req, res) {
 		try {
-			let studio = req.studio;
+			let studio = req.token.user;
 
 			if (!studio.forceBalance) {
 				studio.forceBalance = '0';
@@ -497,38 +498,89 @@ module.exports = {
 	*/
 	async addGame(req, res) {
 		try {
-			let studio = req.studio;
-
-			let gameTitle = req.param("title"),
+			let studio = req.token.user,
+				title = req.param("title"),
 				description = req.param("description"),
-				platform = req.param("platform"),
-				active = req.param('activeStatus')
+				avatar = req.param("avatar"),
+				age = req.param("age"),
+				male = req.param("male"),
+				female = req.param("female"),
+				regions = req.param("regions"),
+				mau = req.param("mau"),
+				pc = req.param("pc"),
+				mac = req.param("mac"),
+				console = req.param("console"),
+				android = req.param("android"),
+				ios = req.param("ios"),
+				pcLink = req.param("pcLink"),
+				macLink = req.param("macLink"),
+				androidLink = req.param("androidLink"),
+				consoleLink = req.param("consoleLink"),
+				iosLink = req.param("iosLink"),
+				gender = '';
 
-			if (!req.file('avatar')) {
-				throw new CustomError('You must provide a valid game image to be listed on the RaidParty studio app.', { status: 401 });
+			// Ensure at least one asset was uploaded
+			if(!avatar){
+				throw new CustomError('You must provide at least one game screenshot', { status: 401, err_code: "not_found" });
 			}
 
-			req.file('avatar').upload({ maxBytes: 10000000 }, async function (err, file) {
-				if (!file) {
-					throw new CustomError('Error Uploading image file.', { status: 401 });
-				}
-				let isAndroid, isIos;
-				_.map(JSON.parse(platform), (pfObject) => {
-					isAndroid = pfObject.name === 'android' ? true : false;
-					isIos = pfObject.name === 'ios' ? true : false;
-				});
-				let avatarBase64Data = await new Buffer(fs.readFileSync(file[0].fd)).toString("base64");
+			// Format gender field
+			gender = "Male: " + male + "% | Female: " + female + "%";
 
-				let addGame = await Game.create({ title: gameTitle, description: description, active: active, avatar: avatarBase64Data, isAndroid: isAndroid, isIos: isIos, platform: platform, studio: studio.id });
+			// Ensure that uploaded files exist
+			avatar = '/images/games/banners/' + avatar;
 
-				if (!addGame) {
-					throw new CustomError('Could not add that game due to a technical issue. Please try again later.', { status: 400 });
-				}
+			let game = await Game.create({studio:studio.id,active:false,dynamicAdsEnabled:false,title:title,dynamicAdsDescription:description,
+				description:description,avatar:avatar,regions:regions,gender:gender,age:age,monthlyActiveUsers:mau});
 
-				return res.ok({ game: addGame });
+			if (!game) {
+				throw new CustomError('Could not save that game', { status: 401, err_code: "not_found" });
+			}
+
+			// Insert platform links
+			if(pc){
+				await GamePlatforms.create({game:game.id,type:'pc',link:pcLink,isCountrySpecific:false,active:false});
+			}
+
+			if(mac){
+				await GamePlatforms.create({game:game.id,type:'mac',link:macLink,isCountrySpecific:false,active:false});
+			}
+
+			if(console){
+				await GamePlatforms.create({game:game.id,type:'console',link:consoleLink,isCountrySpecific:false,active:false});
+			}
+
+			if(android){
+				await GamePlatforms.create({game:game.id,type:'android',link:androidLink,isCountrySpecific:false,active:false});
+			}
+
+			if(ios){
+				await GamePlatforms.create({game:game.id,type:'ios',link:iosLink,isCountrySpecific:false,active:false});
+			}
+
+
+			// Send studio an email that their account has been blocked
+			let msg = `A Studio has uploaded a new game to review<br />
+			Studio ID: ${studio.id}<br />
+			Game ID: ${game.id}<br />
+			Title: ${title}<br />
+			MAU: ${mau}<br />
+			Description: ${description}<br />`;
+
+			// Send activation email/SMS to studio to activate their account
+			await EmailService.sendEmail({
+				fromEmail: 'support@raidparty.io',
+				fromName: 'Account Team',
+				toEmail: 'pete@triforcetokens.io',
+				toName: 'Pete',
+				subject: 'Studio Uploaded A New Game studios.raidparty.io',
+				body: msg
 			});
 
-		} catch (err) {
+			return res.ok({success:true,game:game});
+
+		}catch(err){
+			sails.log.error("StudioController.addGame error: ",err);
 			return util.errorResponse(err, res);
 		}
 	},
@@ -539,7 +591,7 @@ module.exports = {
 	*/
 	async updateGame(req, res) {
 		try {
-			let studio = req.studio;
+			let studio = req.token.user;
 
 			let gameId = req.param("gameId"),
 				gameTitle = req.param("title"),
@@ -585,7 +637,7 @@ module.exports = {
 	*/
 	async deleteGame(req, res) {
 		try {
-			let studio = req.studio;
+			let studio = req.token.user;
 
 			let gameId = req.param("gameId"),
 				gameTitle = req.param("title");
@@ -619,7 +671,7 @@ module.exports = {
 	*/
 	async getGame(req, res) {
 		try {
-			let studio = req.studio,
+			let studio = req.token.user,
 				gameId = req.param("gameId");
 
 			let game = await Game.findOne({ gameId: gameId, studio: studio.id });
@@ -653,7 +705,7 @@ module.exports = {
 				throw new CustomError('You entered the same password as your current password', { status: 400 });
 			}
 
-			let studio = await Studio.findOne({ studioId: req.studio.id });
+			let studio = await Studio.findOne({ id: req.token.user.id });
 
 			// Could not find that account
 			if (!studio) {
@@ -674,9 +726,43 @@ module.exports = {
 			}
 
 			// Current password was correct, enter new password
-			let updatedPassword = await Studio.update({ studioId: studio.id }, { password: newPassword });
+			let updatedPassword = await Studio.update({ id: studio.id }, { password: newPassword });
 
 			return res.ok({ "success": true, "msg": "Your password has been updated successfully" });
+		} catch (err) {
+			return util.errorResponse(err, res);
+		}
+	},
+
+
+
+	async uploadGameImage(req, res) {
+		try {
+
+			let fileType = req.param("type"),
+			uploadPath = 'assets/images/games/banners';
+
+			req.file('asset').upload({
+			  	dirname: require('path').resolve(sails.config.appPath, uploadPath),
+			  	//saveAs: newFileName, /* optional. default file name */
+				maxBytes: 250 * 1024 * 1024 //250 MB
+			}, function (err, uploadedFiles) {
+				if (err){
+					return res.serverError(err);
+				}
+
+				if(uploadedFiles[0].fd.lastIndexOf("/") !== -1){
+					newFileName = uploadedFiles[0].fd.substring(uploadedFiles[0].fd.lastIndexOf("/") + 1);
+				}else if(uploadedFiles[0].fd.lastIndexOf("\\") !== -1){
+					newFileName = uploadedFiles[0].fd.substring(uploadedFiles[0].fd.lastIndexOf("\\") + 1)
+				}
+
+				return res.ok({
+					success: true,
+					fileName: newFileName
+				});
+			});
+
 		} catch (err) {
 			return util.errorResponse(err, res);
 		}

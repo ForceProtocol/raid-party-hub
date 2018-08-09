@@ -6,11 +6,11 @@ module.exports = {
 
         try{
 
+            sails.log.debug("game id is: ",gameId);
+            
             let fontAwesome = GameService.getPlatformFontAwesome(platformType);
 
-            sails.log.debug("fontAwesome is: ",fontAwesome);
-
-            let gamePlatform = await GamePlatforms.create({game:gameId,type:platformType,fontAwesome:fontAwesome,link:link,isCountrySpecific:isCountrySpecific,active:active});
+            let gamePlatform = await GamePlatforms.findOrCreate({game:gameId,type:platformType,link:link},{game:gameId,type:platformType,fontAwesome:fontAwesome,link:link,isCountrySpecific:isCountrySpecific,active:active});
 
             if(!gamePlatform){
                 throw new CustomError('Could not add that game platform link', { status: 401, err_code: "not_found" });
@@ -22,6 +22,24 @@ module.exports = {
             return false;
         }
         
+    },
+
+
+
+    removePlatformLink: async (gameId,platformType)=>{
+
+        try{
+            let gamePlatform = await GamePlatforms.destroy({game:gameId,type:platformType});
+
+            if(!gamePlatform){
+                throw new CustomError('Could not remove that platform link', { status: 401, err_code: "not_found" });
+            }
+
+            return true;
+        }catch(err){
+            sails.log.error("GameService.setPlatformLink Error: ",err);
+            return false;
+        }
     },
 
 

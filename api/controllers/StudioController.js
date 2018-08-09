@@ -6,7 +6,8 @@
  */
 
 const fs = require("fs"),
-BigNumber = require('bignumber.js');
+BigNumber = require('bignumber.js'),
+validUrl = require("valid-url");
 
 
 module.exports = {
@@ -533,23 +534,23 @@ module.exports = {
 
 
 			// Insert platform links
-			if(pc){
+			if(pc && validUrl.isUri(pcLink)){
 				GameService.addPlatformLink(game.id,'pc',pcLink,false,true);
 			}
 
-			if(mac){
+			if(mac && validUrl.isUri(macLink)){
 				GameService.addPlatformLink(game.id,'mac',macLink,false,true);
 			}
 
-			if(console){
+			if(console && validUrl.isUri(consoleLink)){
 				GameService.addPlatformLink(game.id,'console',consoleLink,false,true);
 			}
 
-			if(android){
+			if(android && validUrl.isUri(androidLink)){
 				GameService.addPlatformLink(game.id,'android',androidLink,false,true);
 			}
 
-			if(ios){
+			if(ios && validUrl.isUri(iosLink)){
 				GameService.addPlatformLink(game.id,'ios',iosLink,false,true);
 			}
 
@@ -584,47 +585,86 @@ module.exports = {
 	/**
 	* Update game
 	*/
+	/**
+	* Add game
+	*/
 	async updateGame(req, res) {
 		try {
-			let studio = req.token.user;
-
-			let gameId = req.param("gameId"),
-				gameTitle = req.param("title"),
+			let studio = req.token.user,
+				gameId = req.param("gameId"),
+				title = req.param("title"),
 				description = req.param("description"),
-				platform = req.param("platform"),
-				active = req.param("activeStatus");
+				avatar = req.param("avatar"),
+				age = req.param("age"),
+				male = req.param("male"),
+				female = req.param("female"),
+				regions = req.param("regions"),
+				mau = req.param("mau"),
+				pc = req.param("pc"),
+				mac = req.param("mac"),
+				console = req.param("console"),
+				android = req.param("android"),
+				ios = req.param("ios"),
+				pcLink = req.param("pcLink"),
+				macLink = req.param("macLink"),
+				androidLink = req.param("androidLink"),
+				consoleLink = req.param("consoleLink"),
+				iosLink = req.param("iosLink");
 
-			let updatedGame;
-			if (req._fileparser.upstreams.length) {
 
-				req.file('avatar').upload({ maxBytes: 10000000 }, async function (err, file) {
-					if (!file) {
-						throw new CustomError('Error Uploading image file.', { status: 401 });
-					}
-					let isAndroid, isIos;
-					_.map(JSON.parse(platform), (pfObject) => {
-						isAndroid = pfObject.name === 'android' ? true : false;
-						isIos = pfObject.name === 'ios' ? true : false;
-					});
-					let avatarBase64Data = await new Buffer(fs.readFileSync(file[0].fd)).toString("base64");
-					updatedGame = await Game.update({ gameId: gameId, studio: studio.id }, { title: gameTitle, description: description, platform: platform, isAndroid: isAndroid, isIos: isIos, active: active, avatar: avatarBase64Data });
-					if (!updatedGame) {
-						throw new CustomError('Could not update that game due to a technical issue. Please try again later.', { status: 400 });
-					}
-					return res.ok({ game: updatedGame });
-				})
-			} else {
-				updatedGame = await Game.update({ gameId: gameId, studio: studio.id }, { title: gameTitle, description: description, platform: platform, isAndroid: isAndroid, isIos: isIos, active: active });
-				if (!updatedGame) {
-					throw new CustomError('Could not update that game due to a technical issue. Please try again later.', { status: 400 });
-				}
-				return res.ok({ game: updatedGame });
+			// Ensure at least one asset was uploaded
+			if(!avatar){
+				throw new CustomError('You must provide at least one game screenshot', { status: 401, err_code: "not_found" });
 			}
 
-		} catch (err) {
+			let game = await Game.update({id:gameId,studio:studio.id},{active:false,dynamicAdsEnabled:false,title:title,dynamicAdsDescription:description,
+				description:description,avatar:avatar,regions:regions,age:age,monthlyActiveUsers:mau,monthlyImpressions:mau,male:male,female:female});
+
+			if (!game) {
+				throw new CustomError('Could not update that game', { status: 401, err_code: "not_found" });
+			}
+
+
+			// Insert platform links
+			if(pc && validUrl.isUri(pcLink)){
+				GameService.addPlatformLink(game[0].id,'pc',pcLink,false,true);
+			}else{
+				GameService.removePlatformLink(game[0].id,'pc');
+			}
+
+			if(mac && validUrl.isUri(macLink)){
+				GameService.addPlatformLink(game[0].id,'mac',macLink,false,true);
+			}else{
+				GameService.removePlatformLink(game[0].id,'mac');
+			}
+
+			if(console && validUrl.isUri(consoleLink)){
+				GameService.addPlatformLink(game[0].id,'console',consoleLink,false,true);
+			}else{
+				GameService.removePlatformLink(game[0].id,'console');
+			}
+
+			if(android && validUrl.isUri(androidLink)){
+				GameService.addPlatformLink(game[0].id,'android',androidLink,false,true);
+			}else{
+				GameService.removePlatformLink(game[0].id,'android');
+			}
+
+			if(ios && validUrl.isUri(iosLink)){
+				GameService.addPlatformLink(game[0].id,'ios',iosLink,false,true);
+			}else{
+				GameService.removePlatformLink(game[0].id,'ios');
+			}
+
+			return res.ok({success:true,game:game[0]});
+
+		}catch(err){
+			sails.log.error("StudioController.updateGame error: ",err);
 			return util.errorResponse(err, res);
 		}
 	},
+
+
 
 
 	/**
@@ -637,7 +677,7 @@ module.exports = {
 			let gameId = req.param("gameId"),
 				gameTitle = req.param("title");
 
-			let game = await Game.findOne({ gameId: gameId, studio: studio.id });
+			let game = await Game.findOne({ id: gameId, studio: studio.id });
 
 			if (!game) {
 				throw new CustomError('You do not have relevant permissions to delete that game.', { status: 501 });
@@ -648,7 +688,7 @@ module.exports = {
 				throw new CustomError('You entered the game title incorrectly, that game could not be deleted. Please check the game title and try again.', { status: 400 });
 			}
 
-			let gameDeleted = await Game.destroy({ gameId: game.gameId });
+			let gameDeleted = await Game.destroy({ id: game.gameId });
 
 			if (!gameDeleted) {
 				throw new CustomError('There was a technical problem while deleting the game.', { status: 400 });
@@ -669,13 +709,13 @@ module.exports = {
 			let studio = req.token.user,
 				gameId = req.param("gameId");
 
-			let game = await Game.findOne({ gameId: gameId, studio: studio.id }).populate("gamePlatforms").populate("gameAsset");
+			let game = await Game.findOne({ id: gameId, studio: studio.id }).populate("gamePlatforms").populate("gameAsset");
 
 			if (!game) {
 				throw new CustomError('That game could not be found.', { status: 400 });
 			}
 
-			return res.ok({ game: game });
+			return res.ok(game);
 		} catch (err) {
 			return util.errorResponse(err, res);
 		}

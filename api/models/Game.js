@@ -103,9 +103,14 @@ module.exports = {
 			defaultsTo: ""
 		},
 
-		gender: {
-			type: 'string',
-			defaultsTo: ""
+		male: {
+			type: 'integer',
+			defaultsTo: 0
+		},
+
+		female: {
+			type: 'integer',
+			defaultsTo: 0
 		},
 
 		age: {

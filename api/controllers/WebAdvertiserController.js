@@ -772,10 +772,12 @@ module.exports = {
 				// Convert game avatar to base64 encoded string
 				game.avatar = '/assets/images/' + game.avatar;
 
+				game.gender = "male: " + game.male + "&#37; | Female: " + game.female + "&#37;";
+
 				gameItem = { game_id: game.gameId, title: game.title, dynamicAdsDescription: game.dynamicAdsDescription, 
 					bannerContent: game.bannerContent, link: game.link, platform: game.platform, avatar: game.avatar,
 					monthlyImpressions:game.monthlyImpressions, monthlyActiveUsers:game.monthlyActiveUsers, regions:game.regions, age:game.age,
-					gender:game.gender
+					female:game.female,male:game.male,gender:game.gender
 				};
 
 				finalGamesList.push(gameItem);

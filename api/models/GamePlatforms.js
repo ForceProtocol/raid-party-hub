@@ -17,6 +17,10 @@ module.exports = {
 			type: 'string',
 			required: true
 		},
+		fontAwesome: {
+			type: 'string',
+			defaultsTo: 'fas fa-link'
+		},
 		isCountrySpecific:{
 			type: 'boolean'
 		},

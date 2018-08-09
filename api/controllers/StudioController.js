@@ -516,46 +516,41 @@ module.exports = {
 				macLink = req.param("macLink"),
 				androidLink = req.param("androidLink"),
 				consoleLink = req.param("consoleLink"),
-				iosLink = req.param("iosLink"),
-				gender = '';
+				iosLink = req.param("iosLink");
 
 			// Ensure at least one asset was uploaded
 			if(!avatar){
 				throw new CustomError('You must provide at least one game screenshot', { status: 401, err_code: "not_found" });
 			}
 
-			// Format gender field
-			gender = "Male: " + male + "% | Female: " + female + "%";
-
-			// Ensure that uploaded files exist
-			avatar = '/images/games/banners/' + avatar;
-
 			let game = await Game.create({studio:studio.id,active:false,dynamicAdsEnabled:false,title:title,dynamicAdsDescription:description,
-				description:description,avatar:avatar,regions:regions,gender:gender,age:age,monthlyActiveUsers:mau});
+				description:description,avatar:avatar,regions:regions,age:age,monthlyActiveUsers:mau,male:male,female:female});
 
 			if (!game) {
 				throw new CustomError('Could not save that game', { status: 401, err_code: "not_found" });
 			}
 
+
+
 			// Insert platform links
 			if(pc){
-				await GamePlatforms.create({game:game.id,type:'pc',link:pcLink,isCountrySpecific:false,active:false});
+				GameService.addPlatformLink(game.id,'pc',pcLink,false,true);
 			}
 
 			if(mac){
-				await GamePlatforms.create({game:game.id,type:'mac',link:macLink,isCountrySpecific:false,active:false});
+				GameService.addPlatformLink(game.id,'mac',macLink,false,true);
 			}
 
 			if(console){
-				await GamePlatforms.create({game:game.id,type:'console',link:consoleLink,isCountrySpecific:false,active:false});
+				GameService.addPlatformLink(game.id,'console',consoleLink,false,true);
 			}
 
 			if(android){
-				await GamePlatforms.create({game:game.id,type:'android',link:androidLink,isCountrySpecific:false,active:false});
+				GameService.addPlatformLink(game.id,'android',androidLink,false,true);
 			}
 
 			if(ios){
-				await GamePlatforms.create({game:game.id,type:'ios',link:iosLink,isCountrySpecific:false,active:false});
+				GameService.addPlatformLink(game.id,'ios',iosLink,false,true);
 			}
 
 
@@ -674,7 +669,7 @@ module.exports = {
 			let studio = req.token.user,
 				gameId = req.param("gameId");
 
-			let game = await Game.findOne({ gameId: gameId, studio: studio.id });
+			let game = await Game.findOne({ gameId: gameId, studio: studio.id }).populate("gamePlatforms").populate("gameAsset");
 
 			if (!game) {
 				throw new CustomError('That game could not be found.', { status: 400 });

@@ -21,12 +21,17 @@ module.exports.routes = {
 	
 	/** Studio Objects */
 	'GET /studio/games': 'StudioController.getGames',
-	'GET /studio/game/:gameId': 'StudioController.getGame',
 	'GET /studio/balance': 'StudioController.getBalance',
-	'POST /studio/game': 'StudioController.addGame',
-	'POST /studio/game/:gameId': 'StudioController.updateGame',
+	'GET /studio/game/:gameId': 'StudioController.getGame',
 	'DELETE /studio/game/:gameId': 'StudioController.deleteGame',
+	'POST /studio/game': 'StudioController.addGame',
 	'POST /studio/game/upload/image': 'StudioController.uploadGameImage',
+	'POST /studio/game/adverts/pause': 'StudioController.pauseGameAdverts',
+	'POST /studio/game/archive': 'StudioController.archiveGame',
+	'POST /studio/game/delete': 'StudioController.deleteGame',
+	'POST /studio/game/activate': 'StudioController.activateGame',
+	'POST /studio/game/file/delete': 'StudioController.deleteFile',
+	'POST /studio/game/:gameId': 'StudioController.updateGame',
 
 
 	/** Player Routes */

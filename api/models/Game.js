@@ -25,6 +25,11 @@ module.exports = {
 			defaultsTo: false
         },
 
+        archived: {
+            type: 'boolean',
+			defaultsTo: false
+        },
+
         dynamicAdsEnabled: {
             type: 'boolean',
 			defaultsTo: false

@@ -459,10 +459,25 @@ module.exports = {
 	*/
 	async getGames(req, res) {
 		try {
-			let studio = req.token.user;
-			let games = await Game.find({ studio: studio.id }).populate("gamePlatforms").populate("gameAdAsset").populate("gameAsset");
+			let studio = req.token.user,
+				active = req.param("active"),
+				archived = req.param("archived");
 
-			return res.ok({ games: games });
+			if(!active || active === 'false'){
+				active = false;
+			}else{
+				active = true;
+			}
+
+			if(!archived || archived === 'false'){
+				archived = false;
+			}else{
+				archived = true;
+			}
+
+			let games = await Game.find({studio:studio.id,active:active,archived:archived }).populate("gamePlatforms").populate("gameAdAsset").populate("gameAsset");
+
+			return res.ok(games);
 		} catch (err) {
 			return util.errorResponse(err, res);
 		}
@@ -802,5 +817,144 @@ module.exports = {
 			return util.errorResponse(err, res);
 		}
 	},
+
+
+
+	async pauseGameAdverts(req,res){
+		try {
+			let studio = req.token.user,
+				gameId = req.param("gameId");
+
+			let game = await Game.findOne({ id: gameId, studio: studio.id }).populate("gameAsset");
+
+			if (!game) {
+				throw new CustomError('That game could not be found.', { status: 400 });
+			}
+
+			let pausedGameAdverts = await GameAdAsset.update({game:game.id},{approved:false});
+
+			return res.ok(pausedGameAdverts);
+		} catch (err) {
+			return util.errorResponse(err, res);
+		}
+	},
+
+
+
+	async archiveGame(req,res){
+		try{
+			let gameId = req.param("gameId"),
+			archived = req.param("archived"),
+			studio = req.token.user,
+			updateQuery = {};
+
+			if(!archived){
+				updateQuery.archived = false;
+				updateQuery.active = true;
+			}else{
+				updateQuery.archived = true;
+				updateQuery.active = false;
+			}
+
+			let archiveGame = await Game.update({studio:studio.id,id:gameId},updateQuery);
+
+			if (archiveGame.length === 0) {
+				throw new CustomError('Could not archive that game. Please check your permissions.', { status: 401, err_code: "not_found" });
+			}
+
+			return res.ok();
+		}catch(err){
+			sails.log.error("StudioController.archiveGame error: ",err);
+			return util.errorResponse(err, res);
+		}
+	},
+
+
+
+	async deleteGame(req,res){
+		try{
+			let gameId = req.param("gameId"),
+			studio = req.token.user;
+
+			let deleteGame = await Game.destroy({studio:studio.id,id:gameId});
+
+			if (deleteGame.length === 0) {
+				throw new CustomError('Could not delete that game. Please check your permissions.', { status: 401, err_code: "not_found" });
+			}
+
+			// Remove files associated with this game
+			if(deleteGame[0].avatar){
+				fs.unlink(sails.config.appPath + '/assets/images/games/banners/' + deleteGame[0].avatar, function(err) {
+			  		if (err){
+						sails.log.error("StudioController.deleteGame delete file error: ", err);
+					}
+				});
+			}
+
+			return res.ok();
+		}catch(err){
+			sails.log.error("StudioController.deleteGame error: ",err);
+			return util.errorResponse(err, res);
+		}
+	},
+
+
+
+	async activateGame(req,res){
+		try{
+
+			let gameId = req.param("gameId"),
+			active = req.param("active"),
+			studio = req.token.user;
+
+			if(!active){
+				active = false;
+			}else{
+				active = true;
+			}
+
+			let gameUpdate = await Game.update({id:gameId,studio:studio.id},{active:active,archived:false});
+
+			if(!gameAdAssetUpdate){
+				throw new CustomError('Could not activate the game.', { status: 401, err_code: "not_found" });
+			}
+
+			return res.ok({success:true});
+		}catch(err){
+			sails.log.error("StudioController.activateGame error: ",err);
+			return util.errorResponse(err, res);
+		}
+	},
+
+
+
+	async deleteFile(req,res){
+		try{
+			let gameId = req.param("gameId"),
+			fileKey = req.param("fileKey"),
+			studio = req.token.user;
+
+			let game = await Game.findOne({studio:studio.id,id:gameId});
+
+			if (game.length === 0) {
+				throw new CustomError('Could not find that game.', { status: 401, err_code: "not_found" });
+			}
+
+			// Remove file
+			if(game[fileKey]){
+				fs.unlink(sails.config.appPath + '/assets/images/games/banners/' + gameAdAsset[fileKey], function(err) {
+			  		if (err){
+						sails.log.error("StudioController.deleteFile delete file error: ", err);
+					}
+				});
+			}
+
+			return res.ok();
+		}catch(err){
+			sails.log.error("StudioController.deleteFile error: ",err);
+			return util.errorResponse(err, res);
+		}
+	},
+
 
 };

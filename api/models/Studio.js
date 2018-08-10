@@ -85,6 +85,11 @@ module.exports = {
 			via: 'studio'
 		},
 
+		gameAdAsset: {
+			collection: 'gameadasset',
+			via: 'studio'
+		},
+
 		toJSON: function () {
 			let obj = this.toObject();
 			delete obj.password;

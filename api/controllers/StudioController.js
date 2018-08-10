@@ -1105,4 +1105,40 @@ module.exports = {
 	},
 
 
+
+	async getGameAdverts(req,res){
+		try{
+			let approved = req.param("approved"),
+			findQuery = {studio:req.token.user.id,archived:false};
+
+			if(!approved || approved == 'false'){
+				findQuery.approved = false;
+			}else{
+				findQuery.approved = true;
+			}
+
+			let campaigns = await GameAdAsset.find(findQuery).populate('gameAsset').populate('game').populate('gameAdSessions').sort('createdAt DESC'),
+			campaignsList = [];
+
+			for (campaign of campaigns) {
+				campaign.gameAsset.screenshot = sails.config.API_HOST + "/adverts/game-assets/screenshots/" + campaign.gameAsset.screenshot;
+
+				// Calculate how long this advert has been viewed in seconds
+				// This sums all the exposure time of every player session recorded for this game ad asset
+				campaign.totalExposure = _.reduce(campaign.gameAdSessions, function(memo, value) { return memo + value.exposedTime}, 0);
+
+				campaign.status = await GameAdvertService.getAdvertStatus(campaign.active,campaign.approved,campaign.startDate,campaign.endDate);
+
+				campaignsList.push(campaign);
+			}
+
+			return res.ok({campaigns:campaignsList});
+		}catch(err){
+			sails.log.error("StudioController.getGameAdverts error: ",err);
+			return util.errorResponse(err, res);
+		}
+	},
+
+
+
 };

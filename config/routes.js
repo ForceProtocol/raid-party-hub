@@ -22,7 +22,8 @@ module.exports.routes = {
 	/** Studio Objects */
 	'GET /studio/games': 'StudioController.getGames',
 	'GET /studio/balance': 'StudioController.getBalance',
-	'GET /studio/game/:gameId': 'StudioController.getGame',
+	'GET /studio/balance': 'StudioController.getBalance',
+	'GET /studio/game/adverts': 'StudioController.getGameAdverts',
 	'DELETE /studio/game/:gameId': 'StudioController.deleteGame',
 	'POST /studio/game': 'StudioController.addGame',
 	'POST /studio/game/upload/image': 'StudioController.uploadGameImage',

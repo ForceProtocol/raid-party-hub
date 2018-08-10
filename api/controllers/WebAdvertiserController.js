@@ -1032,7 +1032,14 @@ module.exports = {
 				resourceUrlImg = '/adverts/images/' + resourceUrlImg;
 			}
 
-			let gameAdAsset = await GameAdAsset.create({game:gameId,gameAsset:gameAsset,active:active,advertiser:advertiserId,width:width,height:height,resourceUrlSd:resourceUrlSd,
+			// Ensure this game exists
+			let game = await Game.findOne({id:gameId});
+
+			if(!game){
+				throw new CustomError('That game does not exist', { status: 401, err_code: "not_found" });
+			}
+
+			let gameAdAsset = await GameAdAsset.create({studio:game.studio,game:gameId,gameAsset:gameAsset,active:active,advertiser:advertiserId,width:width,height:height,resourceUrlSd:resourceUrlSd,
 				resourceUrlHd:resourceUrlHd,resourceUrlImg:resourceUrlImg,maxBid:maxBid,dailyBudget:dailyBudget,startDate:startDate,endDate:endDate});
 
 			if (!gameAdAsset) {
@@ -1096,6 +1103,7 @@ module.exports = {
 			if(resourceUrlImg){
 				resourceUrlImg = '/adverts/images/' + resourceUrlImg;
 			}
+
 
 			let gameAdAsset = await GameAdAsset.update({id:gameAdAssetId,advertiser:advertiserId},{active:true,approved:false,game:gameId,
 				gameAsset:gameAsset,advertiser:advertiserId,width:width,height:height,resourceUrlSd:resourceUrlSd,

@@ -102,6 +102,10 @@ module.exports = {
         advertiser: {
             model: 'advertiser'
         },
+
+        studio: {
+            model: 'studio'
+        },
     },
 	
 };

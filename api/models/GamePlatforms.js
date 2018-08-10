@@ -15,7 +15,7 @@ module.exports = {
 		},
 		link: {
 			type: 'string',
-			required: true
+			defaultsTo: ''
 		},
 		fontAwesome: {
 			type: 'string',

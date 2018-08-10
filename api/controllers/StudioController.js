@@ -6,8 +6,7 @@
  */
 
 const fs = require("fs"),
-BigNumber = require('bignumber.js'),
-validUrl = require("valid-url");
+BigNumber = require('bignumber.js');
 
 
 module.exports = {
@@ -539,7 +538,27 @@ module.exports = {
 				throw new CustomError('You must provide at least one game screenshot', { status: 401, err_code: "not_found" });
 			}
 
-			let game = await Game.create({studio:studio.id,active:false,dynamicAdsEnabled:false,title:title,dynamicAdsDescription:description,
+			if(pcLink && pcLink.startsWith("www.")){
+				pcLink = "https://" + pcLink;
+			}
+
+			if(macLink && macLink.startsWith("www.")){
+				macLink = "https://" + macLink;
+			}
+
+			if(consoleLink && consoleLink.startsWith("www.")){
+				consoleLink = "https://" + consoleLink;
+			}
+
+			if(androidLink && androidLink.startsWith("www.")){
+				androidLink = "https://" + androidLink;
+			}
+
+			if(iosLink && iosLink.startsWith("www.")){
+				iosLink = "https://" + iosLink;
+			}
+
+			let game = await Game.create({studio:studio.id,active:true,archived:false,dynamicAdsEnabled:false,title:title,dynamicAdsDescription:description,
 				description:description,avatar:avatar,regions:regions,age:age,monthlyActiveUsers:mau,male:male,female:female});
 
 			if (!game) {
@@ -548,26 +567,85 @@ module.exports = {
 
 
 
-			// Insert platform links
-			if(pc && validUrl.isUri(pcLink)){
-				GameService.addPlatformLink(game.id,'pc',pcLink,false,true);
+			// Remove an any old platform links if a new link was provided,
+			// or if the user decided not to have any link, remove all links of this type
+			if(!pcLink){
+				pcLink = "";
+				await GamePlatforms.destroy({game:game.id,type:'pc'});
+			}else if(pcLink){
+				await GamePlatforms.destroy({game:game.id,type:'pc',link:{'!':pcLink}});
 			}
 
-			if(mac && validUrl.isUri(macLink)){
-				GameService.addPlatformLink(game.id,'mac',macLink,false,true);
+			if(!macLink){
+				macLink = "";
+				await GamePlatforms.destroy({game:game.id,type:'mac'});
+			}else if(macLink){
+				await GamePlatforms.destroy({game:game.id,type:'mac',link:{'!':macLink}});
 			}
 
-			if(console && validUrl.isUri(consoleLink)){
-				GameService.addPlatformLink(game.id,'console',consoleLink,false,true);
+			if(!consoleLink){
+				consoleLink = "";
+				await GamePlatforms.destroy({game:game.id,type:'console'});
+			}else if(consoleLink){
+				await GamePlatforms.destroy({game:game.id,type:'console',link:{'!':consoleLink}});
 			}
 
-			if(android && validUrl.isUri(androidLink)){
-				GameService.addPlatformLink(game.id,'android',androidLink,false,true);
+			if(!androidLink){
+				androidLink = "";
+				await GamePlatforms.destroy({game:game.id,type:'android'});
+			}else if(androidLink){
+				await GamePlatforms.destroy({game:game.id,type:'android',link:{'!':androidLink}});
 			}
 
-			if(ios && validUrl.isUri(iosLink)){
-				GameService.addPlatformLink(game.id,'ios',iosLink,false,true);
+			if(!iosLink){
+				iosLink = "";
+				await GamePlatforms.destroy({game:game.id,type:'ios'});
+			}else if(iosLink){
+				await GamePlatforms.destroy({game:game.id,type:'ios',link:{'!':iosLink}});
 			}
+
+
+			// Insert platform links if a valid link is provided or empty string
+			if(pc && (GameService.isValidUrl(pcLink) || pcLink == '')){
+				fontAwesomeCode = GameService.getPlatformFontAwesome('pc');
+
+				let createGamePlatform = await GamePlatforms.findOrCreate({game:game.id,type:'pc',link:pcLink},
+					{game:game.id,type:'pc',fontAwesome:fontAwesomeCode,link:pcLink,
+					isCountrySpecific:false,active:true});
+			}
+
+			if(mac && (GameService.isValidUrl(macLink) || macLink == '')){
+				fontAwesomeCode = GameService.getPlatformFontAwesome('mac');
+
+				await GamePlatforms.findOrCreate({game:game.id,type:'mac',link:macLink},
+					{game:game.id,type:'mac',fontAwesome:fontAwesomeCode,link:macLink,
+					isCountrySpecific:false,active:true});
+			}
+
+			if(console && (GameService.isValidUrl(consoleLink) || consoleLink == '')){
+				fontAwesomeCode = GameService.getPlatformFontAwesome('console');
+
+				await GamePlatforms.findOrCreate({game:game.id,type:'console',link:consoleLink},
+					{game:game.id,type:'console',fontAwesome:fontAwesomeCode,link:consoleLink,
+					isCountrySpecific:false,active:true});
+			}
+
+			if(android && (GameService.isValidUrl(androidLink) || androidLink == '')){
+				fontAwesomeCode = GameService.getPlatformFontAwesome('android');
+
+				await GamePlatforms.findOrCreate({game:game.id,type:'android',link:androidLink},
+					{game:game.id,type:'android',fontAwesome:fontAwesomeCode,link:androidLink,
+					isCountrySpecific:false,active:true});
+			}
+
+			if(ios && (GameService.isValidUrl(iosLink) || iosLink == '')){
+				fontAwesomeCode = GameService.getPlatformFontAwesome('ios');
+
+				await GamePlatforms.findOrCreate({game:game.id,type:'ios',link:iosLink},
+					{game:game.id,type:'ios',fontAwesome:fontAwesomeCode,link:iosLink,
+					isCountrySpecific:false,active:true});
+			}
+
 
 
 			// Send studio an email that their account has been blocked
@@ -632,43 +710,113 @@ module.exports = {
 				throw new CustomError('You must provide at least one game screenshot', { status: 401, err_code: "not_found" });
 			}
 
-			let game = await Game.update({id:gameId,studio:studio.id},{active:false,dynamicAdsEnabled:false,title:title,dynamicAdsDescription:description,
+			if(pcLink && pcLink.startsWith("www.")){
+				pcLink = "https://" + pcLink;
+			}
+
+			if(macLink && macLink.startsWith("www.")){
+				macLink = "https://" + macLink;
+			}
+
+			if(consoleLink && consoleLink.startsWith("www.")){
+				consoleLink = "https://" + consoleLink;
+			}
+
+			if(androidLink && androidLink.startsWith("www.")){
+				androidLink = "https://" + androidLink;
+			}
+
+			if(iosLink && iosLink.startsWith("www.")){
+				iosLink = "https://" + iosLink;
+			}
+
+			let game = await Game.update({id:gameId,studio:studio.id},{dynamicAdsEnabled:false,title:title,dynamicAdsDescription:description,
 				description:description,avatar:avatar,regions:regions,age:age,monthlyActiveUsers:mau,monthlyImpressions:mau,male:male,female:female});
 
 			if (!game) {
 				throw new CustomError('Could not update that game', { status: 401, err_code: "not_found" });
 			}
 
+			// Prepare request to destroy multiple platform links
+			let fontAwesomeCode = '';
 
-			// Insert platform links
-			if(pc && validUrl.isUri(pcLink)){
-				GameService.addPlatformLink(game[0].id,'pc',pcLink,false,true);
-			}else{
-				GameService.removePlatformLink(game[0].id,'pc');
+			// Remove an any old platform links if a new link was provided,
+			// or if the user decided not to have any link, remove all links of this type
+			if(!pcLink){
+				pcLink = "";
+				await GamePlatforms.destroy({game:game[0].id,type:'pc'});
+			}else if(pcLink){
+				await GamePlatforms.destroy({game:game[0].id,type:'pc',link:{'!':pcLink}});
 			}
 
-			if(mac && validUrl.isUri(macLink)){
-				GameService.addPlatformLink(game[0].id,'mac',macLink,false,true);
-			}else{
-				GameService.removePlatformLink(game[0].id,'mac');
+			if(!macLink){
+				macLink = "";
+				await GamePlatforms.destroy({game:game[0].id,type:'mac'});
+			}else if(macLink){
+				await GamePlatforms.destroy({game:game[0].id,type:'mac',link:{'!':macLink}});
 			}
 
-			if(console && validUrl.isUri(consoleLink)){
-				GameService.addPlatformLink(game[0].id,'console',consoleLink,false,true);
-			}else{
-				GameService.removePlatformLink(game[0].id,'console');
+			if(!consoleLink){
+				consoleLink = "";
+				await GamePlatforms.destroy({game:game[0].id,type:'console'});
+			}else if(consoleLink){
+				await GamePlatforms.destroy({game:game[0].id,type:'console',link:{'!':consoleLink}});
 			}
 
-			if(android && validUrl.isUri(androidLink)){
-				GameService.addPlatformLink(game[0].id,'android',androidLink,false,true);
-			}else{
-				GameService.removePlatformLink(game[0].id,'android');
+			if(!androidLink){
+				androidLink = "";
+				await GamePlatforms.destroy({game:game[0].id,type:'android'});
+			}else if(androidLink){
+				await GamePlatforms.destroy({game:game[0].id,type:'android',link:{'!':androidLink}});
 			}
 
-			if(ios && validUrl.isUri(iosLink)){
-				GameService.addPlatformLink(game[0].id,'ios',iosLink,false,true);
-			}else{
-				GameService.removePlatformLink(game[0].id,'ios');
+			if(!iosLink){
+				iosLink = "";
+				await GamePlatforms.destroy({game:game[0].id,type:'ios'});
+			}else if(iosLink){
+				await GamePlatforms.destroy({game:game[0].id,type:'ios',link:{'!':iosLink}});
+			}
+
+
+			// Insert platform links if a valid link is provided or empty string
+			if(pc && (GameService.isValidUrl(pcLink) || pcLink == '')){
+				fontAwesomeCode = GameService.getPlatformFontAwesome('pc');
+
+				let createGamePlatform = await GamePlatforms.findOrCreate({game:game[0].id,type:'pc',link:pcLink},
+					{game:game[0].id,type:'pc',fontAwesome:fontAwesomeCode,link:pcLink,
+					isCountrySpecific:false,active:true});
+			}
+
+			if(mac && (GameService.isValidUrl(macLink) || macLink == '')){
+				fontAwesomeCode = GameService.getPlatformFontAwesome('mac');
+
+				await GamePlatforms.findOrCreate({game:game[0].id,type:'mac',link:macLink},
+					{game:game[0].id,type:'mac',fontAwesome:fontAwesomeCode,link:macLink,
+					isCountrySpecific:false,active:true});
+			}
+
+			if(console && (GameService.isValidUrl(consoleLink) || consoleLink == '')){
+				fontAwesomeCode = GameService.getPlatformFontAwesome('console');
+
+				await GamePlatforms.findOrCreate({game:game[0].id,type:'console',link:consoleLink},
+					{game:game[0].id,type:'console',fontAwesome:fontAwesomeCode,link:consoleLink,
+					isCountrySpecific:false,active:true});
+			}
+
+			if(android && (GameService.isValidUrl(androidLink) || androidLink == '')){
+				fontAwesomeCode = GameService.getPlatformFontAwesome('android');
+
+				await GamePlatforms.findOrCreate({game:game[0].id,type:'android',link:androidLink},
+					{game:game[0].id,type:'android',fontAwesome:fontAwesomeCode,link:androidLink,
+					isCountrySpecific:false,active:true});
+			}
+
+			if(ios && (GameService.isValidUrl(iosLink) || iosLink == '')){
+				fontAwesomeCode = GameService.getPlatformFontAwesome('ios');
+
+				await GamePlatforms.findOrCreate({game:game[0].id,type:'ios',link:iosLink},
+					{game:game[0].id,type:'ios',fontAwesome:fontAwesomeCode,link:iosLink,
+					isCountrySpecific:false,active:true});
 			}
 
 			return res.ok({success:true,game:game[0]});

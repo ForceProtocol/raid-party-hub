@@ -5,8 +5,6 @@ module.exports = {
     addPlatformLink: async (gameId,platformType,link,isCountrySpecific,active)=>{
 
         try{
-
-            sails.log.debug("game id is: ",gameId);
             
             let fontAwesome = GameService.getPlatformFontAwesome(platformType);
 
@@ -58,8 +56,13 @@ module.exports = {
             default:
                 return 'fas fa-link';
         }
-    }
+    },
 
+
+    isValidUrl: (url) => {
+        let linkRegex = new RegExp('^(|(http|https):\/\/[^ "]+$|www.[^ "]+$)$');
+        return linkRegex.test(url);
+    }
 
 
 };

@@ -137,7 +137,6 @@ module.exports = {
     async sessionEnd(req,res){
 
         try{
-            sails.log.debug("DynamicAdvertController.sessionEnd called: ", req);
 
             let gameId = req.param("gameId"),
             gameAdAssetId = req.param("gameAdAssetId"),
@@ -156,14 +155,14 @@ module.exports = {
             }
 
             // Make sure this game ad asset exists
-            let gameAdAsset = await GameAdAsset.findOne({id:game.id,game:gameId});
+            let gameAdAsset = await GameAdAsset.findOne({id:gameAdAssetId,game:game.id});
 
             if(!gameAdAsset ){
                 throw new CustomError('Could not find that game ad asset', { status: 401, err_code: "not_found" });
             }
 
             // Find any live campaigns
-            let gameAdAssets = await GameAdAssetSession.create({gameAdAsset:gameAdAssetId,exposedTime:exposedTime,sessionTime:sessionTime});
+            let gameAdAssets = await GameAdSession.create({gameAdAsset:gameAdAssetId,exposedTime:exposedTime,sessionTime:sessionTime});
 
             return res.ok({success:true});
         }catch(err){

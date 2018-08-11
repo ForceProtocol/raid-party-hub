@@ -1141,4 +1141,79 @@ module.exports = {
 
 
 
+	async stopAdvert(req,res){
+		try{
+			let gameAdAsset = req.param("gameAdAsset"),
+				studio = req.token.user;
+
+			let advert = await GameAdAsset.update({id:gameAdAsset,studio:studio.id},{approved:false});
+
+			if (!advert) {
+				throw new CustomError('Could not stop that advert. Are you sure you have the right permissions to change that advert?', { status: 401, err_code: "not_found"});
+			}
+
+			return res.ok();
+		}catch(err){
+			sails.log.error("StudioController.stopAdvert error: ",err);
+			return util.errorResponse(err, res);
+		}
+	},
+
+
+	async approveAdvert(req,res){
+		try{
+			let gameAdAsset = req.param("gameAdAsset"),
+				studio = req.token.user;
+
+			let advert = await GameAdAsset.update({id:gameAdAsset,studio:studio.id},{approved:true});
+
+			if (!advert) {
+				throw new CustomError('Could not approve that advert. Are you sure you have the right permissions to change that advert?', { status: 401, err_code: "not_found"});
+			}
+
+			return res.ok();
+		}catch(err){
+			sails.log.error("StudioController.approveAdvert error: ",err);
+			return util.errorResponse(err, res);
+		}
+	},
+
+
+
+	async downloadAdvertAssets(req,res){
+		try{
+			let gameAdAsset = req.param("gameAdAsset"),
+				assetType = req.param("assetType"),
+				studio = req.token.user;
+
+				sails.log.debug("download asset request: ",gameAdAsset,assetType);
+
+			let advert = await GameAdAsset.findOne({id:gameAdAsset,studio:studio.id});
+
+			if (!advert) {
+				throw new CustomError('Could not find that advert.', { status: 401, err_code: "not_found"});
+			}
+
+			if(advert.resourceUrlHd && assetType == "videoUrlHd"){
+				return res.download(sails.config.appPath + "/assets" + advert.resourceUrlHd);
+			}
+
+			if(advert.resourceUrlSd && assetType == "videoUrlSd"){
+				return res.download(sails.config.appPath + "/assets" + advert.resourceUrlSd);
+			}
+
+			if(advert.resourceUrlImg && assetType == "videoUrlImg"){
+				return res.download(sails.config.appPath + "/assets" + advert.resourceUrlImg);
+			}
+
+			return res.ok();
+
+		}catch(err){
+			sails.log.error("StudioController.downloadAdvertAssets error: ",err);
+			return util.errorResponse(err, res);
+		}
+	},
+
+
+
 };

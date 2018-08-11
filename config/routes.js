@@ -24,14 +24,17 @@ module.exports.routes = {
 	'GET /studio/balance': 'StudioController.getBalance',
 	'GET /studio/balance': 'StudioController.getBalance',
 	'GET /studio/game/adverts': 'StudioController.getGameAdverts',
+	'GET /studio/game/advert/download/:gameAdAsset/:assetType': 'StudioController.downloadAdvertAssets',
 	'DELETE /studio/game/:gameId': 'StudioController.deleteGame',
 	'POST /studio/game': 'StudioController.addGame',
 	'POST /studio/game/upload/image': 'StudioController.uploadGameImage',
-	'POST /studio/game/adverts/pause': 'StudioController.pauseGameAdverts',
 	'POST /studio/game/archive': 'StudioController.archiveGame',
 	'POST /studio/game/delete': 'StudioController.deleteGame',
 	'POST /studio/game/activate': 'StudioController.activateGame',
 	'POST /studio/game/file/delete': 'StudioController.deleteFile',
+	'POST /studio/game/advert/stop': 'StudioController.stopAdvert',
+	'POST /studio/game/advert/approve': 'StudioController.approveAdvert',
+	'POST /studio/game/adverts/pause': 'StudioController.pauseGameAdverts',
 	'POST /studio/game/:gameId': 'StudioController.updateGame',
 
 

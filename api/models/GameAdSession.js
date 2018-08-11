@@ -1,5 +1,5 @@
 /**
- * Products.js
+ * GameAdSession.js
  *
  * @description :: A model definition.  Represents a database table/collection/etc.
  * @docs        :: https://sailsjs.com/docs/concepts/models-and-orm/models
@@ -7,6 +7,11 @@
 
 module.exports = {
     attributes: {
+
+        deviceId: {
+            type: 'string',
+            defaultsTo: ''
+        },
 
         exposedTime: {
             type: 'integer',
@@ -18,18 +23,9 @@ module.exports = {
             defaultsTo: 0
         },
 
-        startDate: {
-        	type: 'datetime'
-        },
-
-        endDate: {
-        	type: 'datetime'
-        },
-
 		gameAdAsset: {
             model: 'gameadasset'
         },
     },
 	
 };
-

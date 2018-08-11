@@ -25,6 +25,7 @@ module.exports.routes = {
 	'GET /studio/balance': 'StudioController.getBalance',
 	'GET /studio/game/adverts': 'StudioController.getGameAdverts',
 	'GET /studio/game/advert/download/:gameAdAsset/:assetType': 'StudioController.downloadAdvertAssets',
+	'GET /studio/game/:gameId': 'StudioController.getGame',
 	'DELETE /studio/game/:gameId': 'StudioController.deleteGame',
 	'POST /studio/game': 'StudioController.addGame',
 	'POST /studio/game/upload/image': 'StudioController.uploadGameImage',

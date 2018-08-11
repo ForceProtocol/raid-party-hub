@@ -1186,8 +1186,6 @@ module.exports = {
 				assetType = req.param("assetType"),
 				studio = req.token.user;
 
-				sails.log.debug("download asset request: ",gameAdAsset,assetType);
-
 			let advert = await GameAdAsset.findOne({id:gameAdAsset,studio:studio.id});
 
 			if (!advert) {

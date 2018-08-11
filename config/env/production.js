@@ -45,7 +45,7 @@ module.exports = {
     APP_HOST: 'https://raidparty.io',
     PLAYER_APP_HOST: 'https://player.raidparty.io/',
     BRANDS_APP_HOST: 'https://brands.raidparty.io/',
-    STUDIOS_APP_HOST: 'https://studios.raidparty.io/',
+    STUDIOS_APP_HOST: 'https://studio.raidparty.io/',
 
     oneSignal: {
         userAuthKey: 'YzBhY2IwNGYtNGVhZS00YjZjLWFiNTctYzViODZkZDQ0OGRh',

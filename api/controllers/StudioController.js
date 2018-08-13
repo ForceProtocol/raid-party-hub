@@ -147,7 +147,7 @@ module.exports = {
 					success: true,
 					token: jwToken.issue({
 						user: studio.toJSON()
-					}, "30 days")
+					}, "60 days")
 				};
 
 				return res.ok(rsp);
@@ -352,7 +352,7 @@ module.exports = {
 
 			await Studio.update({ id: studio.id }, { pin: pin });
 
-			let activationLink = sails.config.STUDIOS_APP_HOST + "change-password?studio=" + studio.id + "&pin=" + pin;
+			let activationLink = sails.config.STUDIOS_APP_HOST + "forgot-password?user=" + studio.id + "&pin=" + pin + "&email=" + studio.email;
 
 			let msg = `Welcome to RaidParty!<br />
 				A password reset request was made. Please visit the link below to update your password.<br /><br />
@@ -373,7 +373,7 @@ module.exports = {
 
 
 			return res.ok({
-				msg: 'Please check your inbox to find a 6 digit password reset PIN',
+				msg: 'Please check your inbox to find a password reset link',
 				success: true,
 			});
 
@@ -1121,7 +1121,12 @@ module.exports = {
 			campaignsList = [];
 
 			for (campaign of campaigns) {
-				campaign.gameAsset.screenshot = sails.config.API_HOST + "/adverts/game-assets/screenshots/" + campaign.gameAsset.screenshot;
+
+				if(campaign.gameAsset){
+					campaign.gameAsset.screenshot = sails.config.API_HOST + "/adverts/game-assets/screenshots/" + campaign.gameAsset.screenshot;
+				}else{
+					campaign.gameAsset = {};
+				}
 
 				// Calculate how long this advert has been viewed in seconds
 				// This sums all the exposure time of every player session recorded for this game ad asset

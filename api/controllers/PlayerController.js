@@ -156,7 +156,7 @@ module.exports = {
 			}
 
 			// Authenticate the request - is this really from the developers game?
-			let game = await Game.findOne({ publicKey: publicKey }).populate('developer');
+			let game = await Game.findOne({ publicKey: publicKey }).populate('studio');
 
 			// Game was not found with public key
 			if (!game) {
@@ -259,7 +259,7 @@ module.exports = {
 			}
 
 			// Authenticate the request - is this really from the developers game?
-			let game = await Game.findOne({ publicKey: publicKey }).populate('developer');
+			let game = await Game.findOne({ publicKey: publicKey }).populate('studio');
 
 			// Game was not found with public key
 			if (!game) {

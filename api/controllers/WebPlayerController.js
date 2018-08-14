@@ -959,7 +959,7 @@ module.exports = {
 			moment.locale(locale);
 
 			// Get games we need for this device
-			let games = await Game.find({ active: true, startDate: { '<=': new Date() }, endDate: { '>=': new Date() } }).populate('rewardCampaign').populate('gamePlatforms');
+			let games = await Game.find({ active: true, startDate: { '<=': new Date() } }).populate('rewardCampaign').populate('gamePlatforms');
 
 			finalGamesList = [];
 			for (game of games) {

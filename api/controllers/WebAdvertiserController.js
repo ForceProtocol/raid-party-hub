@@ -356,6 +356,7 @@ module.exports = {
 			});
 
 		} catch (err) {
+			sails.log.error("WebAdertiserController.resetPassword Err: ",err);
 			return util.errorResponse(err, res);
 		}
 	},

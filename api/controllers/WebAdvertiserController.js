@@ -63,7 +63,7 @@ module.exports = {
 			// await OneSignalService.sendNotificationsToMultipleDevices({ deviceIds: [deviceId], text: pin + " is your activation pin" });
 			okMsg = "Please check your email inbox for an activation link to access your account.";
 			subject = "Welcome to RaidParty! Activate your account to start advertising";
-			activationLink = `${sails.config.BRANDS_APP_HOST}/activate-account?advertiserId=${advertiser.id}&pin=${pin}&email=${email}`;
+			activationLink = `${sails.config.BRANDS_APP_HOST}activate-account?advertiserId=${advertiser.id}&pin=${pin}&email=${email}`;
 			msg = `Welcome to RaidParty!<br /><br />
 				Your advertiser account has been created and is now awaiting your activation. Please click on the link below to activate your account.<br /><br />
 				<strong><a href=\"${activationLink}\">Activate Account</a></strong><br /><br />
@@ -310,7 +310,7 @@ module.exports = {
 			let okMsg, subject, msg;
 
 			await Advertiser.update({ id: user.id }, { pin: pin });
-			const activationLink = `${sails.config.BRANDS_APP_HOST}/forgot-password?email=${email}&user=${user.id}&pin=${pin}`;
+			const activationLink = `${sails.config.BRANDS_APP_HOST}forgot-password?email=${email}&user=${user.id}&pin=${pin}`;
 
 			if (locale == 'es' || locale == 'es_ES' || locale == 'es-MX') {
 				okMsg = 'Por favor, revise su bandeja de entrada para encontrar un PIN de restablecimiento de contraseña de 6 dígitos';

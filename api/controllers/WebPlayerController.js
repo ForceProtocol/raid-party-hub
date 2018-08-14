@@ -1506,10 +1506,24 @@ module.exports = {
 				searchQuery.platform = platform;
 			}
 
-			products = await Products.find(searchQuery);
+			products = await Products.find(searchQuery).populate("productDigitalKey");
 			
 			if (!products) {
 				throw new CustomError('Could not find any products.', { status: 401, err_code: "not_found" });
+			}
+
+			for(let key in products){
+
+				// Calculate real quantity of product
+				if(products[key].productDigitalKey){
+					products[key].qty = products[key].productDigitalKey.filter(digitalKey => {
+						if(!digitalKey.used){
+							return true;
+						}
+						return false;
+					}).length;
+				}
+
 			}
 
 			return res.ok({ success: true, products: products });
@@ -1614,9 +1628,33 @@ module.exports = {
 			await Products.update({id:product.id},{qty:product.qty - 1});
 
 			// Email the player the digital key
+			// Send activation email/SMS to player to activate their account
+			let subject = `Your product order from RaidParty`;
+			let msg = `Hi ${player.firstName} ${player.lastName}<br /><br />
+			Your product order was completed successfully. Please find your digital game key below:<br /><br />
+			<strong>${productDigitalKey.key}</strong><br /><br />
+			You can redeem this key in your steam account by following the steps below:<br />
+			<ol>
+				<li>Launch the Steam client software and log into your Steam account</li>
+				<li>Click the Games Menu</li>
+				<li>Choose Activate a Product on Steam</li>
+				<li>Follow the onscreen instructions to complete the process</li>
+			</ol><br />
+			<a href="https://support.steampowered.com/kb_article.php?ref=5414-tfbn-1352">Official Steam Support Page</a>
+			If you are having any difficulties at all please reach out to us at support@raidparty.io<br />`;
+
+			await EmailService.sendEmail({
+				fromEmail: 'support@raidparty.io',
+				fromName: 'Marketplace Team',
+				toEmail: player.email,
+				toName: player.email,
+				subject: subject,
+				body: msg
+			});
 			
-			return res.ok({result: {success: true, message: ""}});
+			return res.ok({result: {success: true, message: "Your game key has been emailed to you at " + player.email}});
 		} catch (err) {
+			sails.log.error("WebPlayerController.confirmPlayerOrder Err: ",err);
 			return util.errorResponse(err, res);
 		}
 	},

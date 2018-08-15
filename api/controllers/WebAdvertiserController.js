@@ -6,7 +6,8 @@
  */
 
 const moment = require('moment'),
-fs = require("fs");
+fs = require("fs"),
+md5 = require("md5");
 
 module.exports = {
 
@@ -942,18 +943,35 @@ module.exports = {
 		try {
 
 			let fileType = req.param("type"),
-			uploadPath = 'assets/adverts/';
+			uploadPath = 'assets/adverts/',
+			publicPath = '/adverts/',
+			allowedMimeTypes = [];
+
 
 			if(fileType == 'video'){
 				uploadPath = 'assets/adverts/videos';
+				publicPath = '/adverts/videos';
+				allowedMimeTypes = ['video/mp4', 'video/quicktime', 'application/x-troff-msvideo', 'video/avi', 'video/msvideo', 'video/x-msvideo', 'video/mpeg'];
 			}else if(fileType == 'image'){
 				uploadPath = 'assets/adverts/images';
+				publicPath = '/adverts/images';
+				allowedMimeTypes = ['image/jpg','image/jpeg','image/png','image/gif'];
 			}
 
 
 			req.file('asset').upload({
 			  	dirname: require('path').resolve(sails.config.appPath, uploadPath),
-			  	//saveAs: newFileName, /* optional. default file name */
+			  	saveAs: function(file, cb) {
+					var d = new Date();
+					var extension = file.filename.split('.').pop();
+					var uuid = md5(d.getMilliseconds()) + "." + extension;
+
+					if(allowedMimeTypes.indexOf(file.headers['content-type']) === -1) {
+						cb(null,null);
+					}else{
+						cb(null,uuid);
+					}
+		       	},
 				maxBytes: 250 * 1024 * 1024 //250 MB
 			}, function (err, uploadedFiles) {
 				if (err){
@@ -968,7 +986,8 @@ module.exports = {
 
 				return res.ok({
 					success: true,
-					fileName: newFileName
+					fileName: newFileName,
+					filePublicPath: publicPath + "/" + newFileName
 				});
 			});
 
@@ -1017,6 +1036,13 @@ module.exports = {
 
 			// Ensure at least one asset was uploaded
 			if(!resourceUrlHd && !resourceUrlSd && !resourceUrlImg){
+				throw new CustomError('You must provide at least one asset (video or image)', { status: 401, err_code: "not_found" });
+			}
+
+			// Ensure that image files provided are not dangerous
+			if(resourceUrlHd.includes("/") || resourceUrlHd.includes(".exe") ||
+				resourceUrlSd.includes("/") || resourceUrlSd.includes(".exe") ||
+				resourceUrlImg.includes("/") || resourceUrlImg.includes(".exe")){
 				throw new CustomError('You must provide at least one asset (video or image)', { status: 401, err_code: "not_found" });
 			}
 
@@ -1143,7 +1169,16 @@ module.exports = {
 
 				// Calculate how long this advert has been viewed in seconds
 				// This sums all the exposure time of every player session recorded for this game ad asset
-				campaign.totalExposure = _.reduce(campaign.gameAdSessions, function(memo, value) { return memo + value.exposedTime}, 0);
+				campaign.totalExposure = _.reduce(campaign.gameAdSessions, function(memo, value) { return memo + value.sessionTime}, 0);
+
+				campaign.uniqueSessions = campaign.gameAdSessions.filter(session => {
+					if(session.sessionTime > 0){
+						return true;
+					}
+					return false;
+				}).length;
+
+				campaign.avgExposurePerSession = Math.round(campaign.totalExposure / campaign.uniqueSessions);
 
 				campaign.status = await GameAdvertService.getAdvertStatus(campaign.active,campaign.approved,campaign.startDate,campaign.endDate);
 

@@ -600,7 +600,7 @@ module.exports.cron = {
 
 
 	pushLiveAdCampaigns: {
-		schedule: '*/30 * * * * *', //runs every 5 minutes
+		schedule: '*/20 * * * * *', //runs every 20 seconds
 		onTick: function () {
 			GameAdvertService.pushLiveAdCampaigns();
 		}

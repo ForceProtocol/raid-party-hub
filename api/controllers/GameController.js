@@ -120,6 +120,10 @@ module.exports = {
 			moment.locale(locale);
 			
 			let game = await Game.findOne({id:gameId}).populate('rewardCampaign').populate('gamePlatforms');
+
+			if(!game){
+				throw new CustomError("Could not find that game.", { status: 400 });
+			}
 			
 			game.isLive = false;
 				

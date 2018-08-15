@@ -2,11 +2,13 @@ module.exports.routes = {
 
 	/** Public Routes */
 	'GET /': 'PagesController.getHomePage',
+	'GET /regions': 'PagesController.getRegions',
 	'POST /app/subscribe': 'PagesController.postSubscribe',
 	'GET /players/count': 'PlayerController.getPlayerCount',
 	'GET /games/active': 'GameController.getActiveGames',
 	'GET /game/:gameId': 'GameController.getGame',
 	'GET /game/game-assets/:gameId': 'GameController.getGameAssets',
+	'GET /game/game-assets/session-stats/:gameAssetId': 'GameController.getGameAssetSessionStats',
 	'POST /web/contact' : 'PagesController.contact',
 
 

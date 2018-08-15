@@ -1011,8 +1011,8 @@ module.exports = {
 			maxBid = req.param("maxBid"),
 			dailyBudget = req.param("dailyBudget"),
 			active = req.param("active"),
+			regions = req.param("regions"),
 			advertiserId = req.token.user.id;
-
 
 			// Validate width and height values as float
 			if(!width){
@@ -1048,14 +1048,20 @@ module.exports = {
 
 			// Ensure that uploaded files exist
 			if(resourceUrlHd){
+				// Make sure we have just the filename itself
+				resourceUrlHd = resourceUrlHd.substring(resourceUrlHd.lastIndexOf("/") + 1);
 				resourceUrlHd = '/adverts/videos/' + resourceUrlHd;
 			}
 
 			if(resourceUrlSd){
+				// Make sure we have just the filename itself
+				resourceUrlSd = resourceUrlSd.substring(resourceUrlSd.lastIndexOf("/") + 1);
 				resourceUrlSd = '/adverts/videos/' + resourceUrlSd;
 			}
 
 			if(resourceUrlImg){
+				// Make sure we have just the filename itself
+				resourceUrlImg = resourceUrlImg.substring(resourceUrlImg.lastIndexOf("/") + 1);
 				resourceUrlImg = '/adverts/images/' + resourceUrlImg;
 			}
 
@@ -1071,6 +1077,21 @@ module.exports = {
 
 			if (!gameAdAsset) {
 				throw new CustomError('Could not save that campaign', { status: 401, err_code: "not_found" });
+			}
+
+			// Insert regions against gameAdAssetRegion
+			if(regions.length > 0){
+				let createRegions = [];
+				for(const region of regions){
+					createRegions.push({region:region.id,gameAdAsset:gameAdAsset.id});
+				}
+
+				let gameAdAssetRegions = await GameAdAssetRegion.create(createRegions);
+
+				if (!gameAdAssetRegions) {
+					await gameAdAsset.destroy({id:gameAdAsset.id});
+					throw new CustomError('Could not save that campaign', { status: 401, err_code: "not_found" });
+				}
 			}
 
 			return res.ok({success:true,gameAdAsset:gameAdAsset});
@@ -1091,12 +1112,13 @@ module.exports = {
 			height = req.param("height"),
 			resourceUrlHd = req.param("resourceUrlHd"),
 			resourceUrlSd = req.param("resourceUrlSd"),
-			resourceUrlImg = req.param("resourceImg"),
+			resourceUrlImg = req.param("resourceUrlImg"),
 			startDate = req.param("startDate"),
 			endDate = req.param("endDate"),
 			gameAsset = req.param("gameAsset"),
 			maxBid = req.param("maxBid"),
 			dailyBudget = req.param("dailyBudget"),
+			regions = req.param("regions"),
 			advertiserId = req.token.user.id;
 
 
@@ -1120,14 +1142,20 @@ module.exports = {
 
 			// Ensure that uploaded files exist
 			if(resourceUrlHd){
+				// Make sure we have just the filename itself
+				resourceUrlHd = resourceUrlHd.substring(resourceUrlHd.lastIndexOf("/") + 1);
 				resourceUrlHd = '/adverts/videos/' + resourceUrlHd;
 			}
 
 			if(resourceUrlSd){
+				// Make sure we have just the filename itself
+				resourceUrlSd = resourceUrlSd.substring(resourceUrlSd.lastIndexOf("/") + 1);
 				resourceUrlSd = '/adverts/videos/' + resourceUrlSd;
 			}
 
 			if(resourceUrlImg){
+				// Make sure we have just the filename itself
+				resourceUrlImg = resourceUrlImg.substring(resourceUrlImg.lastIndexOf("/") + 1);
 				resourceUrlImg = '/adverts/images/' + resourceUrlImg;
 			}
 
@@ -1138,6 +1166,23 @@ module.exports = {
 
 			if (!gameAdAsset) {
 				throw new CustomError('Could not update that campaign', { status: 401, err_code: "not_found" });
+			}
+
+			// Remove any existing regions on this game ad asset
+			await GameAdAssetRegion.destroy({gameAdAsset:gameAdAssetId});
+
+			// Insert regions against gameAdAssetRegio
+			if(regions.length > 0){
+				let createRegions = [];
+				for(const region of regions){
+					createRegions.push({region:region.id,gameAdAsset:gameAdAssetId});
+				}
+
+				let gameAdAssetRegions = await GameAdAssetRegion.create(createRegions);
+
+				if (!gameAdAssetRegions) {
+					throw new CustomError('Could not update the regions for your campaign', { status: 401, err_code: "not_found" });
+				}
 			}
 
 			return res.ok({success:true,gameAdAsset:gameAdAsset});
@@ -1198,7 +1243,7 @@ module.exports = {
 		try{
 			let gameAdAssetId = req.param("gameAdAssetId");
 
-			let campaign = await GameAdAsset.findOne({advertiser:req.token.user.id,id:gameAdAssetId}).populate('gameAsset').populate('game').populate('gameAdSessions');
+			let campaign = await GameAdAsset.findOne({advertiser:req.token.user.id,id:gameAdAssetId}).populate('gameAsset').populate('game').populate('gameAdSessions').populate('gameAdAssetRegion');
 
 			if (!campaign) {
 				throw new CustomError('Could not find that campaign.', { status: 401, err_code: "not_found" });

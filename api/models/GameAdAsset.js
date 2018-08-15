@@ -91,6 +91,11 @@ module.exports = {
 			via: 'gameAdAsset'
 		},
 
+        gameAdAssetRegion: {
+            collection: 'gameadassetregion',
+            via: 'gameAdAsset'
+        },
+
 		gameAsset: {
 			model: 'gameasset'
 		},

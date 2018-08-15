@@ -201,4 +201,16 @@ module.exports = {
 		});
     },
 
+
+    async getRegions(req,res){
+    	try{
+    		let regions = await Regions.find();
+
+    		return res.ok(regions);
+    	}catch(err){
+    		sails.log.debug("PagesController.getRegions error: ",err);
+    		return res.error();
+    	}
+    }
+
 };

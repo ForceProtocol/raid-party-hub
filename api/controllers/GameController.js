@@ -212,6 +212,46 @@ module.exports = {
 		}catch(err){
 			return res.serverError(err);
 		}
+	},
+
+
+	async getGameAssetSessionStats(req,res){
+		try{
+			let gameAssetId = req.param("gameAssetId"),
+			exposedTime = 0, sessionTime = 0, avgSession = 0,
+			totalSessions = 0;
+
+			let fromDate = moment().subtract(1, 'month').toDate();
+			
+			// Only find most recent game ad session data (1 month ago)
+			let gameAdSessions = await GameAdSession.find({gameAdAsset:gameAssetId,createdAt: {'>=':fromDate}});
+
+			if(!gameAdSessions){
+				return res.ok({exposedTime,sessionTime,avgSession,totalSessions});
+			}
+
+			for(const key in gameAdSessions){
+				exposedTime += parseInt(gameAdSessions[key].exposedTime);
+				sessionTime += parseInt(gameAdSessions[key].sessionTime);
+			}
+
+			totalSessions = gameAdSessions.filter(session => {
+				if(session.exposedTime > 0){
+					return true;
+				}
+				return false;
+			}).length;
+
+			avgSession = Math.round(sessionTime / totalSessions);
+
+			if(!avgSession){
+				avgSession = 0;
+			}
+
+			return res.ok({exposedTime,sessionTime,avgSession});
+		}catch(err){
+			return res.serverError(err);
+		}
 	}
 
 

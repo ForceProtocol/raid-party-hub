@@ -1130,7 +1130,16 @@ module.exports = {
 
 				// Calculate how long this advert has been viewed in seconds
 				// This sums all the exposure time of every player session recorded for this game ad asset
-				campaign.totalExposure = _.reduce(campaign.gameAdSessions, function(memo, value) { return memo + value.exposedTime}, 0);
+				campaign.totalExposure = _.reduce(campaign.gameAdSessions, function(memo, value) { return memo + value.sessionTime}, 0);
+
+				campaign.uniqueSessions = campaign.gameAdSessions.filter(session => {
+					if(session.sessionTime > 0){
+						return true;
+					}
+					return false;
+				}).length;
+
+				campaign.avgExposurePerSession = Math.round(campaign.totalExposure / campaign.uniqueSessions);
 
 				campaign.status = await GameAdvertService.getAdvertStatus(campaign.active,campaign.approved,campaign.startDate,campaign.endDate);
 

@@ -190,6 +190,11 @@ module.exports = {
 			collection: 'gameasset',
 			via: 'game'
 		},
+
+		gameAdSession: {
+			collection: 'gameadsession',
+			via: 'game'
+		},
 		
     },
 	

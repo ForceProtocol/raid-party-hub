@@ -5,6 +5,46 @@ const Dropbox = require('dropbox').Dropbox;
 
 module.exports.cron = {
 
+
+	/** set player locations that may have been missed
+	*/
+	setPlayerLocations: {
+		schedule: '*/10 * * * *', //runs every 10 minutes
+		onTick: function () {
+			GameAdvertService.setPlayerLocations();
+		}
+	},
+
+
+
+	/** Calculate advert spend on latest sessions
+	*/
+	spendAdvertBudget: {
+		schedule: '*/5 * * * *', //runs every 5 minutes
+		onTick: function () {
+			GameAdvertService.spendAdvertBudget();
+		}
+	},
+
+
+	/** Calculate advert spend on latest sessions
+	*/
+	closeGhostGameSessions: {
+		schedule: '*/20 * * * * *', //runs every 1 hour
+		onTick: function () {
+			GameAdvertService.closeGhostGameSessions();
+		}
+	},
+
+
+	/*pushLiveAdCampaigns: {
+		schedule: '* * * * *', //runs every 20 seconds
+		onTick: function () {
+			GameAdvertService.pushLiveAdCampaigns();
+		}
+	},*/
+
+
 	giveAirdropSignupRewards: {
 		schedule: '2 * * * *',  // Run this every hour
 		onTick: async function () {
@@ -594,28 +634,6 @@ module.exports.cron = {
 			}
 
 
-		}
-	},
-
-
-
-	pushLiveAdCampaigns: {
-		schedule: '*/20 * * * * *', //runs every 20 seconds
-		onTick: function () {
-			GameAdvertService.pushLiveAdCampaigns();
-		}
-	},
-
-
-
-	temporaryUpdateGameAdCampaigns: {
-		schedule: '*/5 * * * *', //runs every 5 minutes
-		onTick: async function () {
-			try {
-				await GameAdAsset.update({approved:false},{approved:true});
-			}catch (err) {
-				sails.log.error("Failed to temporaryUpdateGameAdCampaigns cron task: ", err);
-			}
 		}
 	},
 

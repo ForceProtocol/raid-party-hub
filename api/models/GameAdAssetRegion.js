@@ -9,7 +9,12 @@ module.exports = {
 	createdAt: false,
 	updatedAt: false,
     attributes: {
-	
+
+    	countryCode: {
+    		type: 'string',
+    		required: true
+    	},
+
 		gameAdAsset: {
 			model: 'gameadasset'
 		},

@@ -39,6 +39,7 @@ module.exports = {
 	},
 
 	MANDRILL_KEY: 'EHaaGsImRCQrLW9vrWSedA',		// PRODUCTION KEY
+    IPSTACK_KEY: '335765cd87e5d17e4b69f2d879aca981',
 
     hookTimeout: 120000,
     API_HOST: 'https://staging.hub.raidparty.io',

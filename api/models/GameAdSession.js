@@ -8,23 +8,26 @@
 module.exports = {
     attributes: {
 
-        deviceId: {
-            type: 'string',
-            defaultsTo: ''
-        },
-
-        exposedTime: {
-            type: 'integer',
-            defaultsTo: 0
-        },
-
         sessionTime: {
             type: 'integer',
             defaultsTo: 0
         },
 
+        spent: {
+            type: 'boolean',
+            defaultsTo: false
+        },
+
 		gameAdAsset: {
             model: 'gameadasset'
+        },
+
+        player: {
+            model: 'playertogameadsession'
+        },
+
+        game: {
+            model: 'game'
         },
     },
 	

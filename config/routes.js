@@ -51,10 +51,20 @@ module.exports.routes = {
 
 
 	/** SDK DYNAMIC ADVERTISEMENT SOCKET ROUTES */
+	'POST /sdk/advert/start-session/:gameId': 'DynamicAdvertController.startSession',
+	'POST /sdk/advert/end-session/:gameId': 'DynamicAdvertController.endSession',
+	'POST /sdk/advert/game-object/:gameId': 'DynamicAdvertController.findAdvertForGameObject',
+
+
+	/** SDK DYNAMIC TEST ROUTES */
+	'GET /test/sdk/advert/start-session': 'DynamicAdvertController.testStartSession',
+	'GET /test/sdk/advert/end-session': 'DynamicAdvertController.testEndSession',
+	'GET /test/sdk/advert/game-object-video': 'DynamicAdvertController.testFindVideoAdvertForGameObject',
+	'GET /test/sdk/advert/game-object-texture': 'DynamicAdvertController.testFindTextureAdvertForGameObject',
+
 	'GET /sdk/advert/connect/:gameId/:gameAssetId': 'DynamicAdvertController.connectGame',
 	'GET /sdk/advert/load/:gameId/:gameAssetId': 'DynamicAdvertController.getLiveAdverts',
 	'GET /sdk/advert/connect/test': 'DynamicAdvertController.testConnectGame',
-	'POST /sdk/advert/session-end/:gameId/:gameAdAssetId': 'DynamicAdvertController.sessionEnd',
 
 
 	/** OUR OWN MOBILE APPLICATION API ROUTES **/

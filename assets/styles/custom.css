@@ -1,0 +1,54 @@
+/*------------------------------------
+  Animate.css
+------------------------------------*/
+
+
+@keyframes fadeInUp {
+  from {
+  	opacity: 0;
+    transform: translate3d(0, 25%, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.fadeInUp {
+  animation-name: fadeInUp;
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translate3d(0, 10px, 0);
+    visibility: visible;
+  }
+
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.slideInUp {
+  animation-name: slideInUp;
+}
+
+
+.u-clients {
+  width: 8rem;
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.u-stop-color-gold-light {
+    stop-color: #ead87a;
+}
+.u-stop-color-gold-dark {
+    stop-color: #cba43c;
+}
+
+.u-header__section,
+.u-header--bg-transparent:not(.js-header-fix-moment) .u-header__section {
+  background-color: #fff;
+}

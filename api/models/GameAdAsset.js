@@ -48,6 +48,16 @@ module.exports = {
             defaultsTo: 0
         },
 
+        availableBudget: {
+            type: 'float',
+            defaultsTo: 0
+        },
+
+        usedBudget: {
+            type: 'float',
+            defaultsTo: 0
+        },
+
         link: {
         	type: 'string',
         	defaultsTo: ''
@@ -63,9 +73,9 @@ module.exports = {
         	defaultsTo: ''
         },
 
-     	resourceUrlImg: {
-        	type: 'string',
-        	defaultsTo: ''
+        textures: {
+            type: 'json',
+            defaultsTo: ""
         },
 
         timeRanges: {

@@ -76,5 +76,9 @@ module.exports.policies = {
 	
 	PagesController: {
         '*': true
+    },
+
+    DynamicAdvertController: {
+        '*': true
     }
 };

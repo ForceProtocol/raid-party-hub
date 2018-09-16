@@ -51,6 +51,11 @@ module.exports = {
 			required: true,
 			unique: true
 		},
+
+		availableBudget: {
+			type: 'float',
+			defaultsTo: 0
+		},
 		
 		accountStatus: {
 			type: 'integer',

@@ -22,6 +22,7 @@ module.exports.routes = {
 	'POST /studio/contact': 'StudioController.contact',
 	
 	/** Studio Objects */
+	'GET /studio/auth-check': 'StudioController.authCheck',
 	'GET /studio/games': 'StudioController.getGames',
 	'GET /studio/balance': 'StudioController.getBalance',
 	'GET /studio/balance': 'StudioController.getBalance',
@@ -112,6 +113,7 @@ module.exports.routes = {
 	'GET /web/advertiser-games': 'WebAdvertiserController.getGames',
 	'GET /web/advertiser/campaigns': 'WebAdvertiserController.getCampaigns',
 	'GET /web/advertiser/campaign/:gameAdAssetId': 'WebAdvertiserController.getCampaign',
+	'GET /web/advertiser/campaign-data/:gameAdAssetId': 'WebAdvertiserController.getCampaignData',
 	'GET /web/advertiser/download': 'WebAdvertiserController.downloadItem',
 	'POST /web/advertiser/signup': 'WebAdvertiserController.signupUser',
 	'POST /web/advertiser/login': 'WebAdvertiserController.loginUser',

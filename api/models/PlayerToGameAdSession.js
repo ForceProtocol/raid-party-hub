@@ -23,25 +23,21 @@ module.exports = {
 
         countryCode: {
             type: 'string',
-            required: true,
             defaultsTo: ""
         },
 
         regionCode: {
             type: 'string',
-            required: true,
             defaultsTo: ""
         },
 
         regionName: {
             type: 'string',
-            required: true,
             defaultsTo: ""
         },
 
         city: {
             type: 'string',
-            required: true,
             defaultsTo: ""
         },
 

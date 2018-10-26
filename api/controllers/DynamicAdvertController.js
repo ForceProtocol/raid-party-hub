@@ -41,7 +41,8 @@ module.exports = {
                 let playerLocation = await GameAdvertService.getPlayerLocation(playerIp);
 
                 if(!playerLocation || playerLocation.success === false){
-                    throw new CustomError('Player could not be registered', { status: 500, err_code: "server_error" });
+                    playerLocation = {country_code:'',region_code:'',region_name:'',city:'',longitude:0,latitude:0};
+                    playerIp = '';
                 }
 
                 // Create the player
@@ -194,21 +195,8 @@ module.exports = {
                 // Set the game asset URL
                 if(gameAdAsset.gameAsset.type == 'screen'){
                     advertType = 'video';
-                    // Set the HTTP(S) url for HD video resource
-                    if(gameAdAsset.resourceUrlHd != null && gameAdAsset.resourceUrlHd){
-                        gameAdAsset.resourceUrlHd = sails.config.API_HOST + gameAdAsset.resourceUrlHd;
-                    }
-
-                    // Set the HTTP(S) url for SD video resource
-                    if(gameAdAsset.resourceUrlSd != null && gameAdAsset.resourceUrlSd){
-                        gameAdAsset.resourceUrlSd = sails.config.API_HOST + gameAdAsset.resourceUrlSd;
-                    }
                 }else if(gameAdAsset.gameAsset.type == 'texture'){
                     advertType = 'texture';
-                    // Set the HTTP(S) url for image/texture resource
-                    if(gameAdAsset.resourceUrlImg != null && gameAdAsset.resourceUrlImg){
-                        gameAdAsset.resourceUrlImg = sails.config.API_HOST + gameAdAsset.resourceUrlImg;
-                    }
 
                     // Store all game textures needed for this game object
                     gameObjectTextures = gameAdAsset.textures;

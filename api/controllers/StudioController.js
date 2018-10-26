@@ -11,6 +11,13 @@ BigNumber = require('bignumber.js');
 
 module.exports = {
 
+	/**
+	* Simple route to allow studioAuth policy to respond to request
+	*/
+	async authCheck(req,res){
+		return res.ok();		
+	},
+	
 
 	/**
 	* Sign Up New Studio

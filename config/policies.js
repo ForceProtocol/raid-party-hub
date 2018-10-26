@@ -28,7 +28,6 @@ module.exports.policies = {
         changePassword: true,
         sendEmailsToAirdropUsers: true,
         '*': 'playerAuth'
-        
     },
 
     WebPlayerController: {

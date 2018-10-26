@@ -1,5 +1,6 @@
 const moment = require('moment'),
-request = require('request-promise');
+request = require('request-promise'),
+validIpAddress = require('ip-address').Address4;
 
 module.exports = {
 
@@ -150,6 +151,12 @@ module.exports = {
     getPlayerLocation: async(playerIp)=>{
         try{
 
+            let address = new validIpAddress(playerIp);
+
+            if(!address.isValid()){
+                return false;
+            }
+
             playerLocation = await request({
                 method: 'GET',
                 uri: 'http://api.ipstack.com/' + playerIp + '?access_key=' + sails.config.IPSTACK_KEY,
@@ -211,10 +218,9 @@ module.exports = {
                 }
 
 
-                let updatedPlayer = await PlayerToGameAdSession.update({id:player.id},{regionCode:playerLocation.region_code,
+                let updatedPlayer = await PlayerToGameAdSession.update({playerId:player.playerId},{regionCode:playerLocation.region_code,
                     regionName:playerLocation.region_name,city:playerLocation.city,longitude:playerLocation.longitude,
                     latitude:playerLocation.latitude});
-
 
                 if(!updatedPlayer){
                     sails.log.error("could not update player");

@@ -30,7 +30,7 @@ module.exports.cron = {
 	/** Calculate advert spend on latest sessions
 	*/
 	closeGhostGameSessions: {
-		schedule: '*/20 * * * * *', //runs every 1 hour
+		schedule: '*/12 * * *', //runs every 12 hours
 		onTick: function () {
 			GameAdvertService.closeGhostGameSessions();
 		}

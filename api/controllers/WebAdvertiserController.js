@@ -1257,6 +1257,86 @@ module.exports = {
 	},
 
 
+	async getCampaignData(req,res){
+		try{
+			let gameAdAssetId = req.param("gameAdAssetId"),
+			startDate = req.param("startDate"),
+			endDate = req.param("endDate");
+
+			if(!startDate){
+				startDate = moment().subtract(6,"days");
+			}
+
+			if(!endDate){
+				endDate = moment();
+			}
+
+			let dateRangeDiffDays = endDate.diff(startDate,"days");
+
+			// Ensure the game ad asset belongs to this advertiser
+			let validAdvertiser = await GameAdAsset.findOne({advertiser:req.token.user.id,id:gameAdAssetId});
+
+			if(!validAdvertiser){
+				throw new CustomError('You are not permitted to access that data.', { status: 404, err_code: "unauthorized" });
+			}
+
+			let sessions = await GameAdSession.find({gameAdAsset:gameAdAssetId,createdAt: {">=": startDate.toDate()},createdAt: {"<=": endDate.toDate()}});
+
+			if (!sessions) {
+				throw new CustomError('Could not find the data requested.', { status: 401, err_code: "not_found" });
+			}
+
+			// Group sessions by day
+			let groupedSessionData = [];
+
+			// Create keys for each day between the two set dates
+			// Arranged in date order
+			for(let i = 0;i <= dateRangeDiffDays;i++){
+				let dateIndex = moment(startDate).add(i,"days").format("YYYY-MM-DD");
+				groupedSessionData.push({date:dateIndex,players:{},sessionCount:0,exposureTime:0});
+			}
+
+			// Aggregate values of this adverts player sessions according to day
+			sessions.forEach(function(session,i){
+				let createdAt = JSON.stringify(session.createdAt);
+				let dateIndex = createdAt.substring(1,11);
+
+				// Find groupedSessionData by date value
+				let index = groupedSessionData.findIndex(p => p.date == dateIndex);
+
+				// Create this days index
+				if(!groupedSessionData[index]){
+					groupedSessionData[index] = {date: dateIndex,players:{}};
+					groupedSessionData[index].players[session.player] = true;
+					groupedSessionData[index].sessionCount = 1;
+					groupedSessionData[index].exposureTime = session.sessionTime;
+				}else{
+					groupedSessionData[index].players[session.player] = true;
+					groupedSessionData[index].sessionCount++;
+					groupedSessionData[index].exposureTime += session.sessionTime;
+				}
+			});
+
+			// Work out averages
+			for(let i in groupedSessionData){
+				if(groupedSessionData[i].sessionCount < 1){
+					groupedSessionData[i].exposureTimeAvg = 0;
+				}else{
+					groupedSessionData[i].exposureTimeAvg = Math.round(groupedSessionData[i].exposureTime / groupedSessionData[i].sessionCount);
+				}
+
+				groupedSessionData[i].uniqueSessions = _.size(groupedSessionData[i].players);
+				groupedSessionData[i].uniqueSessions.jsDate = moment(groupedSessionData[i].date).toDate();
+			}
+
+			return res.ok(groupedSessionData);
+		}catch(err){
+			sails.log.error("WebAdertiserController.getCampaign error: ",err);
+			return util.errorResponse(err, res);
+		}
+	},
+
+
 
 	async downloadItem(req,res){
 		try{

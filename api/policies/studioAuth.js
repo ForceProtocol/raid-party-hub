@@ -57,9 +57,8 @@ module.exports = function (req, res, next) {
 
 			Studio.findOne({id:token.user.id,accountStatus:2})
 			.then(_user=>{
-
 				if(!_user){
-					throw new CustomError('Invalid token. User doesn\'t exist');
+					return res.json(401, {err: 'No Authorization header was found'});
 				}
 				
 				req.token = {user: _user};

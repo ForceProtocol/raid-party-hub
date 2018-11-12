@@ -147,14 +147,14 @@ module.exports = {
             gameAssetId = req.param("game_object_id");
 
             if(!gameId || !gameAssetId){
-                throw new CustomError('Invalid Params Sent', { status: 401, err_code: "not_found" });
+                throw new CustomError('Invalid Params Sent', { status: 404, err_code: "not_found" });
             }
 
             // Make sure this game exists
             let game = await Game.findOne({gameId:gameId});
 
             if(!game){
-                throw new CustomError('Could not find your game', { status: 401, err_code: "not_found" });
+                throw new CustomError('Could not find your game', { status: 404, err_code: "not_found" });
             }
 
             // Find player location
@@ -162,7 +162,7 @@ module.exports = {
             let playerData = await PlayerToGameAdSession.findOne({playerId:playerId});
 
             if(!playerData){
-                throw new CustomError('Could not find that stored player', { status: 401, err_code: "not_found" });
+                throw new CustomError('Could not find that stored player', { status: 404, err_code: "not_found" });
             }
 
             // Find live campaigns and select which ones to send back
@@ -598,7 +598,7 @@ module.exports = {
 			gameAssetId = req.param("gameAssetId");
 
 			if(!gameId || !gameAssetId){
-				throw new CustomError('Invalid Params Sent', { status: 401, err_code: "not_found" });
+				throw new CustomError('Invalid Params Sent', { status: 404, err_code: "not_found" });
 			}
 
 
@@ -606,7 +606,7 @@ module.exports = {
 			let game = await Game.findOne({gameId:gameId});
 
 			if(!game){
-				throw new CustomError('Could not find your game', { status: 401, err_code: "not_found" });
+				throw new CustomError('Could not find your game', { status: 404, err_code: "not_found" });
 			}
 
             // Find any live campaigns

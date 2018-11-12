@@ -44,6 +44,7 @@ module.exports.routes = {
 
 	/** Player Routes */
 	'POST /app/player': 'PlayerController.signupPlayer',
+	'POST /app/add-wallet': 'PlayerController.addWallet',
 
 
 	/** SDK PLAYER ROUTES */

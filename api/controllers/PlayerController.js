@@ -384,7 +384,38 @@ module.exports = {
 			sails.log.debug("Get Player Count fired error: ", err);
 			return res.serverError();
 		}
-	}
+	},
+
+
+
+	async addWallet(req, res) {
+
+		let email = req.param("email"),
+			etherAddress = req.param("etherAddress");
+
+		try {
+			// Validate sent params
+			if (!email || !etherAddress) {
+				throw new CustomError(sails.__("You did not provide all details required"), { status: 400 });
+			}
+
+			let player = await Player.findOne({ email: email });
+
+			// Player already exists
+			if (!player) {
+				throw new CustomError("Could not update your wallet address as your account was not found.", { status: 400 });
+			}
+
+			await Player.update({id:player.id},{etherAddress:etherAddress});
+
+			return res.ok({
+				success: true,
+			});
+		} catch (err) {
+			return util.errorResponse(err, res);
+		}
+	},
+
 
 
 };

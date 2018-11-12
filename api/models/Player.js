@@ -22,6 +22,11 @@ module.exports = {
 			}
 		},
 
+		etherAddress: {
+			type: 'string',
+			size: 80,
+		},
+
 		code: {
 			type: 'string',
 			size: 7,

@@ -219,17 +219,30 @@ module.exports = {
     	try{
     		let playerId = req.param("playerId");
 
+    		sails.log.debug("get claim key: ");
+
     		let player = await Player.findOne({playerId:playerId});
 
-    		if(player){
-    			await Player.update({id:player.id},{keyClaimed:true});
-    		}else{
+    		if(!player){
     			return res.notFound();
     		}
 
-    		sails.log.debug("player data is: ",player);
+    		// try to find game key with players ID first
+    		let gameKey = await EximiusGameKey.findOne({playerId:player.playerId});
 
-    		return res.ok(player.claimKey);
+    		if(!gameKey){
+	    		// Get a game key
+	    		gameKey = await EximiusGameKey.findOne({keyClaimed:false});
+	    	}
+
+	    	// no key found at all
+    		if(!gameKey){
+    			return res.ok('All Keys Have Been Claimed - <a href="https://store.steampowered.com/app/505740/Eximius_Seize_the_Frontline/">Get Eximius Here</a>');
+    		}
+
+    		await EximiusGameKey.update({id:gameKey.id},{keyClaimed:true,playerId:player.playerId});
+
+    		return res.ok(gameKey.key);
     	}catch(err){
     		sails.log.debug("PagesController.getClaimKey error: ",err);
     		return res.notFound();

@@ -5,9 +5,8 @@
  * @help        :: See http://links.sailsjs.org/docs/controllers
  */
 
-var Mailchimp = require('mailchimp-api-v3')
-var mailchimp = new Mailchimp('17718b6328f312bc750f542d8fbefd5c-us16');
-var mandrill = require('node-mandrill')('EHaaGsImRCQrLW9vrWSedA');
+var domain = 'mg.raidparty.io';
+var mailgun = require('mailgun-js')({apiKey: sails.config.MAILGUN_KEY, domain: domain});
 
 module.exports = {
 
@@ -15,47 +14,64 @@ module.exports = {
 	/**
 	* Add a subscriber to a mailchimp list
 	*/
-	addSubscriber: function (listId,email,firstName,lastName,subscribeStatus,language) {
-	
-		sails.log.debug("-- addSubscriber mailchimp requested --");
-		
-		if(typeof language === 'undefined' || !language){
-			language = 'en';
+	addSubscriber: async(listId,email,firstName,lastName,subscribeStatus)=>{
+
+		try{
+			var list = mailgun.lists('subscriber@mg.raidparty.io');
+
+			var user = {
+			  subscribed: true,
+			  address: email,
+			  name: firstName + " " + lastName,
+			};
+			 
+			list.members().create(user, function (err, data) {
+				if(error){
+					sails.log.debug("Error adding subscriber mailgun: ",err);
+					return false;
+				}
+
+				return true;
+			});
+		}catch(err){
+			sails.log.debug("Error adding subscriber mailgun: ",err);
+			return false;
 		}
-		
-		return mailchimp.post('/lists/' + listId + '/members', {
-			email_address : email,
-			status: subscribeStatus,
-			merge_fields: {
-				"FNAME": firstName,
-				"LNAME": lastName
-			},
-			language: language
-		})
-		.then(function(results) {
-			return results;
-		})
-		.catch(function (err) {
-			throw err;
-		});
 	},
 	
 	
 	
-	sendMandrillEmail: function(to,from,subject,text){
-		mandrill('/messages/send', {
-			message: {
-				to: to,
-				from_email: from,
-				subject: subject,
-				text: text
+	sendMandrillEmail: async(to,from,subject,text)=>{
+
+		try{
+			let toName;
+
+			if(typeof to.email === 'undefined'){
+				return false;
 			}
-		},function(error, response){
-			// there was an error
-			if (error){
-				console.log( JSON.stringify(error) );
-			}
-		});
+
+			var data = {
+			  from: from,
+			  to: to.email,
+			  subject: subject,
+			  text: text
+			};
+ 
+			mailgun.messages().send(data, function (error, body) {
+
+				if(error){
+					sails.log.debug("Error sending email via mailgun: ",err);
+					return false;
+				}
+
+				return true;
+			});
+
+		}catch(err){
+			sails.log.debug("Error sending email via mailgun: ",err);
+			return false;
+		}
+
 	},
 	
 	

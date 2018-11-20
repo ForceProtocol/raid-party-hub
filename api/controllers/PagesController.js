@@ -211,6 +211,29 @@ module.exports = {
     		sails.log.debug("PagesController.getRegions error: ",err);
     		return res.error();
     	}
+    },
+
+
+
+    async getClaimKey(req,res){
+    	try{
+    		let playerId = req.param("playerId");
+
+    		let player = await Player.findOne({playerId:playerId});
+
+    		if(player){
+    			await Player.update({id:player.id},{keyClaimed:true});
+    		}else{
+    			return res.notFound();
+    		}
+
+    		sails.log.debug("player data is: ",player);
+
+    		return res.ok(player.claimKey);
+    	}catch(err){
+    		sails.log.debug("PagesController.getClaimKey error: ",err);
+    		return res.notFound();
+    	}
     }
 
 };

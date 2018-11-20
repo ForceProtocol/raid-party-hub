@@ -54,4 +54,6 @@ module.exports = {
         appId: '28142d5f-8d0d-463e-aa33-26de871f9591'
     },
 
+    
+    MAILGUN_KEY: '6cb643a51eaee9afb8aa268986269852-a4502f89-42963f1a'
 };

@@ -136,4 +136,6 @@ module.exports.routes = {
 	'GET /airdrop-users-send-email': 'MobileAppPlayerController.sendEmailsToAirdropUsers',
 	'GET /generate-player-code-send-email': 'MobileAppPlayerController.sendEmailsToPlayersWithoutCode',
 	'GET /activate-players': 'MobileAppPlayerController.activatePlayers',
+
+	'GET /claim-game-key/:playerId': 'PagesController.getClaimKey',
 };

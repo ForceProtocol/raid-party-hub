@@ -106,6 +106,16 @@ module.exports = {
 			type: 'string'
 		},
 
+		claimKey: {
+			type: 'string',
+			defaultsTo: ''
+		},
+
+		keyClaimed: {
+			type: 'boolean',
+			defaultsTo: false
+		},
+
 		games: {
 			collection: 'game',
 			via: 'player',

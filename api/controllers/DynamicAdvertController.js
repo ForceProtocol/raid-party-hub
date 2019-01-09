@@ -29,6 +29,8 @@ module.exports = {
                 throw new CustomError('Could not find that game', { status: 404, err_code: "not_found" });
             }
 
+            sails.log.error("Player IP received: " + playerIp);
+
             // Set player ID to store in database
             let storedPlayerId = GameAdvertService.generatePlayerId(playerId,game.id);
 
@@ -214,6 +216,8 @@ module.exports = {
                     advertId: gameAdAsset.id,
                     adverts: [gameAdAsset.id],
                     textures: gameObjectTextures,
+                    resourceUrlHd: gameAdAsset.resourceUrlHd,
+                    resourceUrlSd: gameAdAsset.resourceUrlSd,
                     videos: [{hd:gameAdAsset.resourceUrlHd,sd:gameAdAsset.resourceUrlSd}],
                     maxBid: gameAdAsset.maxBid
                 };

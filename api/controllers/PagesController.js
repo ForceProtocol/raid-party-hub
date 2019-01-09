@@ -219,8 +219,6 @@ module.exports = {
     	try{
     		let playerId = req.param("playerId");
 
-    		sails.log.debug("get claim key: ");
-
     		let player = await Player.findOne({playerId:playerId});
 
     		if(!player){

@@ -346,7 +346,7 @@ module.exports = {
 				fromEmail: 'support@raidparty.io',
 				fromName: 'Success Team',
 				toEmail: user.email,
-				toName: user.email,
+				toName: user.firstName + " " + user.lastName,
 				subject: subject,
 				body: msg
 			});

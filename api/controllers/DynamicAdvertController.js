@@ -16,7 +16,12 @@ module.exports = {
         try{
             let gameId = req.param("gameId"),
             playerId = req.param("player_id"),
-            playerIp = req.param("player_ip");
+            playerIp = req.param("player_ip"),
+            clientRemoteIp = req.connection.remoteAddress;
+
+            if(playerIp != clientRemoteIp){
+                playerIp = clientRemoteIp;
+            }
 
             if(!gameId || !playerId){
                 throw new CustomError('Missing params: Require game_id, player_id and player_ip', { status: 400, err_code: "bad_request" });

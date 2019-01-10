@@ -57,19 +57,7 @@ module.exports = {
   sendEmail: function(opts){
     let {fromEmail,fromName,toEmail,toName,subject,body,cc,bcc,inReply,headers} = opts;
 
-    fromEmail = translateToEmail(fromEmail);
-
-
-    !fromEmail.length && fromEmail.push('support@' + sails.config.MAILER);
-
     return new sails.bluebird(function(resolve,reject){
-
-
-      // if(typeof transporter === 'undefined' || transporter.length == 0){
-      //   // Create a normal transport object - will probably fail delivery. Should use SMTP
-      //   transporter = nodemailer.createTransport();
-      // }
-
 
       // Make sure required params are provided
       if(typeof fromEmail === 'undefined' || fromEmail.length == 0){
@@ -91,7 +79,6 @@ module.exports = {
       // Uses npm sanitize-html
       let plainTextBody = require('sanitize-html') (body,{allowedTags: []});
 
-      sails.log('sending to ', toEmail);
       // Message object
       var messageOptions = {
 

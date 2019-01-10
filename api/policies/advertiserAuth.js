@@ -19,15 +19,14 @@ module.exports = function (req, res, next) {
 	try {
 		let duid = _.isString(req.headers.cduid) ? req.headers.cduid : null;
 
-		sails.log.verbose(`${new Date()} - auth request from ${ip} for route: ${req.route.path}. socket status: ${req.isSocket ? 'socket request' : 'http request'}`);
+		sails.log.info(`${new Date()} - auth request from ${ip} for route: ${req.route.path}. socket status: ${req.isSocket ? 'socket request' : 'http request'}`);
 
 		if (req.param('token')) {
 			token = req.param('token');
 
 			// We delete the token from param to not mess with blueprints
 			//delete req.query.token; Enabled for demo purposes
-		}
-		else if (req.headers && req.headers.authorization) {
+		} else if (req.headers && req.headers.authorization) {
 			let parts = req.headers.authorization.split(' ');
 			if (parts.length === 2) {
 				let scheme = parts[0],
@@ -42,6 +41,7 @@ module.exports = function (req, res, next) {
 		} else {
 			return res.json(401, {err: 'No Authorization header was found'});
 		}
+
 
 		jwToken.verify(token, function (err, token) {
 			if (err) {
